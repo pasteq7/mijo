@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { NutrientBar } from './NutrientBar';
 import { NUTRIENT_META } from '../data/nutrients';
 import type { DailyGoals, NutrientKey } from '../types';
-import { ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import clsx from 'clsx';
 
 interface Props {
   totals: Partial<DailyGoals>;
@@ -11,75 +11,43 @@ interface Props {
 }
 
 const GROUPS = [
-  { key: 'macros', label: '🌾 Macronutriments' },
-  { key: 'vitamines', label: '🌿 Vitamines' },
-  { key: 'mineraux', label: '🪨 Minéraux' },
-  { key: 'acidesgras', label: '💧 Acides gras' },
-  { key: 'aminoacides', label: '🔗 Acides aminés essentiels' },
+  { key: 'macros', label: 'Macro' },
+  { key: 'vitamines', label: 'Vit' },
+  { key: 'mineraux', label: 'Min' },
 ] as const;
 
 export function NutrientPanel({ totals, goals }: Props) {
-  const [openGroups, setOpenGroups] = useState<Set<string>>(
-    new Set(['macros', 'vitamines'])
-  );
-
-  const toggle = (key: string) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-       if (next.has(key)) {
-         next.delete(key);
-       } else {
-         next.add(key);
-       }
-      return next;
-    });
-  };
+  const [activeTab, setActiveTab] = useState('macros');
 
   return (
     <div className="space-y-3">
-      {GROUPS.map(({ key, label }) => {
-        const nutrients = NUTRIENT_META.filter((n) => n.group === key);
-        const isOpen = openGroups.has(key);
-        return (
-          <div key={key} className="bg-[#F0EBE0] rounded-2xl overflow-hidden">
-            <button
-              onClick={() => toggle(key)}
-              className="w-full flex justify-between items-center px-4 py-3 font-semibold text-stone-700 hover:bg-stone-200/50 transition-colors"
-            >
-              <span>{label}</span>
-              <motion.span
-                animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronDown size={18} />
-              </motion.span>
-            </button>
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  key="content"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-4 pb-4 space-y-4">
-                    {nutrients.map((meta) => (
-                      <NutrientBar
-                        key={meta.id}
-                        meta={meta}
-                        value={totals[meta.id as NutrientKey] ?? 0}
-                        goal={goals[meta.id as NutrientKey] as number}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
+      <div className="flex gap-4 text-xs border-b border-[--border]">
+        {GROUPS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={clsx(
+              'pb-2 transition-colors relative font-medium uppercase tracking-[0.05em]',
+              activeTab === key ? 'text-[--text-h]' : 'text-[--text] hover:text-[--text-h]'
+            )}
+          >
+            {label}
+            {activeTab === key && (
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[--accent]" />
+            )}
+          </button>
+        ))}
+      </div>
+      <div className="min-h-[200px] pt-3">
+        {NUTRIENT_META.filter((n) => n.group === activeTab).map((meta) => (
+          <NutrientBar
+            key={meta.id}
+            meta={meta}
+            value={totals[meta.id as NutrientKey] ?? 0}
+            goal={goals[meta.id as NutrientKey] as number}
+          />
+        ))}
+      </div>
     </div>
   );
 }

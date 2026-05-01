@@ -12,40 +12,39 @@ export function DayStats({ totals, goals }: Props) {
 
   const score = (() => {
     if (cal === 0) return null;
-    if (calPct < 50) return { label: 'Assiette légère', color: 'text-amber-600' };
-    if (calPct < 80) return { label: 'Bonne progression', color: 'text-[#7C9A6E]' };
-    if (calPct <= 110) return { label: 'Journée équilibrée ✓', color: 'text-emerald-600' };
-    return { label: 'Apport généreux', color: 'text-[#C4704F]' };
+    if (calPct < 50) return { label: 'Léger', color: 'text-[--text]' };
+    if (calPct < 80) return { label: 'En cours', color: 'text-[--text-h]' };
+    if (calPct <= 110) return { label: 'Équilibré', color: 'text-[--accent]' };
+    return { label: 'Généreux', color: 'text-[--action]' };
   })();
 
   return (
-    <div className="bg-[#F0EBE0] rounded-2xl px-5 py-4">
-      <div className="flex justify-between items-end mb-2">
+    <div className="px-6 py-5 bg-[--bg-subtle] border border-[--border] rounded-[2rem] shadow-[var(--shadow-sm)]">
+      <div className="flex justify-between items-end mb-4">
         <div>
-          <p className="text-xs text-stone-400 uppercase tracking-wide mb-0.5">Calories du jour</p>
           <motion.p
             key={Math.round(cal)}
-            initial={{ opacity: 0.5, y: -4 }}
+            initial={{ opacity: 0.5, y: -2 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-stone-800 tabular-nums"
+            className="text-4xl font-light text-[--text-h] tabular-nums tracking-tighter display-font"
           >
             {Math.round(cal)}
+            <span className="text-xs font-normal text-[--text] ml-1.5 font-sans">kcal</span>
           </motion.p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-stone-400">objectif</p>
-          <p className="text-lg font-semibold text-stone-600">{goals.calories} kcal</p>
+          <p className="text-xs font-medium text-[--text] uppercase tracking-[0.1em] opacity-60">/ {goals.calories}</p>
         </div>
       </div>
-      <div className="h-2.5 bg-stone-200 rounded-full overflow-hidden">
+      <div className="h-2 bg-[--warm-200] rounded-full overflow-hidden shadow-inner">
         <motion.div
-          className="h-full bg-[#7C9A6E] rounded-full"
+          className="h-full bg-[--accent] rounded-full"
           animate={{ width: `${calPct}%` }}
-          transition={{ type: 'spring', stiffness: 50, damping: 14 }}
+          transition={{ type: 'spring', stiffness: 80, damping: 16 }}
         />
       </div>
       {score && (
-        <p className={`text-sm font-medium mt-2 ${score.color}`}>{score.label}</p>
+        <p className={`text-xs font-medium mt-3 ${score.color}`}>{score.label}</p>
       )}
     </div>
   );

@@ -1,15 +1,17 @@
 import { useState, useCallback } from 'react';
-import { Settings, Leaf } from 'lucide-react';
-import { FoodSearch } from './components/FoodSearch';
-import { FoodList } from './components/FoodList';
-import { NutrientPanel } from './components/NutrientPanel';
-import { DayStats } from './components/DayStats';
-import { InsightCard } from './components/InsightCard';
-import { GoalsModal } from './components/GoalsModal';
 import { useNutrients } from './hooks/useNutrients';
+import { useFoodSuggestions } from './hooks/useFoodSuggestions';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { DEFAULT_GOALS } from './data/nutrients';
-import type { Food, SelectedFood, DailyGoals, Season } from './types';
+import { MEAL_GOALS, multiplyGoals } from './data/nutrients';
+import { FOODS } from './data/foods';
+
+import { MainLayout } from './components/layout/MainLayout';
+import { UtilityRail } from './components/layout/UtilityRail';
+import { FoodManagement } from './components/views/FoodManagement';
+import { AnalysisView } from './components/views/AnalysisView';
+import { GoalsModal } from './components/GoalsModal';
+
+import type { Food, SelectedFood, NutrientGoals, MealRecord, Season } from './types';
 
 function getCurrentSeason(): Season {
   const month = new Date().getMonth() + 1;
@@ -20,15 +22,16 @@ function getCurrentSeason(): Season {
 }
 
 export default function App() {
-  const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>(
-    'veganut-foods', []
-  );
-  const [goals, setGoals] = useLocalStorage<DailyGoals>(
-    'veganut-goals', DEFAULT_GOALS
-  );
+  const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('veganut-foods', []);
+  const [pastMeals, setPastMeals] = useLocalStorage<MealRecord[]>('veganut-history', []);
+  const [dailyGoals, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', multiplyGoals(MEAL_GOALS, 3));
+  const [mealGoals, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
+  const [mealsPerDay, setMealsPerDay] = useLocalStorage<number>('veganut-meals-per-day', 3);
   const [showGoals, setShowGoals] = useState(false);
+  
   const currentSeason = getCurrentSeason();
   const totals = useNutrients(selectedFoods);
+  const { activeGoals, balancedSuggestions, targetedSuggestions } = useFoodSuggestions(selectedFoods, pastMeals, mealGoals);
 
   const selectedIds = new Set(selectedFoods.map((sf) => sf.food.id));
 
@@ -37,9 +40,14 @@ export default function App() {
       if (prev.find((sf) => sf.food.id === food.id)) {
         return prev.filter((sf) => sf.food.id !== food.id);
       }
-      return [...prev, { food, qty: food.defaultQty }];
+      return[...prev, { food, qty: food.defaultQty }];
     });
   }, [setSelectedFoods]);
+
+  const handleAddFoodById = useCallback((id: string) => {
+    const food = FOODS.find((f) => f.id === id);
+    if (food) handleToggle(food);
+  },[handleToggle]);
 
   const handleUpdateQty = useCallback((id: string, qty: number) => {
     setSelectedFoods((prev) =>
@@ -51,100 +59,64 @@ export default function App() {
     setSelectedFoods((prev) => prev.filter((sf) => sf.food.id !== id));
   }, [setSelectedFoods]);
 
+  const handleSaveMeal = useCallback(() => {
+    if (selectedFoods.length === 0) return;
+    const newMeal: MealRecord = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      foods: selectedFoods,
+      totals,
+    };
+    setPastMeals((prev) => [...prev, newMeal].slice(-10)); // Keep last 10 meals history
+    setSelectedFoods([]); // Clear plate for next meal
+  },[selectedFoods, totals, setPastMeals, setSelectedFoods]);
+
   return (
-    <div className="min-h-screen bg-[#FAFAF7] text-stone-800">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#FAFAF7]/90 backdrop-blur border-b border-stone-200">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Leaf size={20} className="text-[#7C9A6E]" />
-            <h1 className="font-semibold text-[#7C9A6E] text-lg">VegaNutrient</h1>
-            <span className="text-xs text-stone-400 capitalize ml-1">
-              · {currentSeason}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            {selectedFoods.length > 0 && (
-              <button
-                onClick={() => setSelectedFoods([])}
-                className="text-xs text-stone-400 hover:text-[#C4704F] transition-colors"
-              >
-                Réinitialiser
-              </button>
-            )}
-            <button
-              onClick={() => setShowGoals(true)}
-              className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-800 px-3 py-1.5 rounded-lg hover:bg-stone-100 transition-colors"
-            >
-              <Settings size={15} />
-              Objectifs
-            </button>
-          </div>
-        </div>
-      </header>
+    <>
+      <MainLayout
+        utilityRail={
+          <UtilityRail
+            onOpenGoals={() => setShowGoals(true)}
+            onResetFoods={() => setSelectedFoods([])}
+            hasFoods={selectedFoods.length > 0}
+            currentSeason={currentSeason}
+          />
+        }
+        sidebar={
+          <FoodManagement
+            selectedFoods={selectedFoods}
+            selectedIds={selectedIds}
+            onToggle={handleToggle}
+            onUpdateQty={handleUpdateQty}
+            onRemove={handleRemove}
+            currentSeason={currentSeason}
+          />
+        }
+      >
+        <AnalysisView
+          totals={totals}
+          dailyGoals={dailyGoals}
+          mealGoals={mealGoals}
+          activeGoals={activeGoals}
+          balancedSuggestions={balancedSuggestions}
+          targetedSuggestions={targetedSuggestions}
+          selectedFoods={selectedFoods}
+          onAddFood={handleAddFoodById}
+          onSaveMeal={handleSaveMeal}
+        />
+      </MainLayout>
 
-      {/* Main layout */}
-      <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left column */}
-        <div className="space-y-6">
-          <section>
-            <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">
-              Sélectionner des aliments
-            </h2>
-            <FoodSearch
-              selectedIds={selectedIds}
-              onToggle={handleToggle}
-              currentSeason={currentSeason}
-            />
-          </section>
-
-          <section>
-            <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">
-              Mon assiette du jour
-              {selectedFoods.length > 0 && (
-                <span className="ml-2 text-xs bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full normal-case font-normal">
-                  {selectedFoods.length} aliment{selectedFoods.length > 1 ? 's' : ''}
-                </span>
-              )}
-            </h2>
-            <FoodList
-              items={selectedFoods}
-              onUpdateQty={handleUpdateQty}
-              onRemove={handleRemove}
-            />
-          </section>
-        </div>
-
-        {/* Right column */}
-        <div className="space-y-4">
-          <DayStats totals={totals} goals={goals} />
-
-
-
-          <section>
-            <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">
-              Couverture nutritionnelle
-            </h2>
-            <NutrientPanel totals={totals} goals={goals} />
-          </section>
-
-                    {/* Insights */}
-          {selectedFoods.length > 0 && (
-            <div className="space-y-2">
-              <InsightCard totals={totals} goals={goals} />
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* Goals modal */}
       {showGoals && (
         <GoalsModal
-          goals={goals}
-          onSave={setGoals}
+          dailyGoals={dailyGoals}
+          mealGoals={mealGoals}
+          mealsPerDay={mealsPerDay}
+          onSaveDaily={setDailyGoals}
+          onSaveMeal={setMealGoals}
+          onSaveMealsPerDay={setMealsPerDay}
           onClose={() => setShowGoals(false)}
         />
       )}
-    </div>
+    </>
   );
 }

@@ -6,9 +6,10 @@ export interface NutrientMeta {
   veganAlert?: boolean;
   tooltip: string;
   tip?: string;
+  isSupplement?: boolean;
 }
 
-export interface DailyGoals {
+export interface NutrientGoals {
   calories: number;
   proteines: number;
   glucides: number;
@@ -36,7 +37,9 @@ export interface DailyGoals {
   threonine: number;
 }
 
-export type NutrientKey = keyof DailyGoals;
+export type NutrientKey = keyof NutrientGoals;
+export type DailyGoals = NutrientGoals;
+export type MealGoals = NutrientGoals;
 
 export type Season = 'printemps' | 'ete' | 'automne' | 'hiver';
 export type FoodCategory =
@@ -55,7 +58,7 @@ export interface Food {
   seasons: Season[];
   unit: string;
   defaultQty: number;
-  per100g: Partial<DailyGoals>;
+  per100g: Partial<NutrientGoals>;
 }
 
 export interface SelectedFood {
@@ -63,8 +66,16 @@ export interface SelectedFood {
   qty: number;
 }
 
+export interface MealRecord {
+  id: string;
+  date: string;
+  foods: SelectedFood[];
+  totals: Partial<NutrientGoals>;
+}
+
 export interface Insight {
-  condition: (totals: Partial<DailyGoals>, goals: DailyGoals) => boolean;
+  condition: (totals: Partial<NutrientGoals>, goals: NutrientGoals) => boolean;
   message: string;
   icon: string;
+  type?: 'warning' | 'success' | 'info';
 }
