@@ -23,12 +23,12 @@ export function NutrientBar({ meta, value, goal }: Props) {
   return (
     <div className="group py-2">
       <div className="flex justify-between items-center mb-1.5">
-        <span className="text-xs font-medium text-[--text-h]">{meta.label}</span>
-        <span className="text-xs text-[--text] tabular-nums">
-          {value.toFixed(1)}{isOver && <span className="text-[--accent] ml-1 font-bold">✓</span>}
+        <span className="text-xs font-medium text-[var(--text-h)]">{meta.label}</span>
+        <span className="text-xs text-[var(--text)] tabular-nums">
+          {value.toFixed(1)}{isOver && <span className="text-[var(--accent)] ml-1 font-bold">✓</span>}
         </span>
       </div>
-      <div className="h-1.5 bg-[--warm-200] rounded-full overflow-hidden shadow-inner">
+      <div className="h-1.5 bg-[var(--warm-200)] rounded-full overflow-hidden shadow-inner">
         <motion.div
           className="h-full rounded-full"
           style={{ backgroundColor: color }}

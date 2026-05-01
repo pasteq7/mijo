@@ -21,19 +21,19 @@ export function NutrientPanel({ totals, goals }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-4 text-xs border-b border-[--border]">
+      <div className="flex gap-4 text-xs border-b border-[var(--border)]">
         {GROUPS.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
             className={clsx(
               'pb-2 transition-colors relative font-medium uppercase tracking-[0.05em]',
-              activeTab === key ? 'text-[--text-h]' : 'text-[--text] hover:text-[--text-h]'
+              activeTab === key ? 'text-[var(--text-h)]' : 'text-[var(--text)] hover:text-[var(--text-h)]'
             )}
           >
             {label}
             {activeTab === key && (
-              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[--accent]" />
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
             )}
           </button>
         ))}

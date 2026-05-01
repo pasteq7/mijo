@@ -27,13 +27,13 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason }) 
   return (
     <div className="space-y-3">
       <div className="relative">
-        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[--text]" />
+        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
         <input
           type="text"
           placeholder="Rechercher…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-8 pr-3 py-2.5 text-xs bg-[--warm-100] text-[--text-h] rounded-xl outline-none focus:ring-2 focus:ring-[--accent-soft] focus:bg-white transition-all shadow-inner"
+          className="w-full pl-8 pr-3 py-2.5 text-xs bg-[var(--warm-100)] text-[var(--text-h)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all shadow-inner"
         />
       </div>
 
@@ -44,7 +44,7 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason }) 
             onClick={() => setCat(c)}
             className={clsx(
               'text-[10px] px-2.5 py-1.5 rounded-lg transition-colors font-medium',
-              cat === c ? 'bg-[--text-h] text-white shadow-sm' : 'bg-[--warm-100] text-[--text] hover:bg-[--warm-200] hover:text-[--text-h]'
+              cat === c ? 'bg-[var(--text-h)] text-white shadow-sm' : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
             )}
           >
             {c}

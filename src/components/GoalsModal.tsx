@@ -62,18 +62,18 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
           exit={{ scale: 0.95, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-between items-center px-6 py-5 border-b border-[var(--border)] bg-white">
-            <h2 className="text-xl font-light text-[--text-h] display-font">Objectifs nutritionnels</h2>
+          <div className="flex justify-between items-center px-6 py-5 border-b border-[var(--border)] bg-[var(--bg-subtle)]">
+            <h2 className="text-xl font-light text-[var(--text-h)] display-font">Objectifs nutritionnels</h2>
             <div className="flex gap-2">
-              <button onClick={onClose} className="text-[--text] hover:text-[--action] transition-colors">
+              <button onClick={onClose} className="text-[var(--text)] hover:text-[var(--action)] transition-colors">
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
           </div>
 
-          <div className="px-6 py-4 bg-white border-b border-[var(--border)]">
+          <div className="px-6 py-4 bg-[var(--bg-subtle)] border-b border-[var(--border)]">
             <div className="flex items-center justify-between max-w-44 mx-auto w-full">
-              <label className="text-sm font-medium text-[--text-h]">Repas / jour</label>
+              <label className="text-sm font-medium text-[var(--text-h)]">Repas / jour</label>
               <input
                 type="number"
                 min={1}
@@ -85,7 +85,7 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
                   setLocalMeals(newVal);
                   setDailyDraft(multiplyGoals(mealDraft, newVal));
                 }}
-                className="w-16 text-right bg-[var(--warm-100)] rounded-xl px-2 py-1.5 text-sm font-medium text-[--text-h] outline-none focus:ring-2 focus:ring-[--accent-soft] shadow-inner"
+                className="w-16 text-right bg-[var(--warm-100)] rounded-xl px-2 py-1.5 text-sm font-medium text-[var(--text-h)] outline-none focus:ring-2 focus:ring-[var(--accent-soft)] shadow-inner"
               />
             </div>
           </div>
@@ -95,8 +95,8 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
               onClick={() => setActiveTab('daily')}
               className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-all ${
                 activeTab === 'daily'
-                  ? 'border-[--accent] text-[--text-h]'
-                  : 'border-transparent text-[--text] hover:text-[--text-h]'
+                  ? 'border-[var(--accent)] text-[var(--text-h)]'
+                  : 'border-transparent text-[var(--text)] hover:text-[var(--text-h)]'
               }`}
             >
               <Sun size={18} strokeWidth={1.5} />
@@ -106,8 +106,8 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
               onClick={() => setActiveTab('meal')}
               className={`flex items-center gap-2 py-4 px-2 ml-4 border-b-2 transition-all ${
                 activeTab === 'meal'
-                  ? 'border-[--accent] text-[--text-h]'
-                  : 'border-transparent text-[--text] hover:text-[--text-h]'
+                  ? 'border-[var(--accent)] text-[var(--text-h)]'
+                  : 'border-transparent text-[var(--text)] hover:text-[var(--text-h)]'
               }`}
             >
               <Moon size={18} strokeWidth={1.5} />
@@ -118,7 +118,7 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
           <div className="px-6 py-3 flex justify-end">
             <button
               onClick={() => setDraft({ ...defaultGoals })}
-              className="flex items-center gap-1.5 text-xs text-[--text] hover:text-[--action] px-3 py-1.5 rounded-lg hover:bg-[var(--warm-200)] transition-colors font-medium"
+              className="flex items-center gap-1.5 text-xs text-[var(--text)] hover:text-[var(--action)] px-3 py-1.5 rounded-lg hover:bg-[var(--warm-200)] transition-colors font-medium"
             >
               <RotateCcw size={14} strokeWidth={1.5} />
               Réinitialiser
@@ -133,13 +133,13 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.15 }}
-                className="space-y-3 bg-white p-4 rounded-2xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
+                className="space-y-3 bg-[var(--bg-subtle)] p-4 rounded-2xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
               >
                 {NUTRIENT_META.map((meta) => (
                   <div key={meta.id} className="flex items-center justify-between gap-4 py-1">
-                    <label className="text-sm text-[--text-h] font-medium flex-1">
+                    <label className="text-sm text-[var(--text-h)] font-medium flex-1">
                       {meta.label}
-                      <span className="text-[--text] ml-1.5 text-xs font-normal">({meta.unit})</span>
+                      <span className="text-[var(--text)] ml-1.5 text-xs font-normal">({meta.unit})</span>
                     </label>
                     <input
                       type="number"
@@ -147,7 +147,7 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
                       step={meta.unit === 'µg' || meta.unit === 'mg' ? 0.1 : 1}
                       value={currentDraft[meta.id as NutrientKey] as number}
                       onChange={(e) => handleChange(activeTab, meta.id as NutrientKey, e.target.value)}
-                      className="w-24 text-right bg-[var(--warm-100)] rounded-lg px-2.5 py-1.5 text-sm font-medium text-[--text-h] outline-none focus:ring-2 focus:ring-[--accent-soft] shadow-inner"
+                      className="w-24 text-right bg-[var(--warm-100)] rounded-lg px-2.5 py-1.5 text-sm font-medium text-[var(--text-h)] outline-none focus:ring-2 focus:ring-[var(--accent-soft)] shadow-inner"
                     />
                   </div>
                 ))}
@@ -155,10 +155,10 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
             </AnimatePresence>
           </div>
 
-          <div className="px-6 py-5 border-t border-[var(--border)] bg-white">
+          <div className="px-6 py-5 border-t border-[var(--border)] bg-[var(--bg-subtle)]">
             <button
               onClick={handleSave}
-              className="w-full bg-[--accent] hover:bg-[#5C7D5B] text-white font-medium py-3 rounded-2xl transition-colors shadow-[var(--shadow-sm)]"
+              className="w-full bg-[var(--accent)] hover:bg-[#5C7D5B] text-white font-medium py-3 rounded-2xl transition-colors shadow-[var(--shadow-sm)]"
             >
               Enregistrer
             </button>

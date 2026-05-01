@@ -34,11 +34,11 @@ export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVis
         scale: isVisible ? 1 : 0.96
       }}
       transition={{ duration: 0.2 }}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 p-4 rounded-2xl bg-white text-[--text-h] shadow-xl pointer-events-none z-50 border border-[var(--border)]"
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 p-4 rounded-2xl bg-[var(--bg-subtle)] text-[var(--text-h)] shadow-xl pointer-events-none z-50 border border-[var(--border)]"
     >
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--border)]">
-        <span className="text-xs font-medium text-[--text]">Énergie</span>
-        <span className="text-sm font-semibold">{calories} <span className="text-xs font-normal text-[--text]">kcal</span></span>
+        <span className="text-xs font-medium text-[var(--text)]">Énergie</span>
+        <span className="text-sm font-semibold">{calories} <span className="text-xs font-normal text-[var(--text)]">kcal</span></span>
       </div>
 
       <div className="grid grid-cols-5 gap-2 mb-4">

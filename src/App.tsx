@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
-import { useNutrients } from './hooks/useNutrients';
+import { useNutrients, useDailyNutrients } from './hooks/useNutrients';
 import { useFoodSuggestions } from './hooks/useFoodSuggestions';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useTheme } from './hooks/useTheme';
 import { MEAL_GOALS, multiplyGoals } from './data/nutrients';
 import { FOODS } from './data/foods';
 
@@ -28,9 +29,11 @@ export default function App() {
   const [mealGoals, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
   const [mealsPerDay, setMealsPerDay] = useLocalStorage<number>('veganut-meals-per-day', 3);
   const [showGoals, setShowGoals] = useState(false);
-  
+
   const currentSeason = getCurrentSeason();
+  const { theme, toggleTheme } = useTheme();
   const totals = useNutrients(selectedFoods);
+  const dailyTotals = useDailyNutrients(totals, pastMeals);
   const { activeGoals, balancedSuggestions, targetedSuggestions } = useFoodSuggestions(selectedFoods, pastMeals, mealGoals);
 
   const selectedIds = new Set(selectedFoods.map((sf) => sf.food.id));
@@ -40,14 +43,14 @@ export default function App() {
       if (prev.find((sf) => sf.food.id === food.id)) {
         return prev.filter((sf) => sf.food.id !== food.id);
       }
-      return[...prev, { food, qty: food.defaultQty }];
+      return [...prev, { food, qty: food.defaultQty }];
     });
   }, [setSelectedFoods]);
 
   const handleAddFoodById = useCallback((id: string) => {
     const food = FOODS.find((f) => f.id === id);
     if (food) handleToggle(food);
-  },[handleToggle]);
+  }, [handleToggle]);
 
   const handleUpdateQty = useCallback((id: string, qty: number) => {
     setSelectedFoods((prev) =>
@@ -69,7 +72,7 @@ export default function App() {
     };
     setPastMeals((prev) => [...prev, newMeal].slice(-10)); // Keep last 10 meals history
     setSelectedFoods([]); // Clear plate for next meal
-  },[selectedFoods, totals, setPastMeals, setSelectedFoods]);
+  }, [selectedFoods, totals, setPastMeals, setSelectedFoods]);
 
   return (
     <>
@@ -80,6 +83,8 @@ export default function App() {
             onResetFoods={() => setSelectedFoods([])}
             hasFoods={selectedFoods.length > 0}
             currentSeason={currentSeason}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         }
         sidebar={
@@ -95,6 +100,7 @@ export default function App() {
       >
         <AnalysisView
           totals={totals}
+          dailyTotals={dailyTotals}
           dailyGoals={dailyGoals}
           mealGoals={mealGoals}
           activeGoals={activeGoals}

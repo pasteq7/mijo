@@ -51,21 +51,21 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason }: Props) {
         className={`
           relative w-full text-left p-4 rounded-2xl border transition-all duration-300
           ${isSelected
-            ? 'border-[--accent] bg-[--accent-soft] shadow-[var(--shadow-sm)]'
-            : 'border-[--border] bg-white hover:border-[--accent] hover:shadow-[var(--shadow-sm)]'
+            ? 'border-[var(--accent)] bg-[var(--accent-soft)] shadow-[var(--shadow-sm)]'
+            : 'border-[var(--border)] bg-[var(--bg)] hover:border-[var(--accent)] hover:shadow-[var(--shadow-sm)]'
           }
         `}
     >
       {isInSeason && (
-        <span className="absolute top-3 right-3 text-[10px] bg-[--accent-soft] text-[--accent] px-2 py-0.5 rounded-full font-medium tracking-wide">
+        <span className="absolute top-3 right-3 text-[10px] bg-[var(--accent-soft)] text-[var(--accent)] px-2 py-0.5 rounded-full font-medium tracking-wide">
           🍃 saison
         </span>
       )}
       <div className="text-3xl mb-2">{food.emoji}</div>
-      <div className={`text-sm font-medium text-[--text-h] leading-tight ${isInSeason ? 'pr-12' : ''}`}>
+      <div className={`text-sm font-medium text-[var(--text-h)] leading-tight ${isInSeason ? 'pr-12' : ''}`}>
         {food.name}
       </div>
-      <div className="text-xs text-[--text] mt-1 opacity-80">
+      <div className="text-xs text-[var(--text)] mt-1 opacity-80">
         {food.per100g.calories || 0} kcal · {food.per100g.proteines || 0}g prot.
       </div>
     </motion.button>

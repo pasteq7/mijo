@@ -1,24 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* Wabi-Sabi / Japandi Palette */
-  --text: #7A756C;
-  --text-h: #2D2C2A;
-  --bg: #EBE6DF; /* Warm Sand */
-  --bg-subtle: #F5F3EF;
-  --bg-soft: rgba(245, 243, 239, 0.7);
-  --border: #D8D3CC;
-  
+  /* Green / Cream Palette (Default) */
+  --text: #5C6B5D;
+  --text-h: #2C362D;
+  --bg: #F9F8F3;
+  --bg-subtle: #F0EFE6;
+  --bg-soft: rgba(240, 239, 230, 0.7);
+  --border: #DCDAD0;
+
   /* Hint Colors */
-  --accent: #6B8E6A; /* Matcha Green */
-  --accent-soft: rgba(107, 142, 106, 0.12);
-  --action: #D96C4A; /* Persimmon */
-  --highlight: #E5B95E; /* Yuzu */
-  --info: #4A5D7E; /* Indigo */
-  
-  --warm-100: #F1EFE9;
-  --warm-200: #E6E1D8;
-  
+  --accent: #607C5D;
+  /* Sage Green */
+  --accent-soft: rgba(96, 124, 93, 0.15);
+  --action: #C87966;
+  /* Muted Clay */
+  --highlight: #D4B26A;
+  /* Warm Gold */
+  --info: #65798C;
+  /* Slate Blue */
+
+  --warm-100: #F0EFE6;
+  --warm-200: #E4E3D8;
+
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.02);
 
@@ -32,6 +36,30 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.dark {
+  /* Catppuccin Macchiato Palette */
+  --text: #a5adcb;
+  --text-h: #cad3f5;
+  --bg: #24273a;
+  --bg-subtle: #1e2030;
+  --bg-soft: rgba(30, 32, 48, 0.7);
+  --border: #363a4f;
+
+  --accent: #a6da95;
+  --accent-soft: rgba(166, 218, 149, 0.15);
+  --action: #f5a97f;
+  --highlight: #eed49f;
+  --info: #8aadf4;
+
+  --warm-100: #363a4f;
+  --warm-200: #494d64;
+
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  color-scheme: dark;
+}
+
 #root {
   width: 100%;
   min-height: 100vh;
@@ -39,17 +67,37 @@
   margin: 0 auto;
 }
 
-body { margin: 0; }
+body {
+  margin: 0;
+}
 
-h1, h2, h3, h4, h5, h6, .display-font { 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display-font {
   font-family: 'Outfit', system-ui, sans-serif;
-  color: var(--text-h); 
-  font-weight: 500; 
+  color: var(--text-h);
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #A09D96; }
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text);
+}

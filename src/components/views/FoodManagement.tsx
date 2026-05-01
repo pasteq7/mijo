@@ -22,11 +22,11 @@ export function FoodManagement({
   return (
     <div className="flex flex-col h-full space-y-8">
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-[--text] uppercase tracking-[0.1em]">Sélection</h2>
+        <h2 className="text-xs font-semibold text-[var(--text)] uppercase tracking-[0.1em]">Sélection</h2>
         <FoodList items={selectedFoods} onUpdateQty={onUpdateQty} onRemove={onRemove} />
       </div>
-      <div className="pt-8 border-t border-[--border] space-y-4">
-        <h3 className="text-xs font-semibold text-[--text] uppercase tracking-[0.1em]">Ajouter</h3>
+      <div className="pt-8 border-t border-[var(--border)] space-y-4">
+        <h3 className="text-xs font-semibold text-[var(--text)] uppercase tracking-[0.1em]">Ajouter</h3>
         <FoodSearch selectedIds={selectedIds} onToggle={onToggle} currentSeason={currentSeason} />
       </div>
     </div>
