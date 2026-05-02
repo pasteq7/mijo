@@ -56,7 +56,7 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
         onClick={onClose}
       >
         <motion.div
-          className="bg-[var(--bg)] rounded-[2rem] w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border border-[var(--border)]"
+          className="bg-[var(--bg)] rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border border-[var(--border)]"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
@@ -133,7 +133,7 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.15 }}
-                className="space-y-3 bg-[var(--bg-subtle)] p-4 rounded-2xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
+                className="space-y-3 bg-[var(--bg-subtle)] p-4 rounded-xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
               >
                 {NUTRIENT_META.map((meta) => (
                   <div key={meta.id} className="flex items-center justify-between gap-4 py-1">
@@ -158,7 +158,7 @@ export function GoalsModal({ dailyGoals, mealGoals, mealsPerDay, onSaveDaily, on
           <div className="px-6 py-5 border-t border-[var(--border)] bg-[var(--bg-subtle)]">
             <button
               onClick={handleSave}
-              className="w-full bg-[var(--accent)] hover:bg-[#5C7D5B] text-white font-medium py-3 rounded-2xl transition-colors shadow-[var(--shadow-sm)]"
+              className="w-full bg-[var(--accent)] hover:bg-[#5C7D5B] text-white font-medium py-3 rounded-xl transition-colors shadow-[var(--shadow-sm)]"
             >
               Enregistrer
             </button>

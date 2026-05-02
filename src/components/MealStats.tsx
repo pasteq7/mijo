@@ -14,7 +14,7 @@ export function MealStats({ totals, goals }: Props) {
   const evalResult = evaluateMeal(totals, goals);
 
   return (
-    <div className="px-8 py-6 bg-[var(--bg-subtle)] border border-[var(--border)] rounded-[2rem] shadow-[var(--shadow-sm)]">
+    <div className="px-8 py-6 bg-[var(--bg-subtle)] border border-[var(--border)] rounded-b-2xl shadow-[var(--shadow-sm)]">
       <div className="flex justify-between items-end mb-4">
         <div>
           <motion.p
@@ -36,7 +36,7 @@ export function MealStats({ totals, goals }: Props) {
           className={`h-full rounded-full ${evalResult.progressColor.replace('bg-', 'bg-')}`}
           style={{ backgroundColor: evalResult.progressColor.includes('amber') ? 'var(--highlight)' : evalResult.progressColor.includes('green') ? 'var(--accent)' : evalResult.progressColor.includes('red') ? 'var(--action)' : 'var(--accent)' }}
           animate={{ width: `${calPct}%` }}
-          transition={{ type: 'spring', stiffness: 80, damping: 16 }}
+          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.6 }}
         />
       </div>
       <div className="flex justify-between items-center">

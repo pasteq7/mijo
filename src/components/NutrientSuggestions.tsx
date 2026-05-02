@@ -20,7 +20,7 @@ export const NutrientSuggestions: FC<Props> = ({ suggestions, onAddFood }) => {
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: idx * 0.03 }}
-          className="group flex items-center gap-3 px-4 py-3 rounded-2xl border border-transparent hover:border-[var(--border)] hover:bg-[var(--bg)] hover:shadow-[var(--shadow-sm)] transition-all cursor-pointer"
+          className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent hover:border-[var(--border)] hover:bg-[var(--bg)] hover:shadow-[var(--shadow-sm)] transition-all cursor-pointer"
           onClick={() => onAddFood(s.food.id)}
         >
           <span className="text-xl">{s.food.emoji}</span>

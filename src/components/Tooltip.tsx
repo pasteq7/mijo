@@ -6,64 +6,65 @@ interface Props {
   zinc: 'low' | 'mid' | 'high';
   magnesium: 'low' | 'mid' | 'high';
   fibre: 'low' | 'mid' | 'high';
-  hasB12: boolean;
-  hasVitD: boolean;
   calories: number;
   isVisible: boolean;
 }
 
-const levelHeight: Record<string, string> = {
-  high: '100%',
-  mid: '66%',
-  low: '33%',
-};
-
-const levelBg: Record<string, string> = {
-  high: 'var(--accent)',
-  mid: 'color-mix(in srgb, var(--accent) 50%, transparent)',
-  low: 'var(--warm-200)',
-};
+const items = [
+  { label: 'Protéines', key: 'protein' as const },
+  { label: 'Fer', key: 'iron' as const },
+  { label: 'Zinc', key: 'zinc' as const },
+  { label: 'Magnésium', key: 'magnesium' as const },
+  { label: 'Fibres', key: 'fibre' as const },
+];
 
 export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVisible }: Props) {
+  const levels = { protein, iron, zinc, magnesium, fibre };
+
   return (
     <motion.div
       initial={false}
-      animate={{ 
+      animate={{
         opacity: isVisible ? 1 : 0,
         y: isVisible ? 0 : 8,
-        scale: isVisible ? 1 : 0.96
+        scale: isVisible ? 1 : 0.96,
       }}
-      transition={{ duration: 0.2 }}
-      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 p-4 rounded-2xl bg-[var(--bg-subtle)] text-[var(--text-h)] shadow-xl pointer-events-none z-50 border border-[var(--border)]"
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      className="w-64 p-5 rounded-2xl bg-[var(--bg-subtle)] text-[var(--text-h)] shadow-xl pointer-events-none border border-[var(--border)] relative"
     >
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--border)]">
+      <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--bg-subtle)] border-r border-b border-[var(--border)] rotate-45" />
+
+      <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[var(--border)]">
         <span className="text-xs font-medium text-[var(--text)]">Énergie</span>
-        <span className="text-sm font-semibold">{calories} <span className="text-xs font-normal text-[var(--text)]">kcal</span></span>
+        <span className="text-sm font-semibold">
+          {calories} <span className="text-xs font-normal text-[var(--text)]">kcal</span>
+        </span>
       </div>
 
-      <div className="grid grid-cols-5 gap-2 mb-4">
-        {[
-          { label: 'PRO', level: protein, color: 'text-stone-500' },
-          { label: 'Fe', level: iron, color: 'text-red-500' },
-          { label: 'Zn', level: zinc, color: 'text-yellow-600' },
-          { label: 'Mg', level: magnesium, color: 'text-green-600' },
-          { label: 'Fib', level: fibre, color: 'text-amber-600' },
-        ].map((item) => (
-          <div key={item.label} className="flex flex-col items-center gap-1.5">
-            <div className="w-2.5 h-8 rounded-full bg-[var(--warm-100)] overflow-hidden relative flex items-end">
-              <div 
-                className="w-full rounded-full transition-all duration-300"
-                style={{
-                  height: levelHeight[item.level],
-                  backgroundColor: levelBg[item.level],
-                }}
-              />
+      <div className="space-y-2.5">
+        {items.map((item) => {
+          const level = levels[item.key];
+          return (
+            <div key={item.key} className="flex items-center gap-3">
+              <span className="text-[11px] text-[var(--text)] w-16 shrink-0">{item.label}</span>
+              <div className="flex-1 h-2 rounded-full bg-[var(--warm-100)] overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    level === 'high'
+                      ? 'bg-[var(--accent)]'
+                      : level === 'mid'
+                      ? 'bg-[var(--accent-soft)]'
+                      : 'bg-[var(--warm-200)]'
+                  }`}
+                  style={{
+                    width: level === 'high' ? '100%' : level === 'mid' ? '66%' : '33%',
+                  }}
+                />
+              </div>
             </div>
-            <span className={`text-[10px] font-medium tracking-wide ${item.color}`}>{item.label}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
-
     </motion.div>
   );
 }

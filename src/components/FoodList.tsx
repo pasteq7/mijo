@@ -16,7 +16,7 @@ export function FoodList({ items, onUpdateQty, onRemove }: Props) {
   }
 
   return (
-    <ul className="space-y-1">
+    <ul className="space-y-1 max-h-[300px] overflow-y-auto">
       <AnimatePresence initial={false}>
         {items.map(({ food, qty }) => (
           <motion.li

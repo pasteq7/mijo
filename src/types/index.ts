@@ -73,6 +73,31 @@ export interface MealRecord {
   totals: Partial<NutrientGoals>;
 }
 
+export interface FavoriteMeal {
+  id: string;
+  sourceMealId: string;
+  name: string;
+  foods: SelectedFood[];
+  totals: Partial<NutrientGoals>;
+  createdAt: string;
+}
+
+export interface DayScore {
+  caloriesPct: number;
+  proteinPct: number;
+  microCoverage: number;
+  label: string;
+}
+
+export interface DayRecord {
+  date: string;
+  meals: MealRecord[];
+  dailyTotals: Partial<NutrientGoals>;
+  status: 'active' | 'validated';
+  validatedAt?: string;
+  score?: DayScore;
+}
+
 export interface Insight {
   condition: (totals: Partial<NutrientGoals>, goals: NutrientGoals) => boolean;
   message: string;

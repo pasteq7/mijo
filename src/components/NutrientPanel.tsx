@@ -20,7 +20,7 @@ export function NutrientPanel({ totals, goals }: Props) {
   const [activeTab, setActiveTab] = useState('macros');
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 backdrop-blur-sm p-2 rounded-md">
       <div className="flex gap-4 text-xs border-b border-[var(--border)]">
         {GROUPS.map(({ key, label }) => (
           <button

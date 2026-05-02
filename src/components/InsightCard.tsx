@@ -25,7 +25,7 @@ export function InsightCard({ totals, goals }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.2 }}
-              className={`flex gap-4 px-5 py-4 border rounded-2xl items-start shadow-[var(--shadow-sm)] ${
+              className={`flex gap-4 px-5 py-4 border rounded-xl items-start shadow-[var(--shadow-sm)] ${
                 isWarning ? 'bg-orange-50/50 border-orange-200 text-orange-900' :
                 isSuccess ? 'bg-green-50/50 border-green-200 text-green-900' :
                 'bg-blue-50/50 border-blue-200 text-blue-900'

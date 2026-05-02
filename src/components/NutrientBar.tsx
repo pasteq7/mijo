@@ -34,7 +34,7 @@ export function NutrientBar({ meta, value, goal }: Props) {
           style={{ backgroundColor: color }}
           initial={{ width: 0 }}
           animate={{ width: `${displayPct}%` }}
-          transition={{ type: 'spring', stiffness: 60, damping: 15 }}
+          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.5 }}
         />
       </div>
     </div>
