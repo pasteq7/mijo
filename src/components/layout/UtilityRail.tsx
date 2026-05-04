@@ -1,4 +1,4 @@
-import { Settings, Leaf, RotateCcw, Sun, Moon, Flower2, Snowflake } from 'lucide-react';
+import { Settings, Leaf, Sun, Moon, Flower2, Snowflake } from 'lucide-react';
 import type { Season } from '../../types';
 
 const seasonConfig: Record<Season, { icon: typeof Leaf; label: string; color: string; softColor: string }> = {
@@ -18,9 +18,9 @@ interface UtilityRailProps {
   dayValidated?: boolean;
 }
 
-export function UtilityRail({ onOpenGoals, onResetFoods, hasFoods, currentSeason, theme, onToggleTheme }: UtilityRailProps) {
+export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }: UtilityRailProps) {
   return (
-    <aside className="w-16 lg:w-24 flex flex-col items-center py-10 bg-transparent z-50">
+    <aside className="w-16 lg:w-24 h-full flex flex-col items-center py-10 bg-transparent z-50">
       <div className="mb-12 text-[var(--accent)] relative">
         <Leaf size={28} strokeWidth={1.5} />
 
@@ -43,15 +43,7 @@ export function UtilityRail({ onOpenGoals, onResetFoods, hasFoods, currentSeason
           <Settings size={20} strokeWidth={1.5} />
         </button>
 
-        {hasFoods && (
-          <button
-            onClick={onResetFoods}
-            className="p-3.5 rounded-full text-[var(--text)] hover:text-[var(--action)] hover:bg-[var(--warm-200)] transition-all shadow-[var(--shadow-sm)] bg-[var(--bg-subtle)] border border-[var(--border)]"
-            title="Réinitialiser"
-          >
-            <RotateCcw size={20} strokeWidth={1.5} />
-          </button>
-        )}
+
       </div>
 
       {(() => {
@@ -64,9 +56,9 @@ export function UtilityRail({ onOpenGoals, onResetFoods, hasFoods, currentSeason
               <Icon size={64} strokeWidth={1} style={{ color: cfg.color }} />
             </div>
             {/* Stacked label over the motif */}
-            <div className="relative flex flex-col items-center gap-[6px] py-6" style={{ color: cfg.color }}>
+            <div className="relative flex flex-col items-center gap-3 py-6" style={{ color: cfg.color }}>
               {cfg.label.toUpperCase().split('').map((char, i) => (
-                <span key={i} className="text-[13px] leading-none" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 300 }}>
+                <span key={i} className="text-[15px] leading-none" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 300 }}>
                   {char}
                 </span>
               ))}

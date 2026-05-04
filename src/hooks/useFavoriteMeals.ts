@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { FavoriteMeal, MealRecord } from '../types';
+import type { FavoriteMeal, MealRecord, SelectedFood, NutrientGoals } from '../types';
 
 function generateName(foods: MealRecord['foods']): string {
   const names = foods.map(sf => sf.food.name);
@@ -29,6 +29,20 @@ export function useFavoriteMeals() {
     });
   }, [setFavorites]);
 
+  const addFavoriteFromSelection = useCallback((foods: SelectedFood[], totals: Partial<NutrientGoals>) => {
+    setFavorites(prev => {
+      const fav: FavoriteMeal = {
+        id: crypto.randomUUID(),
+        sourceMealId: 'selection-' + crypto.randomUUID(),
+        name: generateName(foods),
+        foods,
+        totals,
+        createdAt: new Date().toISOString(),
+      };
+      return [fav, ...prev];
+    });
+  }, [setFavorites]);
+
   const removeFavorite = useCallback((id: string) => {
     setFavorites(prev => prev.filter(f => f.id !== id));
   }, [setFavorites]);
@@ -39,5 +53,5 @@ export function useFavoriteMeals() {
 
   const favoriteIds = new Set(favorites.map(f => f.sourceMealId));
 
-  return { favorites, favoriteIds, addFavorite, removeFavorite, isFavorite };
+  return { favorites, favoriteIds, addFavorite, addFavoriteFromSelection, removeFavorite, isFavorite };
 }

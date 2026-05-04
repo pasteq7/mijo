@@ -5,6 +5,7 @@ import { legumes } from './foods/legumes';
 import { fruits } from './foods/fruits';
 import { graines_noix } from './foods/graines_noix';
 import { autres } from './foods/autres';
+import { boissons } from './foods/boissons';
 
 export const FOODS: Food[] = [
   ...legumineuses,
@@ -12,5 +13,6 @@ export const FOODS: Food[] = [
   ...legumes,
   ...fruits,
   ...graines_noix,
+  ...boissons,
   ...autres,
 ];

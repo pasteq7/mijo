@@ -8,7 +8,7 @@ export function useNutrients(selectedFoods: SelectedFood[]): Partial<DailyGoals>
       const ratio = qty / 100;
       for (const [key, value] of Object.entries(food.per100g)) {
         const k = key as NutrientKey;
-        totals[k] = ((totals[k] ?? 0) + (value ?? 0) * ratio) as never;
+        totals[k] = Math.round((((totals[k] ?? 0) + (value ?? 0) * ratio)) * 10) / 10 as never;
       }
     }
     return totals;

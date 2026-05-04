@@ -10,7 +10,7 @@ interface Props {
 
 export function FavoriteMealCard({ favorite, onLoad, onDelete }: Props) {
   const cal = Math.round(favorite.totals.calories ?? 0);
-  const prot = favorite.totals.proteines ?? 0;
+  const prot = Math.round(favorite.totals.proteines ?? 0);
   const emojis = favorite.foods.map(sf => sf.food.emoji);
   const displayEmojis = emojis.slice(0, 5);
   const extra = emojis.length - displayEmojis.length;

@@ -28,12 +28,6 @@ export const INSIGHTS: Insight[] =[
     message: 'Calcium faible. Un verre de lait végétal enrichi ou du chou kale fera l\'affaire.',
   },
   {
-    condition: (t, g) => pct(t.iode, g.iode) < 30 && pct(t.calories, g.calories) > 50,
-    icon: '🌿',
-    type: 'info',
-    message: 'N\'oublie pas que l\'iode est rare dans les végétaux (sel iodé ou algues sont tes amis).',
-  },
-  {
     condition: (t, g) => pct(t.fibres, g.fibres) >= 100,
     icon: '✅',
     type: 'success',

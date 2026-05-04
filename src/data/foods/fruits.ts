@@ -4,7 +4,7 @@ export const fruits: Food[] = [
   {
     id: 'pomme', name: 'Pomme', emoji: '🍎',
     category: 'fruits', seasons: ['automne', 'hiver'],
-    unit: 'g', defaultQty: 150,
+    unit: 'g', defaultQty: 100,
     per100g: {
       calories: 52, proteines: 0.3, glucides: 14, lipides: 0.2, fibres: 2.4,
       fer: 0.1, vitC: 4.6, vitK: 2.2,
@@ -13,7 +13,7 @@ export const fruits: Food[] = [
   {
     id: 'orange', name: 'Orange', emoji: '🍊',
     category: 'fruits', seasons: ['hiver', 'printemps'],
-    unit: 'g', defaultQty: 150,
+    unit: 'g', defaultQty: 100,
     per100g: {
       calories: 47, proteines: 0.9, glucides: 12, lipides: 0.1, fibres: 2.4,
       fer: 0.1, calcium: 40,
@@ -54,7 +54,7 @@ export const fruits: Food[] = [
   {
     id: 'fraise', name: 'Fraise', emoji: '🍓',
     category: 'fruits', seasons: ['printemps', 'ete'],
-    unit: 'g', defaultQty: 150,
+    unit: 'g', defaultQty: 100,
     per100g: {
       calories: 32, proteines: 0.7, glucides: 7.7, lipides: 0.3, fibres: 2,
       fer: 0.4, calcium: 16, magnesium: 13,
@@ -74,7 +74,7 @@ export const fruits: Food[] = [
   {
     id: 'poire', name: 'Poire', emoji: '🍐',
     category: 'fruits', seasons: ['automne', 'hiver'],
-    unit: 'g', defaultQty: 150,
+    unit: 'g', defaultQty: 100,
     per100g: {
       calories: 57, proteines: 0.4, glucides: 15, lipides: 0.1, fibres: 3.1,
       fer: 0.2, calcium: 9, magnesium: 7,
@@ -84,7 +84,7 @@ export const fruits: Food[] = [
   {
     id: 'raisin', name: 'Raisin', emoji: '🍇',
     category: 'fruits', seasons: ['ete', 'automne'],
-    unit: 'g', defaultQty: 150,
+    unit: 'g', defaultQty: 100,
     per100g: {
       calories: 69, proteines: 0.7, glucides: 18, lipides: 0.2, fibres: 0.9,
       fer: 0.4, calcium: 10, magnesium: 7,

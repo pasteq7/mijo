@@ -6,7 +6,6 @@ export interface NutrientMeta {
   veganAlert?: boolean;
   tooltip: string;
   tip?: string;
-  isSupplement?: boolean;
 }
 
 export interface NutrientGoals {
@@ -15,8 +14,6 @@ export interface NutrientGoals {
   glucides: number;
   lipides: number;
   fibres: number;
-  vitB12: number;
-  vitD: number;
   vitA: number;
   vitC: number;
   vitB9: number;
@@ -27,7 +24,6 @@ export interface NutrientGoals {
   calcium: number;
   zinc: number;
   magnesium: number;
-  iode: number;
   selenium: number;
   omega3: number;
   omega6: number;
@@ -48,6 +44,7 @@ export type FoodCategory =
   | 'légumes'
   | 'fruits'
   | 'graines & noix'
+  | 'boissons'
   | 'autres';
 
 export interface Food {

@@ -1,6 +1,6 @@
 import type { NutrientMeta, NutrientGoals } from '../types';
 
-export const NUTRIENT_META: NutrientMeta[] =[
+export const NUTRIENT_META: NutrientMeta[] = [
   // MACROS
   { id: 'calories', label: 'Calories', unit: 'kcal', group: 'macros', tooltip: 'Énergie de ton repas.' },
   { id: 'proteines', label: 'Protéines', unit: 'g', group: 'macros', tooltip: 'Construction musculaire. Combine céréales et légumineuses.' },
@@ -21,7 +21,6 @@ export const NUTRIENT_META: NutrientMeta[] =[
   { id: 'calcium', label: 'Calcium', unit: 'mg', group: 'mineraux', tooltip: 'Santé osseuse (tofu, chou kale).' },
   { id: 'zinc', label: 'Zinc', unit: 'mg', group: 'mineraux', veganAlert: true, tooltip: 'Immunité. Le trempage aide l\'absorption.' },
   { id: 'magnesium', label: 'Magnésium', unit: 'mg', group: 'mineraux', tooltip: 'Système nerveux (graines, céréales).' },
-  { id: 'iode', label: 'Iode', unit: 'µg', group: 'mineraux', veganAlert: true, tooltip: 'Thyroïde (sel iodé, algues).' },
   { id: 'selenium', label: 'Sélénium', unit: 'µg', group: 'mineraux', tooltip: 'Antioxydant (noix du Brésil).' },
 
   // ACIDES GRAS
@@ -34,7 +33,7 @@ export const NUTRIENT_META: NutrientMeta[] =[
   { id: 'leucine', label: 'Leucine', unit: 'g', group: 'aminoacides', tooltip: 'Synthèse musculaire (soja).' },
   { id: 'threonine', label: 'Thréonine', unit: 'g', group: 'aminoacides', tooltip: 'Protéines structurelles.' },
 ];
- 
+
 // Goals for ~1 MEAL (roughly Daily / 3)
 export const MEAL_GOALS: NutrientGoals = {
   calories: 660,
@@ -42,8 +41,6 @@ export const MEAL_GOALS: NutrientGoals = {
   glucides: 85,
   lipides: 25,
   fibres: 10,
-  vitB12: 0, // Handled via supplement
-  vitD: 0,   // Handled via supplement
   vitA: 250,
   vitC: 40,
   vitB9: 110,
@@ -54,7 +51,6 @@ export const MEAL_GOALS: NutrientGoals = {
   calcium: 300,
   zinc: 4,
   magnesium: 130,
-  iode: 50,
   selenium: 25,
   omega3: 0.8,
   omega6: 4,

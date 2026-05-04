@@ -2,7 +2,18 @@ import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { runMigration } from '../utils/migration';
 import { toDateKey } from '../utils/dateHelpers';
-import type { DayRecord, MealRecord, NutrientGoals, NutrientKey, DayScore } from '../types';
+import type { DayRecord, MealRecord, NutrientGoals, NutrientKey, DayScore, SelectedFood } from '../types';
+
+function computeMealTotals(foods: SelectedFood[]): Partial<NutrientGoals> {
+  const totals: Partial<NutrientGoals> = {};
+  for (const sf of foods) {
+    for (const [key, value] of Object.entries(sf.food.per100g)) {
+      const k = key as NutrientKey;
+      totals[k] = ((totals[k] ?? 0) + ((value ?? 0) / 100) * sf.qty) as never;
+    }
+  }
+  return totals;
+}
 
 function computeDailyTotals(meals: MealRecord[]): Partial<NutrientGoals> {
   const totals: Partial<NutrientGoals> = {};
@@ -19,7 +30,7 @@ function computeScore(dailyTotals: Partial<NutrientGoals>, goals: NutrientGoals)
   const caloriesPct = goals.calories > 0 ? ((dailyTotals.calories ?? 0) / goals.calories) * 100 : 0;
   const proteinPct = goals.proteines > 0 ? ((dailyTotals.proteines ?? 0) / goals.proteines) * 100 : 0;
 
-  const microKeys: NutrientKey[] = ['vitB12', 'vitD', 'vitA', 'vitC', 'vitB9', 'vitB6', 'vitE', 'vitK', 'fer', 'calcium', 'zinc', 'magnesium', 'iode', 'selenium', 'omega3', 'omega6', 'lysine', 'methionine', 'leucine', 'threonine'];
+  const microKeys: NutrientKey[] = ['vitA', 'vitC', 'vitB9', 'vitB6', 'vitE', 'vitK', 'fer', 'calcium', 'zinc', 'magnesium', 'selenium', 'omega3', 'omega6', 'lysine', 'methionine', 'leucine', 'threonine'];
   const microCoverage = microKeys.filter(k => {
     const goal = goals[k];
     return goal > 0 && ((dailyTotals[k] ?? 0) / goal) >= 0.5;
@@ -87,7 +98,11 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
   const pastDays = useMemo(() => {
     return days
       .filter(d => d.status === 'validated')
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort((a, b) => {
+        const aTime = a.validatedAt ?? a.date;
+        const bTime = b.validatedAt ?? b.date;
+        return bTime.localeCompare(aTime);
+      });
   }, [days]);
 
   const addMealToDay = useCallback((meal: MealRecord) => {
@@ -148,12 +163,51 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
     return days.find(d => d.date === date);
   }, [days]);
 
+  const deleteMealFromDay = useCallback((date: string, mealId: string) => {
+    setDays(prev => {
+      const dayIdx = prev.findIndex(d => d.date === date);
+      if (dayIdx === -1) return prev;
+      const day = prev[dayIdx];
+      const updatedMeals = day.meals.filter(m => m.id !== mealId);
+      const dailyTotals = computeDailyTotals(updatedMeals);
+      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
+      const updated = [...prev];
+      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      return updated;
+    });
+  }, [setDays, dailyGoals]);
+
+  const updateMealQuantityInDay = useCallback((date: string, mealId: string, foodIndex: number, newQty: number) => {
+    setDays(prev => {
+      const dayIdx = prev.findIndex(d => d.date === date);
+      if (dayIdx === -1) return prev;
+      const day = prev[dayIdx];
+      const mealIdx = day.meals.findIndex(m => m.id === mealId);
+      if (mealIdx === -1) return prev;
+      const qty = Math.max(1, newQty);
+      const updated = [...prev];
+      const updatedMeals = [...day.meals];
+      const meal = { ...updatedMeals[mealIdx] };
+      const foods = [...meal.foods];
+      foods[foodIndex] = { ...foods[foodIndex], qty };
+      meal.foods = foods;
+      meal.totals = computeMealTotals(foods);
+      updatedMeals[mealIdx] = meal;
+      const dailyTotals = computeDailyTotals(updatedMeals);
+      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
+      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      return updated;
+    });
+  }, [setDays, dailyGoals]);
+
   return {
     activeDay,
     pastDays,
     allDays: days,
     addMealToDay,
     deleteMeal,
+    deleteMealFromDay,
+    updateMealQuantityInDay,
     validateDay,
     getDayByDate,
   };

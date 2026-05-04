@@ -49,13 +49,12 @@ export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVis
               <span className="text-[11px] text-[var(--text)] w-16 shrink-0">{item.label}</span>
               <div className="flex-1 h-2 rounded-full bg-[var(--warm-100)] overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    level === 'high'
-                      ? 'bg-[var(--accent)]'
-                      : level === 'mid'
-                      ? 'bg-[var(--accent-soft)]'
-                      : 'bg-[var(--warm-200)]'
-                  }`}
+                  className={`h-full rounded-full transition-all duration-300 ${level === 'high'
+                    ? 'bg-[var(--accent)]'
+                    : level === 'mid'
+                      ? 'bg-[var(--accent-light)]'
+                      : 'bg-[var(--warm-300)]'
+                    }`}
                   style={{
                     width: level === 'high' ? '100%' : level === 'mid' ? '66%' : '33%',
                   }}

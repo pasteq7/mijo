@@ -8,18 +8,14 @@ export function useFoodSuggestions(selectedFoods: SelectedFood[], pastMeals: Mea
   const totals = useNutrients(selectedFoods);
 
   return useMemo(() => {
-    // We adjust current goals based on what we missed in previous meals!
     const activeGoals = getCompensatedGoals(baseGoals, pastMeals);
     const deficits = calculateDeficits(totals, activeGoals);
-    
-    const balanced = getFoodSuggestions(FOODS, deficits, 'balanced');
-    const targeted = getFoodSuggestions(FOODS, deficits, 'targeted');
+    const suggestions = getFoodSuggestions(FOODS, deficits, selectedFoods);
 
     return {
       activeGoals,
       deficits,
-      balancedSuggestions: balanced,
-      targetedSuggestions: targeted,
+      suggestions,
     };
-  }, [totals, pastMeals, baseGoals]);
+  }, [totals, pastMeals, baseGoals, selectedFoods]);
 }

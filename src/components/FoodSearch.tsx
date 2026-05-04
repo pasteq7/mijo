@@ -1,11 +1,14 @@
-import { useState, useMemo, type FC } from 'react';
-import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis, Star } from 'lucide-react';
+import { useState, useMemo, useEffect, type FC } from 'react';
+import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis, List, Columns2, Sparkles } from 'lucide-react';
 import { FOODS } from '../data/foods';
-import type { Food, FoodCategory, Season, FavoriteMeal } from '../types';
+import type { Food, FoodCategory, Season } from '../types';
+import type { FoodSuggestion } from '../utils/recommendations';
 import { FoodCard } from './FoodCard';
-import { FavoriteMealCard } from './FavoriteMealCard';
-import { motion } from 'framer-motion';
+import { NutrientSuggestions } from './NutrientSuggestions';
 import clsx from 'clsx';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const PLACEHOLDERS = ['Riz...', 'Tofu...', 'Brocoli...', 'Pois chiches...', 'Quinoa...', 'Lentilles...'];
 
 const CATEGORIES: { value: FoodCategory; icon: typeof Bean; label: string }[] = [
   { value: 'légumineuses', icon: Bean, label: 'Légumineuses' },
@@ -16,20 +19,27 @@ const CATEGORIES: { value: FoodCategory; icon: typeof Bean; label: string }[] = 
   { value: 'autres', icon: Ellipsis, label: 'Autres' },
 ];
 
-
 interface Props {
   selectedIds: Set<string>;
   onToggle: (f: Food) => void;
   currentSeason: Season;
-  favorites?: FavoriteMeal[];
-  onLoadFavorite?: (fav: FavoriteMeal) => void;
-  onDeleteFavorite?: (id: string) => void;
+  suggestions: FoodSuggestion[];
+  onAddFood: (id: string) => void;
 }
 
-export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, favorites = [], onLoadFavorite, onDeleteFavorite }) => {
-  const [tab, setTab] = useState<'aliments' | 'favoris'>('aliments');
+export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, suggestions, onAddFood }) => {
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState<FoodCategory | 'tous'>('tous');
+  const [tooltipMode, setTooltipMode] = useState<'simple' | 'advanced'>('simple');
+  const [tab, setTab] = useState<'search' | 'suggestions'>('search');
+
+  const [phIndex, setPhIndex] = useState(0);
+
+  useEffect(() => {
+    if (selectedIds.size > 0) return;
+    const t = setInterval(() => setPhIndex((i) => (i + 1) % PLACEHOLDERS.length), 2500);
+    return () => clearInterval(t);
+  }, [selectedIds.size]);
 
   const filtered = useMemo(() => FOODS.filter((f) => {
     const q = query.toLowerCase();
@@ -38,18 +48,20 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, fa
     return mq && mc;
   }), [query, cat]);
 
+  const hasSuggestions = suggestions.length > 0 && selectedIds.size > 0;
+
   return (
     <div className="space-y-3">
-      <div className="flex gap-6 border-b border-[var(--border)]">
+      <div className="flex border-b border-[var(--border)] gap-6">
         <button
-          onClick={() => setTab('aliments')}
+          onClick={() => setTab('search')}
           className={clsx(
             "px-1 py-2 text-xs font-medium transition-all relative",
-            tab === 'aliments' ? "text-[var(--text-h)]" : "text-[var(--text)] hover:text-[var(--text-h)]"
+            tab === 'search' ? "text-[var(--text-h)]" : "text-[var(--text)] hover:text-[var(--text-h)]"
           )}
         >
-          Aliments
-          {tab === 'aliments' && (
+          Recherche
+          {tab === 'search' && (
             <motion.div
               layoutId="foodSearchTab"
               className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]"
@@ -58,20 +70,18 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, fa
           )}
         </button>
         <button
-          onClick={() => setTab('favoris')}
+          onClick={() => setTab('suggestions')}
           className={clsx(
             "px-1 py-2 text-xs font-medium transition-all relative flex items-center gap-1.5",
-            tab === 'favoris' ? "text-[var(--text-h)]" : "text-[var(--text)] hover:text-[var(--text-h)]"
+            tab === 'suggestions' ? "text-[var(--text-h)]" : "text-[var(--text)] hover:text-[var(--text-h)]"
           )}
         >
-          <Star size={12} />
-          Favoris
-          {favorites.length > 0 && (
-            <span className="text-[10px] bg-[var(--accent)] text-white px-1.5 py-0.5 rounded-full font-bold leading-none">
-              {favorites.length}
-            </span>
+          <Sparkles size={12} />
+          Suggestions
+          {hasSuggestions && (
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
           )}
-          {tab === 'favoris' && (
+          {tab === 'suggestions' && (
             <motion.div
               layoutId="foodSearchTab"
               className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]"
@@ -81,80 +91,105 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, fa
         </button>
       </div>
 
-      {tab === 'aliments' ? (
-        <>
-          <div className="relative">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
-            <input
-              type="text"
-              placeholder="Rechercher…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-2.5 text-xs bg-[var(--warm-100)] text-[var(--text-h)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all shadow-inner"
-            />
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCat('tous')}
-              title="Tous les aliments"
-              className={clsx(
-                'text-[10px] px-2.5 py-2 rounded-xl transition-colors font-medium tracking-wide',
-                cat === 'tous'
-                  ? 'bg-[var(--text-h)] text-white shadow-sm'
-                  : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
-              )}
-            >
-              Tous
-            </button>
-            <div className="w-px h-5 bg-[var(--warm-200)]" />
-            {CATEGORIES.map((c) => (
+      <AnimatePresence mode="wait">
+        {tab === 'search' ? (
+          <motion.div
+            key="search"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="space-y-3"
+          >
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
+              <input
+                type="text"
+                placeholder={PLACEHOLDERS[phIndex]}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full pl-8 pr-8 py-2.5 text-xs bg-[var(--warm-100)] text-[var(--text-h)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all shadow-inner"
+              />
               <button
-                key={c.value}
-                onClick={() => setCat(c.value)}
-                title={c.label}
+                onClick={() => setTooltipMode(tooltipMode === 'simple' ? 'advanced' : 'simple')}
+                title={tooltipMode === 'simple' ? 'Mode avancé' : 'Mode simple'}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--warm-200)]"
+              >
+                {tooltipMode === 'advanced' ? <List size={14} /> : <Columns2 size={14} />}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCat('tous')}
+                title="Tous les aliments"
                 className={clsx(
-                  'p-2 rounded-xl transition-colors',
-                  cat === c.value
+                  'text-[10px] px-2.5 py-2 rounded-xl transition-colors font-medium tracking-wide',
+                  cat === 'tous'
                     ? 'bg-[var(--text-h)] text-white shadow-sm'
                     : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
                 )}
               >
-                <c.icon size={16} />
+                Tous
               </button>
-            ))}
-          </div>
+              <div className="w-px h-5 bg-[var(--warm-200)]" />
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setCat(c.value)}
+                  title={c.label}
+                  className={clsx(
+                    'p-2 rounded-xl transition-colors',
+                    cat === c.value
+                      ? 'bg-[var(--text-h)] text-white shadow-sm'
+                      : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
+                  )}
+                >
+                  <c.icon size={16} />
+                </button>
+              ))}
+            </div>
 
-          <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-0.5">
-            {filtered.map((f) => (
-              <FoodCard
-                key={f.id}
-                food={f}
-                isSelected={selectedIds.has(f.id)}
-                onToggle={onToggle}
-                isInSeason={f.seasons.includes(currentSeason)}
-              />
-            ))}
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-0.5">
-          {favorites.length === 0 ? (
-            <p className="text-xs text-[var(--text)] text-center py-8">
-              Aucun favori pour le moment
-            </p>
-          ) : (
-            favorites.map((fav) => (
-              <FavoriteMealCard
-                key={fav.id}
-                favorite={fav}
-                onLoad={(f) => onLoadFavorite?.(f)}
-                onDelete={onDeleteFavorite ?? (() => {})}
-              />
-            ))
-          )}
-        </div>
-      )}
+            <div className="flex flex-col gap-2 pr-0.5">
+              {filtered.map((f) => (
+                <FoodCard
+                  key={f.id}
+                  food={f}
+                  isSelected={selectedIds.has(f.id)}
+                  onToggle={onToggle}
+                  isInSeason={f.seasons.includes(currentSeason)}
+                  tooltipMode={tooltipMode}
+
+                />
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="suggestions"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="space-y-6 max-h-[440px] overflow-y-auto pr-0.5"
+          >
+            {hasSuggestions ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
+                  <Sparkles size={16} className="text-[#7C9A6E]" />
+                  Pour compléter vos apports
+                </div>
+                <NutrientSuggestions suggestions={suggestions} onAddFood={onAddFood} />
+              </div>
+            ) : (
+              <div className="text-center py-16 text-[var(--text)] text-xs">
+                <Sparkles size={24} className="mx-auto mb-3 opacity-40" />
+                Ajoutez des aliments pour obtenir des suggestions
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

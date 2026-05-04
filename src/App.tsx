@@ -29,7 +29,6 @@ export default function App() {
   const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('veganut-foods', []);
   const [dailyGoals, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', multiplyGoals(MEAL_GOALS, 3));
   const [mealGoals, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
-  const [mealsPerDay, setMealsPerDay] = useLocalStorage<number>('veganut-meals-per-day', 3);
   const [showGoals, setShowGoals] = useState(false);
   const [showDayValidation, setShowDayValidation] = useState(false);
 
@@ -42,14 +41,17 @@ export default function App() {
     pastDays,
     addMealToDay,
     deleteMeal,
+    deleteMealFromDay,
+    updateMealQuantityInDay,
     validateDay,
+    allDays,
   } = useDayHistory(dailyGoals);
 
   const dailyTotals = useDailyNutrients(totals, activeDay?.meals ?? []);
 
-  const { activeGoals, balancedSuggestions, targetedSuggestions } = useFoodSuggestions(selectedFoods, activeDay?.meals ?? [], mealGoals);
+  const { suggestions } = useFoodSuggestions(selectedFoods, activeDay?.meals ?? [], mealGoals);
 
-  const { favorites, favoriteIds, addFavorite, removeFavorite } = useFavoriteMeals();
+  const { favorites, favoriteIds, addFavorite, addFavoriteFromSelection, removeFavorite } = useFavoriteMeals();
 
   const selectedIds = new Set(selectedFoods.map((sf) => sf.food.id));
 
@@ -101,6 +103,23 @@ export default function App() {
     deleteMeal(id);
   }, [deleteMeal]);
 
+  const handleDeleteHistoryMeal = useCallback((date: string, mealId: string) => {
+    deleteMealFromDay(date, mealId);
+  }, [deleteMealFromDay]);
+
+  const handleUpdateHistoryMealQty = useCallback((date: string, mealId: string, foodIndex: number, newQty: number) => {
+    updateMealQuantityInDay(date, mealId, foodIndex, newQty);
+  }, [updateMealQuantityInDay]);
+
+  const handleEditHistoryMealFoods = useCallback((date: string, mealId: string) => {
+    const day = allDays.find(d => d.date === date);
+    if (!day) return;
+    const meal = day.meals.find(m => m.id === mealId);
+    if (!meal) return;
+    setSelectedFoods(meal.foods);
+    deleteMealFromDay(date, mealId);
+  }, [allDays, setSelectedFoods, deleteMealFromDay]);
+
   const handleValidateDay = useCallback(() => {
     validateDay();
     setShowDayValidation(false);
@@ -116,13 +135,64 @@ export default function App() {
     }
   }, [favoriteIds, favorites, addFavorite, removeFavorite]);
 
+  const handleSaveAsFavorite = useCallback(() => {
+    if (selectedFoods.length === 0) return;
+    addFavoriteFromSelection(selectedFoods, totals);
+  }, [selectedFoods, totals, addFavoriteFromSelection]);
+
   const handleLoadFavorite = useCallback((fav: FavoriteMeal) => {
     setSelectedFoods(fav.foods);
   }, [setSelectedFoods]);
 
+  const handleExport = useCallback(() => {
+    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
+      'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
+    const data: Record<string, unknown> = { version: 1, exportedAt: new Date().toISOString() };
+    for (const key of keys) {
+      try {
+        const item = localStorage.getItem(key);
+        if (item) data[key] = JSON.parse(item);
+      } catch { /* skip */ }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `veganut-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleResetAll = useCallback(() => {
+    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
+      'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
+    for (const key of keys) {
+      localStorage.removeItem(key);
+    }
+    window.location.reload();
+  }, []);
+
+  const handleImport = useCallback((json: string) => {
+    try {
+      const data = JSON.parse(json);
+      const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
+        'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
+      for (const key of keys) {
+        if (data[key] !== undefined) {
+          localStorage.setItem(key, JSON.stringify(data[key]));
+        }
+      }
+      window.location.reload();
+    } catch {
+      alert('Format de fichier invalide');
+    }
+  }, []);
+
   return (
     <>
       <MainLayout
+        showConnectionArrow={selectedFoods.length === 0}
+        showTutorial={selectedFoods.length === 0}
         utilityRail={
           <UtilityRail
             onOpenGoals={() => setShowGoals(true)}
@@ -142,12 +212,13 @@ export default function App() {
             onUpdateQty={handleUpdateQty}
             onRemove={handleRemove}
             onSaveMeal={handleSaveMeal}
-            onValidateDay={() => setShowDayValidation(true)}
-            mealCountToday={activeDay?.meals.length ?? 0}
+            onSaveAsFavorite={handleSaveAsFavorite}
             currentSeason={currentSeason}
             favorites={favorites}
             onLoadFavorite={handleLoadFavorite}
             onDeleteFavorite={removeFavorite}
+            suggestions={suggestions}
+            onAddFood={handleAddFoodById}
           />
         }
       >
@@ -156,17 +227,18 @@ export default function App() {
           dailyTotals={dailyTotals}
           dailyGoals={dailyGoals}
           mealGoals={mealGoals}
-          activeGoals={activeGoals}
-          balancedSuggestions={balancedSuggestions}
-          targetedSuggestions={targetedSuggestions}
           selectedFoods={selectedFoods}
+          onAddFood={handleAddFoodById}
           pastMeals={activeDay?.meals ?? []}
           pastDays={pastDays}
-          onAddFood={handleAddFoodById}
           onEditMeal={handleEditMeal}
           onDeleteMeal={handleDeleteMeal}
+          onDeleteHistoryMeal={handleDeleteHistoryMeal}
+          onUpdateHistoryMealQty={handleUpdateHistoryMealQty}
+          onEditHistoryMealFoods={handleEditHistoryMealFoods}
           favoriteIds={favoriteIds}
           onToggleFavorite={handleToggleFavorite}
+          onValidateDay={() => setShowDayValidation(true)}
         />
       </MainLayout>
 
@@ -174,11 +246,12 @@ export default function App() {
         <GoalsModal
           dailyGoals={dailyGoals}
           mealGoals={mealGoals}
-          mealsPerDay={mealsPerDay}
           onSaveDaily={setDailyGoals}
           onSaveMeal={setMealGoals}
-          onSaveMealsPerDay={setMealsPerDay}
           onClose={() => setShowGoals(false)}
+          onExport={handleExport}
+          onImport={handleImport}
+          onResetAll={handleResetAll}
         />
       )}
 

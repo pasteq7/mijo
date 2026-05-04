@@ -1,4 +1,4 @@
-import type { Food, NutrientGoals, NutrientKey, MealRecord } from '../types';
+import type { Food, FoodCategory, NutrientGoals, NutrientKey, MealRecord, SelectedFood } from '../types';
 import { NUTRIENT_META } from '../data/nutrients';
 
 export interface NutrientDeficit {
@@ -14,7 +14,6 @@ export interface FoodSuggestion {
   food: Food;
   score: number;
   contributingNutrients: { id: NutrientKey; impact: number }[];
-  type: 'balanced' | 'targeted';
 }
 
 // Dynamically adjust current meal goals based on what was missed in recent meals
@@ -30,7 +29,7 @@ export function getCompensatedGoals(baseGoals: NutrientGoals, pastMeals: MealRec
     const meta = NUTRIENT_META.find(m => m.id === k);
     
     // Ignore macros for compensation (don't overeat calories because of past meals) and supplements
-    if (meta?.group === 'macros' || meta?.isSupplement) continue;
+    if (meta?.group === 'macros') continue;
     
     const pastTarget = baseGoals[k] * recent.length;
     const pastActual = recent.reduce((sum, m) => sum + (m.totals[k] ?? 0), 0);
@@ -47,8 +46,6 @@ export function calculateDeficits(totals: Partial<NutrientGoals>, goals: Nutrien
   return (Object.keys(goals) as NutrientKey[])
     .map((id) => {
       const meta = NUTRIENT_META.find((m) => m.id === id);
-      if (meta?.isSupplement) return null; // Exclude B12 and VitD entirely
-
       const goal = goals[id];
       const current = totals[id] ?? 0;
       const deficit = Math.max(0, goal - current);
@@ -70,49 +67,70 @@ export function calculateDeficits(totals: Partial<NutrientGoals>, goals: Nutrien
 export function getFoodSuggestions(
   foods: Food[],
   deficits: NutrientDeficit[],
-  mode: 'balanced' | 'targeted'
+  selectedFoods: SelectedFood[] = [],
 ): FoodSuggestion[] {
-  if (deficits.length === 0) return[];
+  if (deficits.length === 0) return [];
 
   const topDeficits = deficits.slice(0, 5);
-  const mostDeficient = topDeficits[0];
+  const selectedIds = new Set(selectedFoods.map(sf => sf.food.id));
 
-  return foods
+  // Synergy: what's already in the meal
+  const selectedCategories = new Set(selectedFoods.map(sf => sf.food.category));
+  const hasCereals = selectedCategories.has('céréales');
+  const hasLegumes = selectedCategories.has('légumineuses');
+  const needsCerealLegumeBoost = (hasCereals && !hasLegumes) || (hasLegumes && !hasCereals);
+  const needsVitCBoost = deficits.some(d => d.id === 'fer') && deficits.some(d => d.id === 'vitC');
+
+  const scored = foods
+    .filter(f => !selectedIds.has(f.id))
     .map((food) => {
+      const contributingNutrients: { id: NutrientKey; impact: number }[] = [];
       let score = 0;
-      const contributingNutrients: { id: NutrientKey; impact: number }[] =[];
-      const calories = food.per100g.calories ?? 1;
 
-      if (mode === 'targeted') {
-        const value = food.per100g[mostDeficient.id] ?? 0;
-        if (value > 0) {
-          score = (value / mostDeficient.goal) * 100;
-          score = score / (calories / 50); // Penalize extreme calories slightly
-          contributingNutrients.push({ id: mostDeficient.id, impact: score });
-        }
-      } else {
-        let nutrientSum = 0;
-        topDeficits.forEach((d) => {
-          const value = food.per100g[d.id] ?? 0;
-          if (value > 0) {
-            const impact = (value / d.goal) * 100;
-            nutrientSum += impact * (d.percentDeficit / 100);
-            contributingNutrients.push({ id: d.id, impact });
-          }
-        });
-        score = nutrientSum / (calories / 100);
+      topDeficits.forEach((d) => {
+        const per100 = food.per100g[d.id] ?? 0;
+        if (per100 <= 0) return;
+
+        const servingValue = per100 * (food.defaultQty / 100);
+        const coverage = Math.min(1, servingValue / d.deficit);
+        score += coverage * (d.percentDeficit / 100);
+        contributingNutrients.push({ id: d.id, impact: Math.round(coverage * 100) });
+      });
+
+      // Synergy: complete proteins (céréales + légumineuses)
+      if (needsCerealLegumeBoost &&
+          ((food.category === 'légumineuses' && hasCereals) ||
+           (food.category === 'céréales' && hasLegumes))) {
+        score *= 1.5;
+      }
+
+      // Synergy: iron absorption (boost vitamin C sources when both iron and vitC are lacking)
+      if (needsVitCBoost && (food.per100g.vitC ?? 0) > 5) {
+        score *= 1.3;
       }
 
       return {
         food,
         score,
         contributingNutrients: contributingNutrients.sort((a, b) => b.impact - a.impact).slice(0, 3),
-        type: mode,
       };
     })
     .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+    .sort((a, b) => b.score - a.score);
+
+  // Diversity: limit to 2 suggestions per category to ensure variety
+  const categoryCount = new Map<FoodCategory, number>();
+  const diverse: FoodSuggestion[] = [];
+
+  for (const s of scored) {
+    const count = categoryCount.get(s.food.category) ?? 0;
+    if (count >= 2) continue;
+    categoryCount.set(s.food.category, count + 1);
+    diverse.push(s);
+    if (diverse.length >= 5) break;
+  }
+
+  return diverse;
 }
 
 // Realistic Meal Evaluator
