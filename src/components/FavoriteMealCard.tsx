@@ -16,7 +16,7 @@ export function FavoriteMealCard({ favorite, onLoad, onDelete }: Props) {
   const extra = emojis.length - displayEmojis.length;
 
   return (
-    <div className="relative bg-[var(--warm-100)] rounded-xl shadow-[var(--shadow-sm)] p-4">
+    <div className="relative bg-[var(--warm-100)] rounded-xl shadow-[var(--shadow-sm)] p-4 overflow-x-hidden">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Star size={14} className="shrink-0 fill-[var(--highlight)] text-[var(--highlight)]" />

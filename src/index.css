@@ -154,15 +154,6 @@ h6,
   letter-spacing: -0.03em;
 }
 
-@keyframes dash-move {
-  to {
-    stroke-dashoffset: -24;
-  }
-}
-
-.animate-dash {
-  animation: dash-move 0.8s linear infinite;
-}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

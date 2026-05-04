@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Minus, Plus, X, Star } from 'lucide-react';
+import { StepIndicator } from './StepIndicator';
 import type { SelectedFood, FavoriteMeal } from '../types';
 import { FavoriteMealCard } from './FavoriteMealCard';
 import clsx from 'clsx';
@@ -20,6 +21,7 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveAsFavorite, favor
 
   return (
     <div className="space-y-3">
+      <StepIndicator step={2} label="Sélectionner" />
       <div className="flex gap-6 border-b border-[var(--border)]">
         <button
           onClick={() => setTab('selection')}
@@ -66,7 +68,7 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveAsFavorite, favor
           <p className="text-xs text-[var(--text)] py-4 text-center italic">Ajoute des aliments</p>
         ) : (
           <div className="space-y-2">
-            <ul className="space-y-1 max-h-[280px] overflow-y-auto">
+            <ul className="space-y-1 max-h-[280px] overflow-y-auto overflow-x-hidden">
               <AnimatePresence initial={false}>
                 {items.map(({ food, qty }) => (
                   <motion.li
@@ -120,7 +122,7 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveAsFavorite, favor
           </div>
         )
       ) : (
-        <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-0.5">
+        <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto overflow-x-hidden pr-0.5">
           {favorites.length === 0 ? (
             <p className="text-xs text-[var(--text)] text-center py-8">
               Aucun favori pour le moment

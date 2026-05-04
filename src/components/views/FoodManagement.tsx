@@ -37,9 +37,17 @@ export function FoodManagement({
   onAddFood
 }: FoodManagementProps) {
   return (
-    <div className="flex flex-col h-full space-y-8">
-      <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-[var(--text)] uppercase tracking-[0.1em]">Sélection</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 h-full">
+      <div className="flex flex-col space-y-4 overflow-y-auto">
+        <FoodSearch
+          selectedIds={selectedIds}
+          onToggle={onToggle}
+          currentSeason={currentSeason}
+          suggestions={suggestions}
+          onAddFood={onAddFood}
+        />
+      </div>
+      <div className="flex flex-col space-y-4 overflow-y-auto overflow-x-hidden">
         <FoodList items={selectedFoods} onUpdateQty={onUpdateQty} onRemove={onRemove} onSaveAsFavorite={onSaveAsFavorite} favorites={favorites} onLoadFavorite={onLoadFavorite} onDeleteFavorite={onDeleteFavorite} />
         <AnimatePresence>
           {selectedFoods.length > 0 && (
@@ -63,17 +71,6 @@ export function FoodManagement({
             </motion.div>
           )}
         </AnimatePresence>
-
-      </div>
-      <div className="pt-8 border-t border-[var(--border)] space-y-4">
-        <h3 className="text-xs font-semibold text-[var(--text)] uppercase tracking-[0.1em]">Ajouter</h3>
-        <FoodSearch
-          selectedIds={selectedIds}
-          onToggle={onToggle}
-          currentSeason={currentSeason}
-          suggestions={suggestions}
-          onAddFood={onAddFood}
-        />
       </div>
     </div>
   );

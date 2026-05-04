@@ -87,6 +87,7 @@ export interface DayScore {
 }
 
 export interface DayRecord {
+  id: string;
   date: string;
   meals: MealRecord[];
   dailyTotals: Partial<NutrientGoals>;

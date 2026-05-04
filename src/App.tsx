@@ -103,21 +103,21 @@ export default function App() {
     deleteMeal(id);
   }, [deleteMeal]);
 
-  const handleDeleteHistoryMeal = useCallback((date: string, mealId: string) => {
-    deleteMealFromDay(date, mealId);
+  const handleDeleteHistoryMeal = useCallback((dayId: string, mealId: string) => {
+    deleteMealFromDay(dayId, mealId);
   }, [deleteMealFromDay]);
 
-  const handleUpdateHistoryMealQty = useCallback((date: string, mealId: string, foodIndex: number, newQty: number) => {
-    updateMealQuantityInDay(date, mealId, foodIndex, newQty);
+  const handleUpdateHistoryMealQty = useCallback((dayId: string, mealId: string, foodIndex: number, newQty: number) => {
+    updateMealQuantityInDay(dayId, mealId, foodIndex, newQty);
   }, [updateMealQuantityInDay]);
 
-  const handleEditHistoryMealFoods = useCallback((date: string, mealId: string) => {
-    const day = allDays.find(d => d.date === date);
+  const handleEditHistoryMealFoods = useCallback((dayId: string, mealId: string) => {
+    const day = allDays.find(d => d.id === dayId);
     if (!day) return;
     const meal = day.meals.find(m => m.id === mealId);
     if (!meal) return;
     setSelectedFoods(meal.foods);
-    deleteMealFromDay(date, mealId);
+    deleteMealFromDay(dayId, mealId);
   }, [allDays, setSelectedFoods, deleteMealFromDay]);
 
   const handleValidateDay = useCallback(() => {
@@ -191,8 +191,7 @@ export default function App() {
   return (
     <>
       <MainLayout
-        showConnectionArrow={selectedFoods.length === 0}
-        showTutorial={selectedFoods.length === 0}
+
         utilityRail={
           <UtilityRail
             onOpenGoals={() => setShowGoals(true)}
@@ -205,40 +204,39 @@ export default function App() {
           />
         }
         sidebar={
-          <FoodManagement
+          <AnalysisView
+            totals={totals}
+            dailyTotals={dailyTotals}
+            dailyGoals={dailyGoals}
+            mealGoals={mealGoals}
             selectedFoods={selectedFoods}
-            selectedIds={selectedIds}
-            onToggle={handleToggle}
-            onUpdateQty={handleUpdateQty}
-            onRemove={handleRemove}
-            onSaveMeal={handleSaveMeal}
-            onSaveAsFavorite={handleSaveAsFavorite}
-            currentSeason={currentSeason}
-            favorites={favorites}
-            onLoadFavorite={handleLoadFavorite}
-            onDeleteFavorite={removeFavorite}
-            suggestions={suggestions}
-            onAddFood={handleAddFoodById}
+            pastMeals={activeDay?.meals ?? []}
+            pastDays={pastDays}
+            onEditMeal={handleEditMeal}
+            onDeleteMeal={handleDeleteMeal}
+            onDeleteHistoryMeal={handleDeleteHistoryMeal}
+            onUpdateHistoryMealQty={handleUpdateHistoryMealQty}
+            onEditHistoryMealFoods={handleEditHistoryMealFoods}
+            favoriteIds={favoriteIds}
+            onToggleFavorite={handleToggleFavorite}
+            onValidateDay={() => setShowDayValidation(true)}
           />
         }
       >
-        <AnalysisView
-          totals={totals}
-          dailyTotals={dailyTotals}
-          dailyGoals={dailyGoals}
-          mealGoals={mealGoals}
+        <FoodManagement
           selectedFoods={selectedFoods}
+          selectedIds={selectedIds}
+          onToggle={handleToggle}
+          onUpdateQty={handleUpdateQty}
+          onRemove={handleRemove}
+          onSaveMeal={handleSaveMeal}
+          onSaveAsFavorite={handleSaveAsFavorite}
+          currentSeason={currentSeason}
+          favorites={favorites}
+          onLoadFavorite={handleLoadFavorite}
+          onDeleteFavorite={removeFavorite}
+          suggestions={suggestions}
           onAddFood={handleAddFoodById}
-          pastMeals={activeDay?.meals ?? []}
-          pastDays={pastDays}
-          onEditMeal={handleEditMeal}
-          onDeleteMeal={handleDeleteMeal}
-          onDeleteHistoryMeal={handleDeleteHistoryMeal}
-          onUpdateHistoryMealQty={handleUpdateHistoryMealQty}
-          onEditHistoryMealFoods={handleEditHistoryMealFoods}
-          favoriteIds={favoriteIds}
-          onToggleFavorite={handleToggleFavorite}
-          onValidateDay={() => setShowDayValidation(true)}
         />
       </MainLayout>
 

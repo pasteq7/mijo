@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, type FC } from 'react';
 import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis, List, Columns2, Sparkles } from 'lucide-react';
+import { StepIndicator } from './StepIndicator';
 import { FOODS } from '../data/foods';
 import type { Food, FoodCategory, Season } from '../types';
 import type { FoodSuggestion } from '../utils/recommendations';
@@ -50,8 +51,10 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, su
 
   const hasSuggestions = suggestions.length > 0 && selectedIds.size > 0;
 
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
+      <StepIndicator step={1} label="Rechercher" />
       <div className="flex border-b border-[var(--border)] gap-6">
         <button
           onClick={() => setTab('search')}
@@ -99,58 +102,60 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, su
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="space-y-3"
+            className="flex flex-col h-full overflow-x-hidden"
           >
-            <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
-              <input
-                type="text"
-                placeholder={PLACEHOLDERS[phIndex]}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-8 pr-8 py-2.5 text-xs bg-[var(--warm-100)] text-[var(--text-h)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all shadow-inner"
-              />
-              <button
-                onClick={() => setTooltipMode(tooltipMode === 'simple' ? 'advanced' : 'simple')}
-                title={tooltipMode === 'simple' ? 'Mode avancé' : 'Mode simple'}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--warm-200)]"
-              >
-                {tooltipMode === 'advanced' ? <List size={14} /> : <Columns2 size={14} />}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setCat('tous')}
-                title="Tous les aliments"
-                className={clsx(
-                  'text-[10px] px-2.5 py-2 rounded-xl transition-colors font-medium tracking-wide',
-                  cat === 'tous'
-                    ? 'bg-[var(--text-h)] text-white shadow-sm'
-                    : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
-                )}
-              >
-                Tous
-              </button>
-              <div className="w-px h-5 bg-[var(--warm-200)]" />
-              {CATEGORIES.map((c) => (
+            <div className="space-y-3 shrink-0">
+              <div className="relative">
+                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
+                <input
+                  type="text"
+                  placeholder={PLACEHOLDERS[phIndex]}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="w-full pl-8 pr-8 py-2.5 text-xs bg-[var(--warm-100)] text-[var(--text-h)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all shadow-inner"
+                />
                 <button
-                  key={c.value}
-                  onClick={() => setCat(c.value)}
-                  title={c.label}
+                  onClick={() => setTooltipMode(tooltipMode === 'simple' ? 'advanced' : 'simple')}
+                  title={tooltipMode === 'simple' ? 'Mode avancé' : 'Mode simple'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--warm-200)]"
+                >
+                  {tooltipMode === 'advanced' ? <List size={14} /> : <Columns2 size={14} />}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCat('tous')}
+                  title="Tous les aliments"
                   className={clsx(
-                    'p-2 rounded-xl transition-colors',
-                    cat === c.value
+                    'text-[10px] px-2.5 py-2 rounded-xl transition-colors font-medium tracking-wide',
+                    cat === 'tous'
                       ? 'bg-[var(--text-h)] text-white shadow-sm'
                       : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
                   )}
                 >
-                  <c.icon size={16} />
+                  Tous
                 </button>
-              ))}
+                <div className="w-px h-5 bg-[var(--warm-200)]" />
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c.value}
+                    onClick={() => setCat(c.value)}
+                    title={c.label}
+                    className={clsx(
+                      'p-2 rounded-xl transition-colors',
+                      cat === c.value
+                        ? 'bg-[var(--text-h)] text-white shadow-sm'
+                        : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
+                    )}
+                  >
+                    <c.icon size={16} />
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2 pr-0.5">
+            <div className="flex flex-col gap-2 pr-0.5 min-h-0 overflow-y-auto overflow-x-hidden max-h-[440px] mt-3">
               {filtered.map((f) => (
                 <FoodCard
                   key={f.id}
@@ -159,7 +164,6 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, su
                   onToggle={onToggle}
                   isInSeason={f.seasons.includes(currentSeason)}
                   tooltipMode={tooltipMode}
-
                 />
               ))}
             </div>
@@ -171,10 +175,10 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, su
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="space-y-6 max-h-[440px] overflow-y-auto pr-0.5"
+            className="space-y-6 max-h-[440px] overflow-y-auto overflow-x-hidden pr-0.5"
           >
             {hasSuggestions ? (
-              <div className="space-y-3">
+              <div className="space-y-3 overflow-x-hidden">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
                   <Sparkles size={16} className="text-[#7C9A6E]" />
                   Pour compléter vos apports

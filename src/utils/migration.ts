@@ -18,6 +18,13 @@ function toDateKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+
 export function runMigration(): boolean {
   try {
     const oldData = window.localStorage.getItem('veganut-history');
@@ -39,6 +46,7 @@ export function runMigration(): boolean {
     for (const [date, dayMeals] of grouped) {
       const isActive = date === today;
       newDays.push({
+        id: generateId(),
         date,
         meals: dayMeals,
         dailyTotals: isActive ? {} : computeDailyTotals(dayMeals),
