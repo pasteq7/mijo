@@ -10,6 +10,7 @@ interface Props {
   showPlaceholder?: boolean;
   foods?: SelectedFood[];
   bufferFoods?: Set<SelectedFood>;
+  compact?: boolean;
 }
 
 function getColor(pct: number): string {
@@ -26,7 +27,7 @@ interface Segment {
   color: string;
 }
 
-export function NutrientBar({ meta, value, goal, showPlaceholder, foods, bufferFoods }: Props) {
+export function NutrientBar({ meta, value, goal, showPlaceholder, foods, bufferFoods, compact }: Props) {
   const rawPct = goal > 0 ? (value / goal) * 100 : 0;
   const color = getColor(rawPct);
   const isOver = rawPct > 100;
@@ -53,10 +54,10 @@ export function NutrientBar({ meta, value, goal, showPlaceholder, foods, bufferF
   })();
 
   return (
-    <div className="group py-2">
-      <div className="flex justify-between items-center mb-1.5">
-        <span className="text-xs font-medium text-[var(--text-h)]">{meta.label}</span>
-        <span className="text-xs tabular-nums" style={{ color: isEmpty ? undefined : color }}>
+    <div className={`group ${compact ? 'py-0.5' : 'py-2'}`}>
+      <div className={`flex justify-between items-center ${compact ? 'mb-0.5' : 'mb-1.5'}`}>
+        <span className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-[var(--text-h)]`}>{meta.label}</span>
+        <span className={`${compact ? 'text-[10px]' : 'text-xs'} tabular-nums`} style={{ color: isEmpty ? undefined : color }}>
           {showPlaceholder && isEmpty ? '—' : `${value.toFixed(1)}`}{isOver && <span className="ml-1 font-bold">✓</span>}
         </span>
       </div>
@@ -110,7 +111,7 @@ export function NutrientBar({ meta, value, goal, showPlaceholder, foods, bufferF
                 side="top"
                 align="center"
                 sideOffset={6}
-                className="z-50 min-w-[220px] max-w-[300px] bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text-h)] text-[11px] leading-relaxed px-3 py-2.5 rounded-lg shadow-lg space-y-1.5"
+                className="z-50 min-w-[220px] max-w-[300px] bg-[var(--bg-subtle)] border border-[var(--border-soft)] text-[var(--text-h)] text-[11px] leading-relaxed px-3 py-2.5 rounded-xl shadow-sm space-y-1.5"
               >
                 <p className="text-[10px] font-semibold text-[var(--text)] uppercase tracking-wider mb-2">
                   Répartition — {meta.label}

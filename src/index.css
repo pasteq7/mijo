@@ -1,49 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* ─── Shiro · Light Theme ─────────────────────────────── */
-  /* Base: Washi paper, aged ivory, morning mist             */
-
   --text: #4A5147;
-  /* Faded ink on paper             */
   --text-h: #1E2420;
-  /* Deep forest ink                */
   --text-muted: #8A9186;
-  /* Distant mountain, light fog    */
 
-  --bg: #F6F4EE;
-  /* Aged washi paper               */
+  --bg: #F8F9F5;
   --bg-subtle: #EDEAE1;
-  /* Slightly pressed linen         */
   --bg-soft: rgba(237, 234, 225, 0.65);
   --bg-raised: #FAFAF7;
-  /* Fresh unbleached cotton        */
 
   --border: #D8D5C8;
-  /* Dried reed, pale straw         */
   --border-soft: #E8E5DA;
-  /* Gossamer silk screen           */
 
-  /* Accent — Matcha / Moss */
-  --accent: #5C7A58;
-  /* Deep matcha                */
-  --accent-light: #7A9E76;
-  /* Young bamboo shoot         */
-  --accent-soft: rgba(92, 122, 88, 0.12);
+  --accent: #4A6741;
+  --accent-light: #6B8F64;
+  --accent-soft: rgba(74, 103, 65, 0.12);
 
-  /* Action — Beni-iro (Safflower Red) */
   --action: #B8614E;
-  /* Lacquer red, beni          */
   --action-soft: rgba(184, 97, 78, 0.12);
 
-  /* Highlight — Kihada (Yellow Bark) */
   --highlight: #C9A84C;
-  /* Aged gold, kihada dye      */
   --highlight-soft: rgba(201, 168, 76, 0.12);
 
-  /* Info — Hanada (Indigo Flower) */
   --info: #4F6E8A;
-  /* Faded indigo, hanada       */
   --info-soft: rgba(79, 110, 138, 0.12);
 
   --warm-100: #EDEAE1;
@@ -66,51 +46,29 @@
 
 
 .dark {
-
-  /* ─── Cha-iro · Sepia Mid Tone Theme ─────────────────── */
-  /* Base: Tea-stained parchment, dried clay, aged washi     */
-  /* Not dark — a warm amber dusk, like candlelight on paper */
-
   --text: #5C5248;
-  /* Iron gall ink, faded on parchment  */
   --text-h: #2E2820;
-  /* Deep walnut, aged manuscript ink   */
   --text-muted: #9A8E82;
-  /* Pale sepia, distant brushstroke    */
 
   --bg: #E8E0D0;
-  /* Tea-stained washi, aged parchment  */
   --bg-subtle: #DED5C3;
-  /* Pressed linen, dried reed mat      */
   --bg-soft: rgba(222, 213, 195, 0.65);
   --bg-raised: #EDE6D8;
-  /* Unbleached cotton, morning paper   */
 
   --border: #C8BDA8;
-  /* Dried bamboo, pale sienna edge     */
   --border-soft: #D4CAB8;
-  /* Gossamer shadow between stones     */
 
-  /* Accent — Matcha deepened by sepia base */
-  --accent: #5A7252;
-  /* Aged matcha, moss on stone     */
-  --accent-light: #789070;
-  /* Lichen on old cedar post       */
-  --accent-soft: rgba(90, 114, 82, 0.14);
+  --accent: #4A6741;
+  --accent-light: #6B8F64;
+  --accent-soft: rgba(74, 103, 65, 0.14);
 
-  /* Action — Beni warmed by parchment */
   --action: #A85540;
-  /* Darkened lacquer, terracotta   */
   --action-soft: rgba(168, 85, 64, 0.13);
 
-  /* Highlight — Kihada, richer against sepia */
   --highlight: #B8903C;
-  /* Beeswax, aged kihada bark dye  */
   --highlight-soft: rgba(184, 144, 60, 0.13);
 
-  /* Info — Hanada softened to faded indigo */
   --info: #4A6478;
-  /* Ai-zome cloth, long sun-faded  */
   --info-soft: rgba(74, 100, 120, 0.13);
 
   --warm-100: #DED5C3;
@@ -154,6 +112,31 @@ h6,
   letter-spacing: -0.03em;
 }
 
+
+.card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+  border-radius: 1.5rem;
+  border: 1px solid var(--border-soft);
+}
+
+.dark .card {
+  background: rgba(237, 230, 216, 0.5);
+}
+
+.seg-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--warm-200);
+  overflow: hidden;
+}
+
+.seg-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

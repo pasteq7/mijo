@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Leaf, Check } from 'lucide-react';
 import type { Food } from '../types';
 import { Tooltip } from './Tooltip';
 import { AdvancedTooltip } from './AdvancedTooltip';
@@ -9,8 +10,8 @@ interface Props {
   food: Food;
   isSelected: boolean;
   onToggle: (food: Food) => void;
-  isInSeason: boolean;
-  tooltipMode: 'simple' | 'advanced';
+  isInSeason?: boolean;
+  tooltipMode?: 'simple' | 'advanced';
 }
 
 function getNutrientLevel(value: number, thresholds: { low: number; mid: number; high: number }): 'low' | 'mid' | 'high' {
@@ -19,7 +20,7 @@ function getNutrientLevel(value: number, thresholds: { low: number; mid: number;
   return 'low';
 }
 
-export function FoodCard({ food, isSelected, onToggle, isInSeason, tooltipMode }: Props) {
+export function FoodCard({ food, isSelected, onToggle, isInSeason = false, tooltipMode = 'simple' }: Props) {
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [anchorTop, setAnchorTop] = useState(0);
@@ -46,9 +47,9 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason, tooltipMode }
   };
 
   const dotClass = (level: 'low' | 'mid' | 'high') => {
-    if (level === 'high') return 'bg-[var(--accent)]';
-    if (level === 'mid') return 'bg-[var(--accent-light)]';
-    return 'bg-[var(--warm-300)]';
+    if (level === 'high') return 'bg-[var(--accent)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]';
+    if (level === 'mid') return 'bg-[var(--accent-light)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]';
+    return 'bg-[var(--border-soft)] opacity-40';
   };
 
   return (
@@ -88,42 +89,45 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason, tooltipMode }
 
       <motion.button
         onClick={() => onToggle(food)}
-        whileHover={{ x: 2 }}
+        whileHover={{ y: -1, boxShadow: 'var(--shadow)' }}
         whileTap={{ scale: 0.98 }}
-
         className={`
-          relative w-full flex flex-row items-center gap-3 px-3 py-2.5 rounded-xl border
-          transition-colors duration-200
+          relative w-full flex items-center gap-3 py-2.5 pl-2.5 pr-3 rounded-3xl border transition-colors duration-200
           ${isSelected
-            ? 'border-[var(--border)] bg-[var(--accent-soft)]'
-            : 'border-[var(--border)] bg-[var(--bg)] hover:bg-[var(--warm-100)]'
+            ? 'border-[var(--accent)] bg-[var(--accent-soft)] shadow-[0_0_0_1px_var(--accent),0_4px_16px_rgba(74,103,65,0.12)]'
+            : 'border-[var(--border-soft)] backdrop-blur-sm hover:border-[var(--border)] hover:bg-[var(--warm-100)]'
           }
         `}
       >
-        {isSelected && (
-          <div className="absolute inset-y-1 left-0 w-[3px] bg-[var(--accent)] rounded-r-full" />
-        )}
-        {isInSeason && (
-          <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[var(--accent)] opacity-60" />
-        )}
-
-        <span className="text-base leading-none shrink-0">{food.emoji}</span>
-
-        <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-medium text-[var(--text-h)] leading-tight truncate">
-            {food.name}
-          </div>
-          <div className="text-[11px] tabular-nums text-[var(--text)] mt-0.5 opacity-75">
-            {nutrients.calories || 0} kcal · {nutrients.proteines || 0}g prot
-          </div>
+        <div className="w-10 h-10 rounded-xl bg-[var(--bg)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] flex items-center justify-center relative shrink-0">
+          <span className="text-2xl leading-none">{food.emoji}</span>
+          {isSelected ? (
+            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center shadow-[0_2px_6px_rgba(74,103,65,0.3)]">
+              <Check size={10} strokeWidth={3} />
+            </div>
+          ) : isInSeason && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--accent-soft)] flex items-center justify-center">
+              <Leaf size={9} className="text-[var(--accent)]" />
+            </div>
+          )}
         </div>
 
-        <div className="flex gap-1 shrink-0">
-          <div className={`w-1.5 h-1.5 rounded-full ${dotClass(protein)}`} />
-          <div className={`w-1.5 h-1.5 rounded-full ${dotClass(iron)}`} />
-          <div className={`w-1.5 h-1.5 rounded-full ${dotClass(zinc)}`} />
-          <div className={`w-1.5 h-1.5 rounded-full ${dotClass(magnesium)}`} />
-          <div className={`w-1.5 h-1.5 rounded-full ${dotClass(fibre)}`} />
+        <div className="flex flex-col min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="display-font text-sm font-medium text-[var(--text-h)] truncate leading-snug tracking-tight">
+              {food.name}
+            </span>
+            <div className="flex gap-1.5 items-center shrink-0">
+              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(protein)}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(iron)}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(zinc)}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(magnesium)}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(fibre)}`} />
+            </div>
+          </div>
+          <span className="text-xs text-[var(--text-muted)] tabular-nums leading-snug mt-0.5">
+            {nutrients.calories || 0} kcal &middot; {nutrients.proteines || 0}g prot
+          </span>
         </div>
       </motion.button>
     </div>

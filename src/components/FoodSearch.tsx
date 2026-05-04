@@ -1,13 +1,10 @@
-import { useState, useMemo, useEffect, type FC } from 'react';
-import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis, List, Columns2, Sparkles } from 'lucide-react';
-import { StepIndicator } from './StepIndicator';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis } from 'lucide-react';
 import { FOODS } from '../data/foods';
 import type { Food, FoodCategory, Season } from '../types';
-import type { FoodSuggestion } from '../utils/recommendations';
-import { FoodCard } from './FoodCard';
-import { NutrientSuggestions } from './NutrientSuggestions';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FoodCard } from './FoodCard';
 
 const PLACEHOLDERS = ['Riz...', 'Tofu...', 'Brocoli...', 'Pois chiches...', 'Quinoa...', 'Lentilles...'];
 
@@ -20,19 +17,24 @@ const CATEGORIES: { value: FoodCategory; icon: typeof Bean; label: string }[] = 
   { value: 'autres', icon: Ellipsis, label: 'Autres' },
 ];
 
+const MONTH_SEASON: Record<number, Season> = {
+  3: 'printemps', 4: 'printemps', 5: 'printemps',
+  6: 'ete', 7: 'ete', 8: 'ete',
+  9: 'automne', 10: 'automne', 11: 'automne',
+  12: 'hiver', 1: 'hiver', 2: 'hiver',
+};
+const currentSeason = MONTH_SEASON[new Date().getMonth() + 1]!;
+
 interface Props {
   selectedIds: Set<string>;
   onToggle: (f: Food) => void;
-  currentSeason: Season;
-  suggestions: FoodSuggestion[];
-  onAddFood: (id: string) => void;
+  tooltipMode: 'simple' | 'advanced';
+  onTooltipModeChange: (mode: 'simple' | 'advanced') => void;
 }
 
-export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, suggestions, onAddFood }) => {
+export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeChange }: Props) {
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState<FoodCategory | 'tous'>('tous');
-  const [tooltipMode, setTooltipMode] = useState<'simple' | 'advanced'>('simple');
-  const [tab, setTab] = useState<'search' | 'suggestions'>('search');
 
   const [phIndex, setPhIndex] = useState(0);
 
@@ -49,151 +51,92 @@ export const FoodSearch: FC<Props> = ({ selectedIds, onToggle, currentSeason, su
     return mq && mc;
   }), [query, cat]);
 
-  const hasSuggestions = suggestions.length > 0 && selectedIds.size > 0;
-
-
   return (
-    <div className="space-y-2">
-      <StepIndicator step={1} label="Rechercher" />
-      <div className="flex border-b border-[var(--border)] gap-6">
-        <button
-          onClick={() => setTab('search')}
-          className={clsx(
-            "px-1 py-2 text-xs font-medium transition-all relative",
-            tab === 'search' ? "text-[var(--text-h)]" : "text-[var(--text)] hover:text-[var(--text-h)]"
-          )}
-        >
-          Recherche
-          {tab === 'search' && (
-            <motion.div
-              layoutId="foodSearchTab"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]"
-              transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
+    <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-col lg:gap-4 lg:flex-1 lg:min-h-0">
+      <div className="flex items-center gap-2">
+        <h3 className="display-font text-base font-semibold text-[var(--text-h)] shrink-0">
+          Catalogue d'aliments
+        </h3>
+        <div className="flex items-center gap-2 ml-auto">
+          <div className="relative max-w-60">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
+            <input
+              type="text"
+              placeholder={PLACEHOLDERS[phIndex]}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 text-sm bg-[var(--warm-100)] text-[var(--text-h)] rounded-full outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all"
             />
-          )}
-        </button>
-        <button
-          onClick={() => setTab('suggestions')}
-          className={clsx(
-            "px-1 py-2 text-xs font-medium transition-all relative flex items-center gap-1.5",
-            tab === 'suggestions' ? "text-[var(--text-h)]" : "text-[var(--text)] hover:text-[var(--text-h)]"
-          )}
-        >
-          <Sparkles size={12} />
-          Suggestions
-          {hasSuggestions && (
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-          )}
-          {tab === 'suggestions' && (
-            <motion.div
-              layoutId="foodSearchTab"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]"
-              transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.4 }}
-            />
-          )}
-        </button>
+          </div>
+          <button
+            onClick={() => onTooltipModeChange(tooltipMode === 'simple' ? 'advanced' : 'simple')}
+            className={clsx(
+              'text-[11px] px-3 py-1.5 rounded-full transition-all font-medium shrink-0',
+              tooltipMode === 'advanced'
+                ? 'bg-[var(--accent)] text-white shadow-sm'
+                : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
+            )}
+          >
+            {tooltipMode === 'simple' ? 'Simple' : 'Avancé'}
+          </button>
+        </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {tab === 'search' ? (
-          <motion.div
-            key="search"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="flex flex-col h-full overflow-x-hidden"
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setCat('tous')}
+          className={clsx(
+            'text-[11px] px-4 py-1.5 rounded-full transition-all font-medium',
+            cat === 'tous'
+              ? 'bg-[var(--accent)] text-white shadow-sm'
+              : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
+          )}
+        >
+          Tous
+        </button>
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.value}
+            onClick={() => setCat(c.value)}
+            title={c.label}
+            className={clsx(
+              'flex items-center gap-1.5 text-[11px] px-3.5 py-1.5 rounded-full transition-all font-medium',
+              cat === c.value
+                ? 'bg-[var(--accent)] text-white shadow-sm'
+                : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
+            )}
           >
-            <div className="space-y-3 shrink-0">
-              <div className="relative">
-                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
-                <input
-                  type="text"
-                  placeholder={PLACEHOLDERS[phIndex]}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="w-full pl-8 pr-8 py-2.5 text-xs bg-[var(--warm-100)] text-[var(--text-h)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all shadow-inner"
-                />
-                <button
-                  onClick={() => setTooltipMode(tooltipMode === 'simple' ? 'advanced' : 'simple')}
-                  title={tooltipMode === 'simple' ? 'Mode avancé' : 'Mode simple'}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--warm-200)]"
-                >
-                  {tooltipMode === 'advanced' ? <List size={14} /> : <Columns2 size={14} />}
-                </button>
-              </div>
+            <c.icon size={14} />
+            {c.label}
+          </button>
+        ))}
+      </div>
 
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setCat('tous')}
-                  title="Tous les aliments"
-                  className={clsx(
-                    'text-[10px] px-2.5 py-2 rounded-xl transition-colors font-medium tracking-wide',
-                    cat === 'tous'
-                      ? 'bg-[var(--text-h)] text-white shadow-sm'
-                      : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
-                  )}
-                >
-                  Tous
-                </button>
-                <div className="w-px h-5 bg-[var(--warm-200)]" />
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c.value}
-                    onClick={() => setCat(c.value)}
-                    title={c.label}
-                    className={clsx(
-                      'p-2 rounded-xl transition-colors',
-                      cat === c.value
-                        ? 'bg-[var(--text-h)] text-white shadow-sm'
-                        : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
-                    )}
-                  >
-                    <c.icon size={16} />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 pr-0.5 min-h-0 overflow-y-auto overflow-x-hidden max-h-[440px] mt-3">
-              {filtered.map((f) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[300px] lg:max-h-none lg:flex-1 lg:min-h-0 overflow-y-auto pr-0.5">
+        <AnimatePresence>
+          {filtered.map((food) => {
+            const isSelected = selectedIds.has(food.id);
+            const isInSeason = food.seasons.includes(currentSeason);
+            return (
+              <motion.div
+                key={food.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.12 }}
+              >
                 <FoodCard
-                  key={f.id}
-                  food={f}
-                  isSelected={selectedIds.has(f.id)}
+                  food={food}
+                  isSelected={isSelected}
                   onToggle={onToggle}
-                  isInSeason={f.seasons.includes(currentSeason)}
+                  isInSeason={isInSeason}
                   tooltipMode={tooltipMode}
                 />
-              ))}
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="suggestions"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="space-y-6 max-h-[440px] overflow-y-auto overflow-x-hidden pr-0.5"
-          >
-            {hasSuggestions ? (
-              <div className="space-y-3 overflow-x-hidden">
-                <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
-                  <Sparkles size={16} className="text-[#7C9A6E]" />
-                  Pour compléter vos apports
-                </div>
-                <NutrientSuggestions suggestions={suggestions} onAddFood={onAddFood} />
-              </div>
-            ) : (
-              <div className="text-center py-16 text-[var(--text)] text-xs">
-                <Sparkles size={24} className="mx-auto mb-3 opacity-40" />
-                Ajoutez des aliments pour obtenir des suggestions
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
     </div>
   );
-};
+}

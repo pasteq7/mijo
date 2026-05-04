@@ -1,19 +1,15 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { NutritionOverview } from '../NutritionOverview';
 import { MealHistory } from '../MealHistory';
-import { StepIndicator } from '../StepIndicator';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import type { NutrientGoals, SelectedFood, MealRecord, DayRecord } from '../../types';
+import { NutrientBar } from '../NutrientBar';
+import { NUTRIENT_META } from '../../data/nutrients';
+import type { NutrientGoals, MealRecord, DayRecord, NutrientKey, SelectedFood } from '../../types';
 import clsx from 'clsx';
 
 interface AnalysisViewProps {
-  totals: Partial<NutrientGoals>;
   dailyTotals: Partial<NutrientGoals>;
   dailyGoals: NutrientGoals;
-  mealGoals: NutrientGoals;
-  selectedFoods: SelectedFood[];
   pastMeals: MealRecord[];
   pastDays: DayRecord[];
   onEditMeal: (id: string) => void;
@@ -26,12 +22,15 @@ interface AnalysisViewProps {
   onValidateDay?: () => void;
 }
 
+const GROUPS = [
+  { key: 'macros', label: 'Macros' },
+  { key: 'vitamines', label: 'Micros' },
+  { key: 'mineraux', label: 'Minéraux' },
+] as const;
+
 export function AnalysisView({
-  totals,
   dailyTotals,
   dailyGoals,
-  mealGoals,
-  selectedFoods,
   pastMeals,
   pastDays,
   onEditMeal,
@@ -43,25 +42,21 @@ export function AnalysisView({
   onToggleFavorite,
   onValidateDay,
 }: AnalysisViewProps) {
+  const [activeTab, setActiveTab] = useState('macros');
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
-  const [showRepas, setShowRepas] = useState(true);
-
-  const showEmpty = selectedFoods.length === 0 && pastMeals.length === 0 && pastDays.length === 0;
-  const hasFoods = selectedFoods.length > 0;
 
   const selectedDay = selectedDayId ? pastDays.find(d => d.id === selectedDayId) ?? null : null;
   const isPastDay = selectedDay !== null;
 
-  const bufferFoods = useMemo(() => new Set(selectedFoods), [selectedFoods]);
+  const currentTotals = isPastDay && selectedDay ? selectedDay.dailyTotals : dailyTotals;
+  const currentGoal = dailyGoals;
 
-  const currentFoods = useMemo(() => {
-    if (isPastDay && selectedDay) return selectedDay.meals.flatMap(m => m.foods);
-    return showRepas
-      ? selectedFoods
-      : [...selectedFoods, ...pastMeals.flatMap(m => m.foods)];
-  }, [isPastDay, selectedDay, showRepas, selectedFoods, pastMeals]);
+  const cal = currentTotals.calories ?? 0;
+  const calPct = Math.min((cal / currentGoal.calories) * 100, 100);
 
-  const chronoDays = useMemo(() => [...pastDays].reverse(), [pastDays]);
+  const radius = 36;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (calPct / 100) * circumference;
 
   const selectedDayIdx = useMemo(() => {
     if (!selectedDayId) return null;
@@ -89,170 +84,162 @@ export function AnalysisView({
     return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
+  const nutrientMeta = NUTRIENT_META.filter(n => n.group === activeTab);
+
+  const combinedFoods: SelectedFood[] = useMemo(() => {
+    const meals = isPastDay && selectedDay ? selectedDay.meals : pastMeals;
+    return meals.flatMap(meal => meal.foods);
+  }, [isPastDay, selectedDay, pastMeals]);
+
   return (
-    <AnimatePresence mode="wait">
-      {showEmpty ? null : (
-        <motion.div
-          key="populated"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="w-full space-y-6 pb-4">
-            <StepIndicator step={3} label="Analyser" />
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex flex-col space-y-4">
-                  {pastDays.length > 0 && (
-                    <div className="flex items-center justify-center gap-2 pt-2">
-                      <button
-                        onClick={goOlder}
-                        disabled={!canGoOlder}
-                        className={clsx(
-                          "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
-                          canGoOlder
-                            ? "text-[var(--text-h)] hover:bg-[var(--warm-200)]"
-                            : "text-[var(--text)] opacity-30 cursor-not-allowed"
-                        )}
-                      >
-                        <ChevronLeft size={14} />
-                      </button>
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-[11px] font-semibold text-[var(--text)] uppercase tracking-[0.12em] mb-6">
+          Analyse nutritionnelle
+        </h3>
 
-                      <div className="flex items-center gap-1.5">
-                        {chronoDays.map((day, i) => {
-                          const isActive = day.id === selectedDayId;
-                          const dayNumber = i + 1;
-                          return (
-                            <Tooltip.Provider key={day.id} delayDuration={400}>
-                              <Tooltip.Root>
-                                <Tooltip.Trigger asChild>
-                                  <button
-                                    onClick={() => setSelectedDayId(day.id)}
-                                    className={clsx(
-                                      "w-7 h-7 rounded-lg text-[11px] font-medium transition-all",
-                                      isActive
-                                        ? "bg-[var(--accent)] text-white shadow-sm"
-                                        : "bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]"
-                                    )}
-                                  >
-                                    {dayNumber}
-                                  </button>
-                                </Tooltip.Trigger>
-                                <Tooltip.Portal>
-                                  <Tooltip.Content
-                                    side="top"
-                                    align="center"
-                                    sideOffset={6}
-                                    className="z-50 bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text-h)] text-[11px] leading-relaxed px-3 py-2 rounded-lg shadow-lg space-y-0.5"
-                                  >
-                                    <p className="font-medium">{formatDayDate(day.date)}</p>
-                                    <p className="text-[var(--text)]">
-                                      {day.score?.label ?? '—'} &middot; {Math.round(day.dailyTotals.calories ?? 0)} kcal
-                                    </p>
-                                    <Tooltip.Arrow className="fill-[var(--bg-subtle)]" />
-                                  </Tooltip.Content>
-                                </Tooltip.Portal>
-                              </Tooltip.Root>
-                            </Tooltip.Provider>
-                          );
-                        })}
-                        <Tooltip.Provider delayDuration={400}>
-                          <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                              <button
-                                  onClick={() => { setSelectedDayId(null); setShowRepas(pastMeals.length === 0); }}
-                                className={clsx(
-                                  "w-7 h-7 rounded-lg text-[11px] font-medium transition-all border-2",
-                                  selectedDayId === null
-                                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
-                                    : "border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                                )}
-                              >
-                                A
-                              </button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                              <Tooltip.Content
-                                side="top"
-                                align="center"
-                                sideOffset={6}
-                                className="z-50 bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text-h)] text-[11px] leading-relaxed px-3 py-2 rounded-lg shadow-lg space-y-0.5"
-                              >
-                                <p className="font-medium">Aujourd'hui</p>
-                                <p className="text-[var(--text)]">
-                                  {Math.round(dailyTotals.calories ?? 0)} kcal &middot; {pastMeals.length} repas
-                                </p>
-                                <Tooltip.Arrow className="fill-[var(--bg-subtle)]" />
-                              </Tooltip.Content>
-                            </Tooltip.Portal>
-                          </Tooltip.Root>
-                        </Tooltip.Provider>
-                      </div>
-
-                      <button
-                        onClick={goNewer}
-                        disabled={!canGoNewer}
-                        className={clsx(
-                          "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
-                          canGoNewer
-                            ? "text-[var(--text-h)] hover:bg-[var(--warm-200)]"
-                            : "text-[var(--text)] opacity-30 cursor-not-allowed"
-                        )}
-                      >
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={isPastDay ? `past-${selectedDayId}` : 'day'}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <NutritionOverview
-                        totals={isPastDay && selectedDay ? selectedDay.dailyTotals : (showRepas ? totals : dailyTotals)}
-                        goals={isPastDay && selectedDay ? dailyGoals : (showRepas ? mealGoals : dailyGoals)}
-                        showPlaceholder={!hasFoods && !isPastDay}
-                        foods={currentFoods}
-                        bufferFoods={!isPastDay && !showRepas ? bufferFoods : undefined}
-                        dayRecord={isPastDay && selectedDay ? selectedDay : undefined}
-                        showToggle={!isPastDay}
-                        showRepas={showRepas}
-                        onToggleRepas={setShowRepas}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                  {isPastDay && selectedDay ? (
-                    <MealHistory
-                      meals={selectedDay.meals}
-                      readOnly
-                      favoriteIds={favoriteIds}
-                      onToggleFavorite={onToggleFavorite}
-                      onDeleteHistory={onDeleteHistoryMeal ? (mealId) => onDeleteHistoryMeal(selectedDay.id, mealId) : undefined}
-                      onUpdateQty={onUpdateHistoryMealQty ? (mealId, foodIndex, newQty) => onUpdateHistoryMealQty(selectedDay.id, mealId, foodIndex, newQty) : undefined}
-                      onEditFoods={onEditHistoryMealFoods ? (mealId) => onEditHistoryMealFoods(selectedDay.id, mealId) : undefined}
-                    />
-                  ) : (
-                    <MealHistory
-                      meals={pastMeals}
-                      onEdit={onEditMeal}
-                      onDelete={onDeleteMeal}
-                      favoriteIds={favoriteIds}
-                      onToggleFavorite={onToggleFavorite}
-                      onValidateDay={onValidateDay}
-                    />
-                  )}
-
-                </div>
-              </div>
-            </div>
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[var(--border-soft)]">
+          <svg width="90" height="90" viewBox="0 0 90 90" className="shrink-0">
+            <circle cx="45" cy="45" r={radius} fill="none" stroke="var(--warm-200)" strokeWidth="8" />
+            <motion.circle
+              cx="45" cy="45" r={radius}
+              fill="none"
+              stroke="var(--accent)"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              animate={{ strokeDashoffset: offset }}
+              transform="rotate(-90 45 45)"
+              transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.8 }}
+            />
+            <text x="45" y="40" textAnchor="middle" className="font-number" fontSize="18" fill="var(--text-h)">
+              {Math.round(cal)}
+            </text>
+            <text x="45" y="54" textAnchor="middle" fontSize="8" fill="var(--text-muted)">
+              /{currentGoal.calories}
+            </text>
+          </svg>
+          <div>
+            <p className="text-xs text-[var(--text)] font-medium">Total du jour</p>
+            <p className="text-2xl font-light text-[var(--text-h)] display-font tabular-nums">
+              {Math.round(cal)} <span className="text-sm text-[var(--text-muted)] font-sans">kcal</span>
+            </p>
+            <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+              {pastMeals.length} repas · {Math.round(calPct)}% objectif
+            </p>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+
+        <div className="flex gap-2 mb-5">
+          {GROUPS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={clsx(
+                'text-[11px] px-3.5 py-1.5 rounded-full transition-all font-medium',
+                activeTab === key
+                  ? 'bg-[var(--accent)] text-white shadow-sm'
+                  : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)]'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-3"
+            >
+              {nutrientMeta.map((meta) => {
+                const val = currentTotals[meta.id as NutrientKey] ?? 0;
+                const goal = currentGoal[meta.id as NutrientKey] as number;
+                return (
+                  <NutrientBar
+                    key={meta.id}
+                    meta={meta}
+                    value={val}
+                    goal={goal}
+                    foods={combinedFoods}
+                    showPlaceholder
+                  />
+                );
+              })}
+              {nutrientMeta.length === 0 && (
+                <p className="text-xs text-[var(--text-muted)] italic py-4 text-center">
+                  Aucun nutriment dans ce groupe
+                </p>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="pt-2 border-t border-[var(--border-soft)]">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[11px] font-semibold text-[var(--text)] uppercase tracking-[0.12em]">
+            Repas enregistrés
+          </h3>
+          {pastDays.length > 0 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={goOlder}
+                disabled={!canGoOlder}
+                className={clsx(
+                  "w-6 h-6 flex items-center justify-center rounded-lg transition-all",
+                  canGoOlder
+                    ? "text-[var(--text)] hover:bg-[var(--warm-200)]"
+                    : "text-[var(--text-muted)] opacity-30 cursor-not-allowed"
+                )}
+              >
+                <ChevronLeft size={12} />
+              </button>
+              <span className="text-[10px] text-[var(--text-muted)] tabular-nums min-w-[3rem] text-center">
+                {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : 'Aujourd\'hui'}
+              </span>
+              <button
+                onClick={goNewer}
+                disabled={!canGoNewer}
+                className={clsx(
+                  "w-6 h-6 flex items-center justify-center rounded-lg transition-all",
+                  canGoNewer
+                    ? "text-[var(--text)] hover:bg-[var(--warm-200)]"
+                    : "text-[var(--text-muted)] opacity-30 cursor-not-allowed"
+                )}
+              >
+                <ChevronRight size={12} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {selectedDayId && selectedDay ? (
+          <MealHistory
+            meals={selectedDay.meals}
+            readOnly
+            favoriteIds={favoriteIds}
+            onToggleFavorite={onToggleFavorite}
+            onDeleteHistory={onDeleteHistoryMeal ? (mealId) => onDeleteHistoryMeal(selectedDay.id, mealId) : undefined}
+            onUpdateQty={onUpdateHistoryMealQty ? (mealId, foodIndex, newQty) => onUpdateHistoryMealQty(selectedDay.id, mealId, foodIndex, newQty) : undefined}
+            onEditFoods={onEditHistoryMealFoods ? (mealId) => onEditHistoryMealFoods(selectedDay.id, mealId) : undefined}
+          />
+        ) : (
+          <MealHistory
+            meals={pastMeals}
+            onEdit={onEditMeal}
+            onDelete={onDeleteMeal}
+            favoriteIds={favoriteIds}
+            onToggleFavorite={onToggleFavorite}
+            onValidateDay={onValidateDay}
+          />
+        )}
+      </div>
+    </div>
   );
 }

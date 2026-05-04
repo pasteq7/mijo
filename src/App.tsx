@@ -1,12 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useNutrients, useDailyNutrients } from './hooks/useNutrients';
-import { useFoodSuggestions } from './hooks/useFoodSuggestions';
 import { useDayHistory } from './hooks/useDayHistory';
 import { useFavoriteMeals } from './hooks/useFavoriteMeals';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { MEAL_GOALS, multiplyGoals } from './data/nutrients';
-import { FOODS } from './data/foods';
 
 import { MainLayout } from './components/layout/MainLayout';
 import { UtilityRail } from './components/layout/UtilityRail';
@@ -15,7 +13,7 @@ import { AnalysisView } from './components/views/AnalysisView';
 import { GoalsModal } from './components/GoalsModal';
 import { DayValidationDialog } from './components/DayValidationDialog';
 
-import type { Food, SelectedFood, NutrientGoals, MealRecord, Season, FavoriteMeal } from './types';
+import type { Food, SelectedFood, NutrientGoals, MealRecord, Season } from './types';
 
 function getCurrentSeason(): Season {
   const month = new Date().getMonth() + 1;
@@ -49,9 +47,7 @@ export default function App() {
 
   const dailyTotals = useDailyNutrients(totals, activeDay?.meals ?? []);
 
-  const { suggestions } = useFoodSuggestions(selectedFoods, activeDay?.meals ?? [], mealGoals);
-
-  const { favorites, favoriteIds, addFavorite, addFavoriteFromSelection, removeFavorite } = useFavoriteMeals();
+  const { favorites, favoriteIds, addFavorite, removeFavorite } = useFavoriteMeals();
 
   const selectedIds = new Set(selectedFoods.map((sf) => sf.food.id));
 
@@ -63,11 +59,6 @@ export default function App() {
       return [...prev, { food, qty: food.defaultQty }];
     });
   }, [setSelectedFoods]);
-
-  const handleAddFoodById = useCallback((id: string) => {
-    const food = FOODS.find((f) => f.id === id);
-    if (food) handleToggle(food);
-  }, [handleToggle]);
 
   const handleUpdateQty = useCallback((id: string, qty: number) => {
     setSelectedFoods((prev) =>
@@ -135,15 +126,6 @@ export default function App() {
     }
   }, [favoriteIds, favorites, addFavorite, removeFavorite]);
 
-  const handleSaveAsFavorite = useCallback(() => {
-    if (selectedFoods.length === 0) return;
-    addFavoriteFromSelection(selectedFoods, totals);
-  }, [selectedFoods, totals, addFavoriteFromSelection]);
-
-  const handleLoadFavorite = useCallback((fav: FavoriteMeal) => {
-    setSelectedFoods(fav.foods);
-  }, [setSelectedFoods]);
-
   const handleExport = useCallback(() => {
     const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
       'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
@@ -190,6 +172,14 @@ export default function App() {
 
   return (
     <>
+      <img
+        src="/nature.svg"
+        alt=""
+        aria-hidden
+        className="pointer-events-none fixed bottom-0 left-0 z-0 w-[50vw] max-w-[800px] opacity-[0.15]"
+        style={{ transform: 'scaleX(-1)' }}
+      />
+
       <MainLayout
 
         utilityRail={
@@ -205,11 +195,8 @@ export default function App() {
         }
         sidebar={
           <AnalysisView
-            totals={totals}
             dailyTotals={dailyTotals}
             dailyGoals={dailyGoals}
-            mealGoals={mealGoals}
-            selectedFoods={selectedFoods}
             pastMeals={activeDay?.meals ?? []}
             pastDays={pastDays}
             onEditMeal={handleEditMeal}
@@ -230,13 +217,8 @@ export default function App() {
           onUpdateQty={handleUpdateQty}
           onRemove={handleRemove}
           onSaveMeal={handleSaveMeal}
-          onSaveAsFavorite={handleSaveAsFavorite}
-          currentSeason={currentSeason}
-          favorites={favorites}
-          onLoadFavorite={handleLoadFavorite}
-          onDeleteFavorite={removeFavorite}
-          suggestions={suggestions}
-          onAddFood={handleAddFoodById}
+          totals={totals}
+          goals={mealGoals}
         />
       </MainLayout>
 
