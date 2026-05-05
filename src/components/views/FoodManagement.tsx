@@ -11,6 +11,7 @@ interface FoodManagementProps {
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
   onSaveMeal: () => void;
+  onClear: () => void;
   totals: Partial<NutrientGoals>;
   goals: NutrientGoals;
 }
@@ -22,6 +23,7 @@ export function FoodManagement({
   onUpdateQty,
   onRemove,
   onSaveMeal,
+  onClear,
   totals,
   goals,
 }: FoodManagementProps) {
@@ -38,6 +40,7 @@ export function FoodManagement({
           onUpdateQty={onUpdateQty}
           onRemove={onRemove}
           onSaveMeal={onSaveMeal}
+          onClear={onClear}
         />
       </div>
       <div className="col-span-1 lg:col-span-2 card p-5 min-h-0 flex flex-col">

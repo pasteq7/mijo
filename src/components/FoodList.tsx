@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Minus, Plus, X, CheckCircle2, Trash2 } from 'lucide-react';
 import type { SelectedFood } from '../types';
 
 interface Props {
@@ -7,20 +7,61 @@ interface Props {
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
   onSaveMeal: () => void;
+  onClear: () => void;
 }
 
-export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal }: Props) {
+export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: Props) {
   if (items.length === 0) {
     return (
-      <div className="min-h-[210px] max-h-[210px] flex flex-col items-center justify-center h-full py-6 text-center">
-        <Sparkles size={24} className="text-[var(--text-muted)] mb-2 opacity-40" />
-        <p className="text-xs text-[var(--text-muted)]">Ajoute des aliments depuis les suggestions</p>
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-[var(--text-h)]">Aliments sélectionnés</h3>
+          <span className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] opacity-30">
+            <Trash2 size={14} />
+          </span>
+        </div>
+        <div className="min-h-[180px] max-h-[180px] overflow-y-auto space-y-1.5">
+          {[1].map((i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[var(--warm-100)] animate-pulse"
+            >
+              <div className="w-8 h-8 rounded-lg bg-[var(--warm-200)] shrink-0" />
+              <div className="flex-1 h-4 rounded bg-[var(--warm-200)]" />
+              <div className="flex items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-[var(--warm-200)]" />
+                <div className="w-12 h-4 rounded bg-[var(--warm-200)]" />
+                <div className="w-6 h-6 rounded-full bg-[var(--warm-200)]" />
+              </div>
+              <div className="w-6 h-6 rounded-lg bg-[var(--warm-200)]" />
+            </div>
+          ))}
+        </div>
+        <button
+          disabled
+          className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--warm-200)] text-[var(--text-muted)] rounded-2xl font-medium text-sm shadow-sm mt-auto cursor-not-allowed"
+        >
+          <CheckCircle2 size={18} />
+          Valider le repas
+        </button>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold text-[var(--text-h)]">Aliments sélectionnés</h3>
+        {items.length > 0 && (
+          <button
+            onClick={onClear}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--action)] hover:bg-[var(--warm-200)] transition-colors"
+            title="Vider la liste"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
       <div className="min-h-[180px] max-h-[180px] overflow-y-auto">
         <ul className="space-y-1.5">
           <AnimatePresence initial={false}>

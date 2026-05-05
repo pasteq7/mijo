@@ -55,7 +55,7 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
   return (
     <div
       ref={cardRef}
-      className="relative"
+      className="relative h-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -92,7 +92,7 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
         whileHover={{ y: -1, boxShadow: 'var(--shadow)' }}
         whileTap={{ scale: 0.98 }}
         className={`
-          relative w-full flex items-center gap-3 py-2.5 pl-2.5 pr-3 rounded-3xl border transition-colors duration-200
+          relative w-full h-16 flex items-center gap-3 py-2.5 pl-2.5 pr-3 rounded-3xl border transition-colors duration-200
           ${isSelected
             ? 'border-[var(--accent)] bg-[var(--accent-soft)] shadow-[0_0_0_1px_var(--accent),0_4px_16px_rgba(74,103,65,0.12)]'
             : 'border-[var(--border-soft)] backdrop-blur-sm hover:border-[var(--border)] hover:bg-[var(--warm-100)]'

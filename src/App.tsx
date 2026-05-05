@@ -70,6 +70,10 @@ export default function App() {
     setSelectedFoods((prev) => prev.filter((sf) => sf.food.id !== id));
   }, [setSelectedFoods]);
 
+  const handleClear = useCallback(() => {
+    setSelectedFoods([]);
+  }, [setSelectedFoods]);
+
   const handleSaveMeal = useCallback(() => {
     if (selectedFoods.length === 0) return;
     const newMeal: MealRecord = {
@@ -207,6 +211,7 @@ export default function App() {
             favoriteIds={favoriteIds}
             onToggleFavorite={handleToggleFavorite}
             onValidateDay={() => setShowDayValidation(true)}
+            currentMealFoods={selectedFoods}
           />
         }
       >
@@ -217,6 +222,7 @@ export default function App() {
           onUpdateQty={handleUpdateQty}
           onRemove={handleRemove}
           onSaveMeal={handleSaveMeal}
+          onClear={handleClear}
           totals={totals}
           goals={mealGoals}
         />

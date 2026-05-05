@@ -112,7 +112,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
         ))}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[300px] lg:max-h-none lg:flex-1 lg:min-h-0 overflow-y-auto pr-0.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 content-start max-h-[300px] lg:max-h-none lg:flex-1 lg:min-h-0 overflow-y-auto pr-0.5">
         <AnimatePresence>
           {filtered.map((food) => {
             const isSelected = selectedIds.has(food.id);
@@ -124,6 +124,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.12 }}
+                className="h-full"
               >
                 <FoodCard
                   food={food}
