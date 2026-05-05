@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RotateCcw, Sun, Moon, Download, Upload } from 'lucide-react';
+import { X, RotateCcw, Sun, Moon, Download, Upload, Calculator } from 'lucide-react';
 import { NUTRIENT_META, MEAL_GOALS, DAILY_GOALS } from '../data/nutrients';
+import { calculateGoals, ACTIVITY_LABELS } from '../utils/goalCalculations';
 import type { DailyGoals, MealGoals, NutrientKey } from '../types';
+import type { GoalProfile, Sex, ActivityLevel } from '../utils/goalCalculations';
 
 interface Props {
   dailyGoals: DailyGoals;
@@ -22,6 +24,12 @@ export function GoalsModal({ dailyGoals, mealGoals, onSaveDaily, onSaveMeal, onC
   const [dailyDraft, setDailyDraft] = useState<DailyGoals>({ ...dailyGoals });
   const [mealDraft, setMealDraft] = useState<MealGoals>({ ...mealGoals });
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [viewMode, setViewMode] = useState<'advanced' | 'simple'>('advanced');
+  const [formAge, setFormAge] = useState(30);
+  const [formWeight, setFormWeight] = useState(70);
+  const [formHeight, setFormHeight] = useState(170);
+  const [formSex, setFormSex] = useState<Sex>('male');
+  const [formActivity, setFormActivity] = useState<ActivityLevel>('moderate');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +68,20 @@ export function GoalsModal({ dailyGoals, mealGoals, onSaveDaily, onSaveMeal, onC
     onResetAll();
   };
 
+  const handleCalculate = () => {
+    const profile: GoalProfile = {
+      age: formAge,
+      weight: formWeight,
+      height: formHeight,
+      sex: formSex,
+      activity: formActivity,
+    };
+    const { daily, meal } = calculateGoals(profile);
+    setDailyDraft(daily);
+    setMealDraft(meal);
+    setViewMode('advanced');
+  };
+
   const currentDraft = activeTab === 'daily' ? dailyDraft : mealDraft;
   const defaultGoals = activeTab === 'daily' ? DAILY_GOALS : MEAL_GOALS;
 
@@ -81,6 +103,29 @@ export function GoalsModal({ dailyGoals, mealGoals, onSaveDaily, onSaveMeal, onC
         >
           <div className="flex justify-between items-center px-6 py-5 border-b border-[var(--border)] bg-[var(--bg-subtle)]">
             <h2 className="text-xl font-light text-[var(--text-h)] display-font">Objectifs nutritionnels</h2>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center bg-[var(--warm-100)] rounded-lg p-0.5 border border-[var(--border-soft)]">
+                <button
+                  onClick={() => setViewMode('advanced')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium uppercase tracking-[0.05em] transition-all ${
+                    viewMode === 'advanced'
+                      ? 'bg-[var(--accent)] text-white shadow-[var(--shadow-sm)]'
+                      : 'text-[var(--text)] hover:text-[var(--text-h)]'
+                  }`}
+                >
+                  Manuel
+                </button>
+                <button
+                  onClick={() => setViewMode('simple')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium uppercase tracking-[0.05em] transition-all ${
+                    viewMode === 'simple'
+                      ? 'bg-[var(--accent)] text-white shadow-[var(--shadow-sm)]'
+                      : 'text-[var(--text)] hover:text-[var(--text-h)]'
+                  }`}
+                >
+                  Smart
+                </button>
+              </div>
             <div className="flex items-center gap-0.5">
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -116,41 +161,141 @@ export function GoalsModal({ dailyGoals, mealGoals, onSaveDaily, onSaveMeal, onC
               className="hidden"
             />
           </div>
-          <div className="flex border-b border-[var(--border)] px-6 bg-[var(--bg-subtle)]">
-            <button
-              onClick={() => setActiveTab('daily')}
-              className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-all ${activeTab === 'daily'
-                  ? 'border-[var(--accent)] text-[var(--text-h)]'
-                  : 'border-transparent text-[var(--text)] hover:text-[var(--text-h)]'
-                }`}
-            >
-              <Sun size={18} strokeWidth={1.5} />
-              <span className="text-sm font-medium uppercase tracking-[0.05em]">Journalier</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('meal')}
-              className={`flex items-center gap-2 py-4 px-2 ml-4 border-b-2 transition-all ${activeTab === 'meal'
-                  ? 'border-[var(--accent)] text-[var(--text-h)]'
-                  : 'border-transparent text-[var(--text)] hover:text-[var(--text-h)]'
-                }`}
-            >
-              <Moon size={18} strokeWidth={1.5} />
-              <span className="text-sm font-medium uppercase tracking-[0.05em]">Par repas</span>
-            </button>
           </div>
-
+          {viewMode === 'advanced' && (
+            <div className="flex border-b border-[var(--border)] px-6 bg-[var(--bg-subtle)]">
+              <button
+                onClick={() => setActiveTab('daily')}
+                className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-all ${activeTab === 'daily'
+                    ? 'border-[var(--accent)] text-[var(--text-h)]'
+                    : 'border-transparent text-[var(--text)] hover:text-[var(--text-h)]'
+                  }`}
+              >
+                <Sun size={18} strokeWidth={1.5} />
+                <span className="text-sm font-medium uppercase tracking-[0.05em]">Journalier</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('meal')}
+                className={`flex items-center gap-2 py-4 px-2 ml-4 border-b-2 transition-all ${activeTab === 'meal'
+                    ? 'border-[var(--accent)] text-[var(--text-h)]'
+                    : 'border-transparent text-[var(--text)] hover:text-[var(--text-h)]'
+                  }`}
+              >
+                <Moon size={18} strokeWidth={1.5} />
+                <span className="text-sm font-medium uppercase tracking-[0.05em]">Par repas</span>
+              </button>
+            </div>
+          )}
 
           <div className="overflow-y-auto px-6 pb-6 space-y-4 flex-1">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.15 }}
-                className="space-y-3 bg-[var(--bg-subtle)] p-4 rounded-xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
-              >
-                {NUTRIENT_META.map((meta) => {
+              {viewMode === 'simple' ? (
+                <motion.div
+                  key="simple"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-4 bg-[var(--bg-subtle)] p-5 rounded-xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
+                >
+                  <p className="text-sm text-[var(--text)] leading-relaxed mb-1">
+                    Calculez vos objectifs nutritionnels personnalisés à partir de vos données physiologiques.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-[var(--text-h)] font-medium">Âge</label>
+                    <input
+                      type="number"
+                      min={10}
+                      max={120}
+                      value={formAge || ''}
+                      onChange={(e) => setFormAge(parseInt(e.target.value) || 0)}
+                      className="w-24 text-right bg-[var(--warm-100)] rounded-lg px-2.5 py-1.5 text-sm font-medium text-[var(--text-h)] outline-none focus:ring-2 focus:ring-[var(--accent-soft)] shadow-inner"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-[var(--text-h)] font-medium">
+                      Poids <span className="text-[var(--text)] text-xs font-normal">(kg)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={20}
+                      max={300}
+                      step={0.1}
+                      value={formWeight || ''}
+                      onChange={(e) => setFormWeight(parseFloat(e.target.value) || 0)}
+                      className="w-24 text-right bg-[var(--warm-100)] rounded-lg px-2.5 py-1.5 text-sm font-medium text-[var(--text-h)] outline-none focus:ring-2 focus:ring-[var(--accent-soft)] shadow-inner"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-[var(--text-h)] font-medium">
+                      Taille <span className="text-[var(--text)] text-xs font-normal">(cm)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={50}
+                      max={250}
+                      value={formHeight || ''}
+                      onChange={(e) => setFormHeight(parseInt(e.target.value) || 0)}
+                      className="w-24 text-right bg-[var(--warm-100)] rounded-lg px-2.5 py-1.5 text-sm font-medium text-[var(--text-h)] outline-none focus:ring-2 focus:ring-[var(--accent-soft)] shadow-inner"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-[var(--text-h)] font-medium">Sexe biologique</label>
+                    <div className="flex bg-[var(--warm-100)] rounded-lg p-0.5 border border-[var(--border-soft)]">
+                      <button
+                        onClick={() => setFormSex('male')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          formSex === 'male'
+                            ? 'bg-[var(--accent)] text-white shadow-[var(--shadow-sm)]'
+                            : 'text-[var(--text)] hover:text-[var(--text-h)]'
+                        }`}
+                      >
+                        Masculin
+                      </button>
+                      <button
+                        onClick={() => setFormSex('female')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          formSex === 'female'
+                            ? 'bg-[var(--accent)] text-white shadow-[var(--shadow-sm)]'
+                            : 'text-[var(--text)] hover:text-[var(--text-h)]'
+                        }`}
+                      >
+                        Féminin
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-[var(--text-h)] font-medium">Niveau d'activité</label>
+                    <select
+                      value={formActivity}
+                      onChange={(e) => setFormActivity(e.target.value as ActivityLevel)}
+                      className="w-auto bg-[var(--warm-100)] rounded-lg px-2.5 py-1.5 text-sm font-medium text-[var(--text-h)] outline-none focus:ring-2 focus:ring-[var(--accent-soft)] shadow-inner border-none"
+                    >
+                      {(Object.keys(ACTIVITY_LABELS) as ActivityLevel[]).map((level) => (
+                        <option key={level} value={level}>
+                          {ACTIVITY_LABELS[level]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    onClick={handleCalculate}
+                    className="w-full bg-[var(--accent)] hover:bg-[#5C7D5B] text-white font-medium py-3 rounded-xl transition-colors shadow-[var(--shadow-sm)] flex items-center justify-center gap-2"
+                  >
+                    <Calculator size={16} strokeWidth={1.5} />
+                    Calculer et Appliquer
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-3 bg-[var(--bg-subtle)] p-4 rounded-xl shadow-[var(--shadow-sm)] border border-[var(--border)]"
+                >
+                  {NUTRIENT_META.map((meta) => {
                   const key = meta.id as NutrientKey;
                   const defaultValue = defaultGoals[key];
                   const currentValue = currentDraft[key] as number;
@@ -184,7 +329,8 @@ export function GoalsModal({ dailyGoals, mealGoals, onSaveDaily, onSaveMeal, onC
                     </div>
                   );
                 })}
-              </motion.div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 

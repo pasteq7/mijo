@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNutrients, useDailyNutrients } from './hooks/useNutrients';
 import { useDayHistory } from './hooks/useDayHistory';
 import { useFavoriteMeals } from './hooks/useFavoriteMeals';
@@ -28,10 +28,16 @@ function getCurrentSeason(): Season {
   return 'hiver';
 }
 
+function mergeGoals(stored: NutrientGoals, defaults: NutrientGoals): NutrientGoals {
+  return { ...defaults, ...stored };
+}
+
 export default function App() {
   const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('veganut-foods', []);
-  const [dailyGoals, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', multiplyGoals(MEAL_GOALS, 3));
-  const [mealGoals, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
+  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', multiplyGoals(MEAL_GOALS, 3));
+  const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
+  const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, multiplyGoals(MEAL_GOALS, 3)), [dailyGoalsState]);
+  const mealGoals = useMemo(() => mergeGoals(mealGoalsState, MEAL_GOALS), [mealGoalsState]);
   const [showGoals, setShowGoals] = useState(false);
   const [showDayValidation, setShowDayValidation] = useState(false);
 
@@ -126,6 +132,12 @@ export default function App() {
     setSelectedFoods([]);
   }, [validateDay, setSelectedFoods]);
 
+  const handleAddMeal = useCallback(() => {
+    const el = document.getElementById('food-search-input');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el?.focus();
+  }, []);
+
   const handleToggleFavorite = useCallback((meal: MealRecord) => {
     if (favoriteIds.has(meal.id)) {
       const fav = favorites.find(f => f.sourceMealId === meal.id);
@@ -137,7 +149,7 @@ export default function App() {
 
   const handleExport = useCallback(() => {
     const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
-      'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
+      'veganut-days', 'veganut-favorites', 'veganut-theme'];
     const data: Record<string, unknown> = { version: 1, exportedAt: new Date().toISOString() };
     for (const key of keys) {
       try {
@@ -156,7 +168,7 @@ export default function App() {
 
   const handleResetAll = useCallback(() => {
     const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
-      'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
+      'veganut-days', 'veganut-favorites', 'veganut-theme'];
     for (const key of keys) {
       localStorage.removeItem(key);
     }
@@ -167,7 +179,7 @@ export default function App() {
     try {
       const data = JSON.parse(json);
       const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
-        'veganut-meals-per-day', 'veganut-days', 'veganut-favorites', 'veganut-theme'];
+        'veganut-days', 'veganut-favorites', 'veganut-theme'];
       for (const key of keys) {
         if (data[key] !== undefined) {
           localStorage.setItem(key, JSON.stringify(data[key]));
@@ -217,6 +229,7 @@ export default function App() {
             onToggleFavorite={handleToggleFavorite}
             onValidateDay={() => setShowDayValidation(true)}
             currentMealFoods={selectedFoods}
+            onAddMeal={handleAddMeal}
           />
         }
       >

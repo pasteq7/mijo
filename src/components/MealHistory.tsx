@@ -67,9 +67,12 @@ const extra = emojis.length - displayEmojis.length;
                 transition={{ duration: 0.2 }}
                 className="rounded-xl bg-[var(--warm-100)] overflow-hidden"
               >
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setExpandedId(isExpanded ? null : meal.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--warm-200)] transition-colors text-left"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(isExpanded ? null : meal.id); } }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--warm-200)] transition-colors text-left cursor-pointer"
                 >
                   <span className="text-xs text-[var(--text)] tabular-nums font-medium w-10 shrink-0">
                     {formatTime(meal.date)}
@@ -105,7 +108,7 @@ const extra = emojis.length - displayEmojis.length;
                     size={14}
                     className={`text-[var(--text)] transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
                   />
-                </button>
+                </div>
 
                 <AnimatePresence>
                   {isExpanded && (

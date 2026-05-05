@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import { MealHistory } from '../MealHistory';
-import { NutrientBar } from '../NutrientBar';
+import { DetailedNutritionDrawer } from '../DetailedNutritionDrawer';
 import { NUTRIENT_META } from '../../data/nutrients';
 import type { NutrientGoals, MealRecord, DayRecord, NutrientKey, SelectedFood } from '../../types';
 import clsx from 'clsx';
@@ -21,13 +21,20 @@ interface AnalysisViewProps {
   onToggleFavorite?: (meal: MealRecord) => void;
   onValidateDay?: () => void;
   currentMealFoods?: SelectedFood[];
+  onAddMeal?: () => void;
 }
 
-const GROUPS = [
-  { key: 'macros', label: 'Macros' },
-  { key: 'vitamines', label: 'Micros' },
-  { key: 'mineraux', label: 'Minéraux' },
-] as const;
+const MACRO_KEYS: NutrientKey[] = ['proteines', 'glucides', 'lipides'];
+
+const MACRO_COLORS: Record<string, string> = {
+  proteines: '#8B7BA8',
+  glucides: '#5A7FA0',
+  lipides: '#C47A5A',
+};
+
+const NON_MACRO_NUTRIENTS = NUTRIENT_META.filter(
+  n => n.group !== 'macros' && n.group !== 'aminoacides'
+);
 
 export function AnalysisView({
   dailyTotals,
@@ -44,8 +51,8 @@ export function AnalysisView({
   onValidateDay,
   currentMealFoods,
 }: AnalysisViewProps) {
-  const [activeTab, setActiveTab] = useState('macros');
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const selectedDay = selectedDayId ? pastDays.find(d => d.id === selectedDayId) ?? null : null;
   const isPastDay = selectedDay !== null;
@@ -82,8 +89,6 @@ export function AnalysisView({
     return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
-  const nutrientMeta = NUTRIENT_META.filter(n => n.group === activeTab);
-
   const combinedFoods: SelectedFood[] = useMemo(() => {
     const meals = isPastDay && selectedDay ? selectedDay.meals : pastMeals;
     const savedFoods = meals.flatMap(meal => meal.foods);
@@ -98,145 +103,152 @@ export function AnalysisView({
     return new Set(currentMealFoods);
   }, [currentMealFoods]);
 
+  const metCount = NON_MACRO_NUTRIENTS.filter(n => {
+    const val = currentTotals[n.id as NutrientKey] ?? 0;
+    const goal = currentGoal[n.id as NutrientKey] ?? 0;
+    return goal > 0 && val >= goal;
+  }).length;
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h3 className="text-[11px] font-semibold text-[var(--text)] uppercase tracking-[0.12em] mb-6">
-          Analyse nutritionnelle
-        </h3>
-
-        <div className="mb-6 pb-6 border-b border-[var(--border-soft)] space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-[var(--text)] font-medium">Total du jour</p>
-            <p className="text-lg font-light text-[var(--text-h)] display-font tabular-nums">
-              {Math.round(cal)} <span className="text-xs text-[var(--text-muted)] font-sans">kcal</span>
-            </p>
-          </div>
-          <div className="h-3 rounded-full bg-[var(--warm-100)] overflow-hidden">
-            <motion.div
-              className="h-full rounded-full bg-[var(--accent)]"
-              initial={{ width: 0 }}
-              animate={{ width: `${calPct}%` }}
-              transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.8 }}
-            />
-          </div>
-          <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-            <span>{pastMeals.length} repas</span>
-            <span>{Math.round(calPct)}% objectif</span>
-          </div>
-        </div>
-
-        <div className="flex gap-2 mb-5">
-          {GROUPS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={clsx(
-                'text-[11px] px-3.5 py-1.5 rounded-full transition-all font-medium',
-                activeTab === key
-                  ? 'bg-[var(--accent)] text-white shadow-sm'
-                  : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)]'
+    <div className="space-y-8 flex flex-col min-h-0">
+      <div className="overflow-y-auto flex-1 min-h-0 space-y-8 pr-1">
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm font-semibold text-[var(--text-h)] display-font">
+                Analyse nutritionnelle
+              </h3>
+              <Info size={13} className="text-[var(--text-muted)] shrink-0" />
+            </div>
+            <div className="flex items-center gap-1">
+              {pastDays.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={goOlder}
+                    disabled={!canGoOlder}
+                    className={clsx(
+                      "w-6 h-6 flex items-center justify-center rounded-lg transition-all",
+                      canGoOlder
+                        ? "text-[var(--text)] hover:bg-[var(--warm-200)]"
+                        : "text-[var(--text-muted)] opacity-30 cursor-not-allowed"
+                    )}
+                  >
+                    <ChevronLeft size={12} />
+                  </button>
+                  <span className="text-[10px] text-[var(--text-muted)] tabular-nums min-w-[3rem] text-center">
+                    {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : 'Aujourd\'hui'}
+                  </span>
+                  <button
+                    onClick={goNewer}
+                    disabled={!canGoNewer}
+                    className={clsx(
+                      "w-6 h-6 flex items-center justify-center rounded-lg transition-all",
+                      canGoNewer
+                        ? "text-[var(--text)] hover:bg-[var(--warm-200)]"
+                        : "text-[var(--text-muted)] opacity-30 cursor-not-allowed"
+                    )}
+                  >
+                    <ChevronRight size={12} />
+                  </button>
+                </div>
               )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+            </div>
+          </div>
 
-        <div className="space-y-3">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-3"
-            >
-              {nutrientMeta.map((meta) => {
-                const val = currentTotals[meta.id as NutrientKey] ?? 0;
-                const goal = currentGoal[meta.id as NutrientKey] as number;
+          <div className="pb-3 border-b border-[var(--border-soft)] space-y-2.5">
+            <div className="flex items-end justify-between">
+              <p className="text-3xl font-light text-[var(--text-h)] display-font tabular-nums leading-none">
+                {Math.round(cal)}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] tabular-nums pb-0.5">
+                <span className="text-[var(--accent)] font-medium">/ {currentGoal.calories}</span> kcal
+              </p>
+            </div>
+            <div className="h-1.5 rounded-full bg-[var(--warm-100)] overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-[var(--accent)]"
+                initial={{ width: 0 }}
+                animate={{ width: `${calPct}%` }}
+                transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.8 }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+              <span>{pastMeals.length} repas</span>
+              <span>{Math.round(calPct)}% objectif</span>
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              {MACRO_KEYS.map((key) => {
+                const val = currentTotals[key] ?? 0;
+                const goal = currentGoal[key] ?? 0;
+                const pct = goal > 0 ? Math.min((val / goal) * 100, 100) : 0;
+                const meta = NUTRIENT_META.find(m => m.id === key);
                 return (
-                  <NutrientBar
-                    key={meta.id}
-                    meta={meta}
-                    value={val}
-                    goal={goal}
-                    foods={combinedFoods}
-                    bufferFoods={bufferFoodsSet}
-                    showPlaceholder
-                  />
+                  <div key={key} className="flex-1 min-w-0">
+                    <div className="flex justify-between text-[10px] mb-0.5">
+                      <span className="text-[var(--text-muted)] truncate">{meta?.label}</span>
+                      <span className="tabular-nums text-[var(--text)] ml-1">{Math.round(val)}g</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-[var(--warm-100)] overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.5 }}
+                        style={{ backgroundColor: MACRO_COLORS[key] }}
+                      />
+                    </div>
+                  </div>
                 );
               })}
-              {nutrientMeta.length === 0 && (
-                <p className="text-xs text-[var(--text-muted)] italic py-4 text-center">
-                  Aucun nutriment dans ce groupe
-                </p>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
+            </div>
 
-      <div className="pt-2 border-t border-[var(--border-soft)]">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[11px] font-semibold text-[var(--text)] uppercase tracking-[0.12em]">
-            Repas enregistrés
-          </h3>
-          {pastDays.length > 0 && (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={goOlder}
-                disabled={!canGoOlder}
-                className={clsx(
-                  "w-6 h-6 flex items-center justify-center rounded-lg transition-all",
-                  canGoOlder
-                    ? "text-[var(--text)] hover:bg-[var(--warm-200)]"
-                    : "text-[var(--text-muted)] opacity-30 cursor-not-allowed"
-                )}
-              >
-                <ChevronLeft size={12} />
-              </button>
-              <span className="text-[10px] text-[var(--text-muted)] tabular-nums min-w-[3rem] text-center">
-                {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : 'Aujourd\'hui'}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-[var(--text-muted)]">
+                {metCount}/{NON_MACRO_NUTRIENTS.length} micronutriments atteints
               </span>
               <button
-                onClick={goNewer}
-                disabled={!canGoNewer}
-                className={clsx(
-                  "w-6 h-6 flex items-center justify-center rounded-lg transition-all",
-                  canGoNewer
-                    ? "text-[var(--text)] hover:bg-[var(--warm-200)]"
-                    : "text-[var(--text-muted)] opacity-30 cursor-not-allowed"
-                )}
+                onClick={() => setIsDrawerOpen(true)}
+                className="text-[11px] font-medium text-[var(--accent)] hover:text-[var(--accent-light)] transition-colors"
               >
-                <ChevronRight size={12} />
+                Voir l'analyse complète →
               </button>
             </div>
-          )}
+          </div>
         </div>
 
-        {selectedDayId && selectedDay ? (
-          <MealHistory
-            meals={selectedDay.meals}
-            readOnly
-            favoriteIds={favoriteIds}
-            onToggleFavorite={onToggleFavorite}
-            onDeleteHistory={onDeleteHistoryMeal ? (mealId) => onDeleteHistoryMeal(selectedDay.id, mealId) : undefined}
-            onUpdateQty={onUpdateHistoryMealQty ? (mealId, foodIndex, newQty) => onUpdateHistoryMealQty(selectedDay.id, mealId, foodIndex, newQty) : undefined}
-            onEditFoods={onEditHistoryMealFoods ? (mealId) => onEditHistoryMealFoods(selectedDay.id, mealId) : undefined}
-          />
-        ) : (
-          <MealHistory
-            meals={pastMeals}
-            onEdit={onEditMeal}
-            onDelete={onDeleteMeal}
-            favoriteIds={favoriteIds}
-            onToggleFavorite={onToggleFavorite}
-            onValidateDay={onValidateDay}
-          />
-        )}
+        <div className="pt-2 border-t border-[var(--border-soft)]">
+          {selectedDayId && selectedDay ? (
+            <MealHistory
+              meals={selectedDay.meals}
+              readOnly
+              favoriteIds={favoriteIds}
+              onToggleFavorite={onToggleFavorite}
+              onDeleteHistory={onDeleteHistoryMeal ? (mealId) => onDeleteHistoryMeal(selectedDay.id, mealId) : undefined}
+              onUpdateQty={onUpdateHistoryMealQty ? (mealId, foodIndex, newQty) => onUpdateHistoryMealQty(selectedDay.id, mealId, foodIndex, newQty) : undefined}
+              onEditFoods={onEditHistoryMealFoods ? (mealId) => onEditHistoryMealFoods(selectedDay.id, mealId) : undefined}
+            />
+          ) : (
+            <MealHistory
+              meals={pastMeals}
+              onEdit={onEditMeal}
+              onDelete={onDeleteMeal}
+              favoriteIds={favoriteIds}
+              onToggleFavorite={onToggleFavorite}
+              onValidateDay={onValidateDay}
+            />
+          )}
+        </div>
       </div>
+
+      <DetailedNutritionDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        totals={currentTotals}
+        goals={currentGoal}
+        foods={combinedFoods}
+        bufferFoods={bufferFoodsSet}
+      />
     </div>
   );
 }

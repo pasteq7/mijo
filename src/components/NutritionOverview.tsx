@@ -12,14 +12,14 @@ interface Props {
 
 type Tab = 'macro' | 'micro' | 'mineral';
 
-const macroKeys: NutrientKey[] = ['proteines', 'glucides', 'lipides', 'fibres'];
-const microKeys: NutrientKey[] = ['vitA', 'vitC', 'vitB9', 'vitB6', 'vitE', 'vitK'];
+const macroKeys: NutrientKey[] = ['proteines', 'glucides', 'lipides', 'fibres', 'lysine', 'methionine', 'leucine', 'threonine'];
+const microKeys: NutrientKey[] = ['vitA', 'vitC', 'vitB9', 'vitB6', 'vitE', 'vitK', 'omega3', 'omega6'];
 const mineralKeys: NutrientKey[] = ['fer', 'calcium', 'zinc', 'magnesium', 'selenium'];
 
 const tabs: { id: Tab; label: string }[] = [
-  { id: 'macro', label: 'Macro' },
-  { id: 'micro', label: 'Micro' },
-  { id: 'mineral', label: 'Minéraux' },
+  { id: 'macro', label: 'MACROS' },
+  { id: 'micro', label: 'MICROS' },
+  { id: 'mineral', label: 'MINÉRAUX' },
 ];
 
 export function NutritionOverview({ totals, goals, foods }: Props) {

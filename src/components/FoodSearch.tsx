@@ -61,6 +61,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
           <div className="relative max-w-60">
             <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
             <input
+              id="food-search-input"
               type="text"
               placeholder={PLACEHOLDERS[phIndex]}
               value={query}

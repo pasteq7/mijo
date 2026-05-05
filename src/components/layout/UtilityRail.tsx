@@ -1,5 +1,7 @@
-import { Settings, Leaf, Sun, Moon, Flower2, Snowflake, Clock } from 'lucide-react';
+import { Settings, Leaf, Sun, Snowflake, Flower2, Clock, Palette } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { Season } from '../../types';
+import type { Theme } from '../../hooks/useTheme';
 
 const seasonConfig: Record<Season, { icon: typeof Leaf; label: string; color: string; softColor: string }> = {
   printemps: { icon: Flower2, label: 'Printemps', color: 'var(--accent)', softColor: 'var(--accent-soft)' },
@@ -8,12 +10,20 @@ const seasonConfig: Record<Season, { icon: typeof Leaf; label: string; color: st
   hiver: { icon: Snowflake, label: 'Hiver', color: 'var(--info)', softColor: 'var(--info-soft)' },
 };
 
+const themeLabels: Record<Theme, string> = {
+  washi: 'Washi · 和紙 (Clair)',
+  suna: 'Suna · 砂 (Sable)',
+  matcha: 'Matcha · 抹茶 (Vert)',
+  sora: 'Sora · 空 (Ciel)',
+  sumi: 'Sumi · 墨 (Foncé)',
+};
+
 interface UtilityRailProps {
   onOpenGoals: () => void;
   onResetFoods: () => void;
   hasFoods: boolean;
   currentSeason: Season;
-  theme: 'light' | 'dark';
+  theme: Theme;
   onToggleTheme: () => void;
   dayValidated?: boolean;
 }
@@ -36,10 +46,19 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
         <button
           onClick={onToggleTheme}
           className="p-3 rounded-full text-[var(--text)] hover:text-[var(--highlight)] hover:bg-[var(--warm-200)] transition-all"
-          title={theme === 'light' ? 'Thème foncé' : 'Thème clair'}
+          title={themeLabels[theme]}
         >
-          {theme === 'light' ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
+          <motion.span
+            key={theme}
+            initial={{ rotate: -90, scale: 0.6 }}
+            animate={{ rotate: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="block"
+          >
+            <Palette size={18} strokeWidth={1.5} />
+          </motion.span>
         </button>
+
         <button
           onClick={onOpenGoals}
           className="p-3 rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--warm-200)] transition-all"

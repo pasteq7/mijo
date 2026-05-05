@@ -87,4 +87,15 @@ export const autres: Food[] = [
       omega3: 0.1, omega6: 1.5,
     },
   },
+  {
+    id: 'chips', name: 'Chips de pomme de terre', emoji: '🥔',
+    category: 'autres', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 30,
+    per100g: {
+      calories: 536, proteines: 7, glucides: 49, lipides: 35, fibres: 4.8,
+      fer: 1.8, calcium: 24, magnesium: 67, zinc: 1.1, selenium: 4,
+      vitE: 3.1, vitC: 4,
+      omega3: 0.3, omega6: 9.5,
+    },
+  },
 ];

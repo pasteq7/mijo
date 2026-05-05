@@ -1,6 +1,5 @@
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import { runMigration } from '../utils/migration';
 import { toDateKey } from '../utils/dateHelpers';
 import type { DayRecord, MealRecord, NutrientGoals, NutrientKey, DayScore, SelectedFood } from '../types';
 
@@ -64,8 +63,6 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-
-    runMigration();
 
     const today = toDateKey(new Date());
 

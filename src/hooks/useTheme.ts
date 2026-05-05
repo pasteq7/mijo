@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'washi' | 'suna' | 'matcha' | 'sora' | 'sumi';
 
 const STORAGE_KEY = 'veganut-theme';
+const THEMES: Theme[] = ['washi', 'suna', 'matcha', 'sora', 'sumi'];
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (THEMES.includes(stored as Theme)) return stored as Theme;
+  if (stored === 'light') return 'washi';
+  if (stored === 'dark') return 'suna';
+  return 'washi';
 }
 
 export function useTheme() {
@@ -15,16 +18,16 @@ export function useTheme() {
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    root.classList.remove(...THEMES.map(t => `theme-${t}`));
+    root.classList.add(`theme-${theme}`);
     localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => {
+      const idx = THEMES.indexOf(prev);
+      return THEMES[(idx + 1) % THEMES.length];
+    });
   }, []);
 
   return { theme, toggleTheme };
