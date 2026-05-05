@@ -68,4 +68,4 @@ export function multiplyGoals(goals: NutrientGoals, factor: number): NutrientGoa
   return result;
 }
 
-export const DAILY_GOALS = multiplyGoals(MEAL_GOALS, 3);
+export const DAILY_GOALS = multiplyGoals(MEAL_GOALS, 2.5);

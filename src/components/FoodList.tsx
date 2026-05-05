@@ -65,9 +65,9 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: 
       <div className="min-h-[180px] max-h-[180px] overflow-y-auto">
         <ul className="space-y-1.5">
           <AnimatePresence initial={false}>
-            {items.map(({ food, qty }) => (
+            {items.map((sf) => (
               <motion.li
-                key={food.id}
+                key={sf.id ?? sf.food.id}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 8 }}
@@ -75,28 +75,28 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: 
                 className="group flex items-center gap-3 px-3 py-2 rounded-xl bg-[var(--warm-100)] hover:bg-[var(--warm-200)]"
               >
                 <span className="text-lg leading-none shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/60">
-                  {food.emoji}
+                  {sf.food.emoji}
                 </span>
-                <span className="flex-1 text-sm font-medium text-[var(--text-h)] truncate">{food.name}</span>
+                <span className="flex-1 text-sm font-medium text-[var(--text-h)] truncate">{sf.food.name}</span>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => onUpdateQty(food.id, Math.max(10, qty - 10))}
+                    onClick={() => onUpdateQty(sf.food.id, Math.max(10, sf.qty - 10))}
                     className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-white transition-colors"
                   >
                     <Minus size={12} />
                   </button>
                   <span className="text-xs text-[var(--text)] tabular-nums font-medium min-w-[3rem] text-center">
-                    {qty}{food.unit}
+                    {sf.qty}{sf.food.unit}
                   </span>
                   <button
-                    onClick={() => onUpdateQty(food.id, qty + 10)}
+                    onClick={() => onUpdateQty(sf.food.id, sf.qty + 10)}
                     className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-white transition-colors"
                   >
                     <Plus size={12} />
                   </button>
                 </div>
                 <button
-                  onClick={() => onRemove(food.id)}
+                  onClick={() => onRemove(sf.food.id)}
                   className="w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text)] hover:text-[var(--action)] hover:bg-white opacity-0 group-hover:opacity-100 transition-all"
                 >
                   <X size={14} />

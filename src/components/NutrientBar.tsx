@@ -67,20 +67,20 @@ export function NutrientBar({ meta, value, goal, showPlaceholder, foods, bufferF
             <div className={`h-1.5 rounded-full shadow-inner ${isEmpty ? 'border border-dashed border-[var(--border)] bg-transparent' : 'bg-[var(--warm-200)] overflow-hidden'}`}>
               {segments.length > 0 && (
                 <div className="flex h-full rounded-full overflow-hidden">
-                  {segments.map((seg, i) => {
+                  {segments.map((seg) => {
                     const isBuffer = bufferFoods?.has(seg.food);
                     return (
-                      <div
-                        key={`${seg.food.food.id}-${i}`}
-                        className={`relative h-full ${i === 0 ? 'rounded-l-full' : ''} ${i === segments.length - 1 ? 'rounded-r-full' : ''}`}
-                        style={{ width: `${seg.pct}%` }}
+                      <motion.div
+                        key={seg.food.id}
+                        layout="position"
+                        initial={false}
+                        className="relative h-full"
+                        animate={{ width: `${seg.pct}%` }}
+                        transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.5 }}
                       >
-                        <motion.div
+                        <div
                           className="absolute inset-0"
                           style={{ backgroundColor: seg.color }}
-                          initial={{ width: 0 }}
-                          animate={{ width: '100%' }}
-                          transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.5, delay: i * 0.03 }}
                         />
                         {isBuffer && (
                           <motion.div
@@ -98,7 +98,7 @@ export function NutrientBar({ meta, value, goal, showPlaceholder, foods, bufferF
                             }}
                           />
                         )}
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>

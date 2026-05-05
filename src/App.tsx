@@ -15,6 +15,11 @@ import { DayValidationDialog } from './components/DayValidationDialog';
 
 import type { Food, SelectedFood, NutrientGoals, MealRecord, Season } from './types';
 
+function generateFoodId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+
 function getCurrentSeason(): Season {
   const month = new Date().getMonth() + 1;
   if (month >= 3 && month <= 5) return 'printemps';
@@ -56,7 +61,7 @@ export default function App() {
       if (prev.find((sf) => sf.food.id === food.id)) {
         return prev.filter((sf) => sf.food.id !== food.id);
       }
-      return [...prev, { food, qty: food.defaultQty }];
+      return [...prev, { id: generateFoodId(), food, qty: food.defaultQty }];
     });
   }, [setSelectedFoods]);
 
@@ -90,7 +95,7 @@ export default function App() {
     if (!activeDay) return;
     const meal = activeDay.meals.find(m => m.id === id);
     if (!meal) return;
-    setSelectedFoods(meal.foods);
+    setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? generateFoodId() })));
     deleteMeal(id);
   }, [activeDay, setSelectedFoods, deleteMeal]);
 
@@ -111,7 +116,7 @@ export default function App() {
     if (!day) return;
     const meal = day.meals.find(m => m.id === mealId);
     if (!meal) return;
-    setSelectedFoods(meal.foods);
+    setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? generateFoodId() })));
     deleteMealFromDay(dayId, mealId);
   }, [allDays, setSelectedFoods, deleteMealFromDay]);
 

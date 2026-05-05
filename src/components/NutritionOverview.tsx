@@ -72,11 +72,10 @@ export function NutritionOverview({ totals, goals, foods }: Props) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                  activeTab === tab.id
+                className={`relative px-3 py-1 text-xs font-medium rounded-md transition-colors ${activeTab === tab.id
                     ? 'text-[var(--text-h)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text)]'
-                }`}
+                  }`}
               >
                 {activeTab === tab.id && (
                   <motion.div
@@ -90,7 +89,7 @@ export function NutritionOverview({ totals, goals, foods }: Props) {
             ))}
           </div>
 
-          <div className="space-y-2">
+          <div className="h-[180px] overflow-hidden space-y-1">
             {activeMeta.map((meta) => (
               <NutrientBar
                 key={meta.id}

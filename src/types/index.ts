@@ -59,6 +59,7 @@ export interface Food {
 }
 
 export interface SelectedFood {
+  id?: string;
   food: Food;
   qty: number;
 }
