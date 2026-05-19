@@ -3,6 +3,7 @@ import { MEAL_GOALS, multiplyGoals } from '../data/nutrients';
 
 export type Sex = 'male' | 'female';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'intense';
+export type CalorieTarget = 'deficit' | 'maintain' | 'gain';
 
 export interface GoalProfile {
   age: number;
@@ -10,6 +11,7 @@ export interface GoalProfile {
   height: number;
   sex: Sex;
   activity: ActivityLevel;
+  target?: CalorieTarget;
 }
 
 export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
@@ -20,12 +22,24 @@ export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
   intense: 'Intense',
 };
 
+export const CALORIE_TARGET_LABELS: Record<CalorieTarget, string> = {
+  deficit: 'Léger déficit',
+  maintain: 'Maintien',
+  gain: 'Prise douce',
+};
+
 const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
   sedentary: 1.2,
   light: 1.375,
   moderate: 1.55,
   active: 1.725,
   intense: 1.9,
+};
+
+const CALORIE_TARGET_MULTIPLIERS: Record<CalorieTarget, number> = {
+  deficit: 0.9,
+  maintain: 1,
+  gain: 1.1,
 };
 
 const REFERENCE_DAILY = multiplyGoals(MEAL_GOALS, 3);
@@ -46,16 +60,18 @@ function calculateTDEE(bmr: number, activity: ActivityLevel): number {
 
 export function calculateGoals(profile: GoalProfile): { daily: DailyGoals; meal: MealGoals } {
   const bmr = calculateBMR(profile.weight, profile.height, profile.age, profile.sex);
-  const tdee = calculateTDEE(bmr, profile.activity);
-  const dailyCalories = Math.round(tdee / 10) * 10;
-  const scaleFactor = tdee / REFERENCE_DAILY.calories;
+  const maintenanceCalories = calculateTDEE(bmr, profile.activity);
+  const calorieTarget = profile.target ?? 'maintain';
+  const targetCalories = maintenanceCalories * CALORIE_TARGET_MULTIPLIERS[calorieTarget];
+  const dailyCalories = Math.round(targetCalories / 10) * 10;
+  const scaleFactor = dailyCalories / REFERENCE_DAILY.calories;
 
   const daily: DailyGoals = {
     calories: dailyCalories,
-    proteines: round1((0.20 * tdee) / 4),
-    glucides: round1((0.50 * tdee) / 4),
-    lipides: round1((0.30 * tdee) / 9),
-    fibres: round1(14 * tdee / 1000),
+    proteines: round1((0.20 * dailyCalories) / 4),
+    glucides: round1((0.50 * dailyCalories) / 4),
+    lipides: round1((0.30 * dailyCalories) / 9),
+    fibres: round1(14 * dailyCalories / 1000),
     vitA: round1(REFERENCE_DAILY.vitA * scaleFactor),
     vitC: round1(REFERENCE_DAILY.vitC * scaleFactor),
     vitB9: round1(REFERENCE_DAILY.vitB9 * scaleFactor),
