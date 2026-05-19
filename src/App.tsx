@@ -4,16 +4,26 @@ import { useDayHistory } from './hooks/useDayHistory';
 import { useFavoriteMeals } from './hooks/useFavoriteMeals';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
-import { MEAL_GOALS, multiplyGoals } from './data/nutrients';
+import { DAILY_GOALS, MEAL_GOALS } from './data/nutrients';
 
 import { MainLayout } from './components/layout/MainLayout';
 import { UtilityRail } from './components/layout/UtilityRail';
 import { FoodManagement } from './components/views/FoodManagement';
 import { AnalysisView } from './components/views/AnalysisView';
-import { GoalsModal } from './components/GoalsModal';
+import { NutritionGoalsModal } from './components/NutritionGoalsModal';
 import { DayValidationDialog } from './components/DayValidationDialog';
 
 import type { Food, SelectedFood, NutrientGoals, MealRecord, Season } from './types';
+import type { GoalProfile } from './utils/goalCalculations';
+
+const DEFAULT_GOAL_PROFILE: GoalProfile = {
+  age: 30,
+  weight: 70,
+  height: 170,
+  sex: 'male',
+  activity: 'light',
+  target: 'deficit',
+};
 
 function generateFoodId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -34,10 +44,12 @@ function mergeGoals(stored: NutrientGoals, defaults: NutrientGoals): NutrientGoa
 
 export default function App() {
   const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('veganut-foods', []);
-  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', multiplyGoals(MEAL_GOALS, 3));
+  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', DAILY_GOALS);
   const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
-  const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, multiplyGoals(MEAL_GOALS, 3)), [dailyGoalsState]);
+  const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>('veganut-goal-profile', DEFAULT_GOAL_PROFILE);
+  const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, DAILY_GOALS), [dailyGoalsState]);
   const mealGoals = useMemo(() => mergeGoals(mealGoalsState, MEAL_GOALS), [mealGoalsState]);
+  const smartGoalProfile = useMemo(() => ({ ...DEFAULT_GOAL_PROFILE, ...goalProfile }), [goalProfile]);
   const [showGoals, setShowGoals] = useState(false);
   const [showDayValidation, setShowDayValidation] = useState(false);
 
@@ -148,7 +160,7 @@ export default function App() {
   }, [favoriteIds, favorites, addFavorite, removeFavorite]);
 
   const handleExport = useCallback(() => {
-    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
+    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
       'veganut-days', 'veganut-favorites', 'veganut-theme'];
     const data: Record<string, unknown> = { version: 1, exportedAt: new Date().toISOString() };
     for (const key of keys) {
@@ -167,7 +179,7 @@ export default function App() {
   }, []);
 
   const handleResetAll = useCallback(() => {
-    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
+    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
       'veganut-days', 'veganut-favorites', 'veganut-theme'];
     for (const key of keys) {
       localStorage.removeItem(key);
@@ -178,7 +190,7 @@ export default function App() {
   const handleImport = useCallback((json: string) => {
     try {
       const data = JSON.parse(json);
-      const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals',
+      const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
         'veganut-days', 'veganut-favorites', 'veganut-theme'];
       for (const key of keys) {
         if (data[key] !== undefined) {
@@ -247,11 +259,13 @@ export default function App() {
       </MainLayout>
 
       {showGoals && (
-        <GoalsModal
+        <NutritionGoalsModal
           dailyGoals={dailyGoals}
           mealGoals={mealGoals}
+          smartProfile={smartGoalProfile}
           onSaveDaily={setDailyGoals}
           onSaveMeal={setMealGoals}
+          onSaveSmartProfile={setGoalProfile}
           onClose={() => setShowGoals(false)}
           onExport={handleExport}
           onImport={handleImport}

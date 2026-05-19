@@ -19,8 +19,10 @@ import type { ReactNode } from 'react';
 interface Props {
   dailyGoals: DailyGoals;
   mealGoals: MealGoals;
+  smartProfile: GoalProfile;
   onSaveDaily: (goals: DailyGoals) => void;
   onSaveMeal: (goals: MealGoals) => void;
+  onSaveSmartProfile: (profile: GoalProfile) => void;
   onClose: () => void;
   onExport: () => void;
   onImport: (json: string) => void;
@@ -70,11 +72,13 @@ function getPreviewGoals(profile: GoalProfile) {
   return calculateGoals(profile);
 }
 
-export function GoalsModal({
+export function NutritionGoalsModal({
   dailyGoals,
   mealGoals,
+  smartProfile,
   onSaveDaily,
   onSaveMeal,
+  onSaveSmartProfile,
   onClose,
   onExport,
   onImport,
@@ -85,12 +89,12 @@ export function GoalsModal({
   const [mealDraft, setMealDraft] = useState<MealGoals>({ ...mealGoals });
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('simple');
-  const [formAge, setFormAge] = useState(30);
-  const [formWeight, setFormWeight] = useState(70);
-  const [formHeight, setFormHeight] = useState(170);
-  const [formSex, setFormSex] = useState<Sex>('male');
-  const [formActivity, setFormActivity] = useState<ActivityLevel>('light');
-  const [formTarget, setFormTarget] = useState<CalorieTarget>('deficit');
+  const [formAge, setFormAge] = useState(smartProfile.age);
+  const [formWeight, setFormWeight] = useState(smartProfile.weight);
+  const [formHeight, setFormHeight] = useState(smartProfile.height);
+  const [formSex, setFormSex] = useState<Sex>(smartProfile.sex);
+  const [formActivity, setFormActivity] = useState<ActivityLevel>(smartProfile.activity);
+  const [formTarget, setFormTarget] = useState<CalorieTarget>(smartProfile.target ?? 'deficit');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const profile = useMemo<GoalProfile>(
@@ -141,6 +145,7 @@ export function GoalsModal({
     if (viewMode === 'simple') {
       onSaveDaily(preview.daily);
       onSaveMeal(preview.meal);
+      onSaveSmartProfile(profile);
     } else {
       onSaveDaily(dailyDraft);
       onSaveMeal(mealDraft);
