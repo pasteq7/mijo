@@ -124,4 +124,38 @@ export const cereales: Food[] = [
       lysine: 0.25, methionine: 0.18, leucine: 0.8, threonine: 0.35,
     },
   },
+  {
+    id: 'semoule_couscous', name: 'Semoule de couscous', emoji: '🌾',
+    category: 'céréales', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 100,
+    per100g: {
+      calories: 360, proteines: 12, glucides: 73, lipides: 1.1, fibres: 3.9,
+      fer: 1.2, magnesium: 47, zinc: 0.8, selenium: 27,
+      vitB9: 20, vitB6: 0.1,
+      lysine: 0.25, methionine: 0.19, leucine: 0.88, threonine: 0.35,
+    },
+  },
+  {
+    id: 'muesli', name: 'Muesli', emoji: '🥣',
+    category: 'céréales', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 60,
+    per100g: {
+      calories: 370, proteines: 10, glucides: 64, lipides: 8, fibres: 8,
+      fer: 3.8, calcium: 60, magnesium: 120, zinc: 2.3, selenium: 18,
+      vitB9: 35, vitB6: 0.2, vitE: 2.2,
+      omega3: 0.2, omega6: 2.5,
+      lysine: 0.38, methionine: 0.18, leucine: 0.78, threonine: 0.34,
+    },
+  },
+  {
+    id: 'pain_seigle', name: 'Pain de seigle', emoji: '🍞',
+    category: 'céréales', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 80,
+    per100g: {
+      calories: 259, proteines: 8.5, glucides: 48, lipides: 3.3, fibres: 5.8,
+      fer: 2.8, calcium: 73, magnesium: 40, zinc: 1.1, selenium: 31,
+      vitB9: 38, vitB6: 0.1,
+      lysine: 0.26, methionine: 0.13, leucine: 0.58, threonine: 0.28,
+    },
+  },
 ];

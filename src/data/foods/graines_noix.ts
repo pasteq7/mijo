@@ -108,4 +108,28 @@ export const graines_noix: Food[] = [
       lysine: 0.4, methionine: 0.2, leucine: 1.0, threonine: 0.5,
     },
   },
+  {
+    id: 'noix_cajou', name: 'Noix de cajou', emoji: '🌰',
+    category: 'graines & noix', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 30,
+    per100g: {
+      calories: 553, proteines: 18, glucides: 30, lipides: 44, fibres: 3.3,
+      fer: 6.7, calcium: 37, magnesium: 292, zinc: 5.8, selenium: 19.9,
+      vitB9: 25, vitK: 34,
+      omega3: 0.06, omega6: 7.8,
+      lysine: 0.93, methionine: 0.36, leucine: 1.47, threonine: 0.69,
+    },
+  },
+  {
+    id: 'beurre_cacahuete', name: 'Beurre de cacahuète', emoji: '🥜',
+    category: 'graines & noix', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 20,
+    per100g: {
+      calories: 588, proteines: 25, glucides: 20, lipides: 50, fibres: 6,
+      fer: 1.9, calcium: 43, magnesium: 154, zinc: 2.5, selenium: 4.1,
+      vitE: 9.1, vitB9: 87, vitB6: 0.54,
+      omega3: 0.02, omega6: 13.9,
+      lysine: 0.93, methionine: 0.32, leucine: 1.67, threonine: 0.68,
+    },
+  },
 ];

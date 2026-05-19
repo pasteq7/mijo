@@ -163,4 +163,44 @@ export const legumes: Food[] = [
       vitC: 7.4, vitB9: 19, vitB6: 0.12,
     },
   },
+  {
+    id: 'pomme_de_terre', name: 'Pomme de terre', emoji: '🥔',
+    category: 'légumes', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 150,
+    per100g: {
+      calories: 77, proteines: 2, glucides: 17, lipides: 0.1, fibres: 2.2,
+      fer: 0.8, calcium: 12, magnesium: 23, zinc: 0.3,
+      vitC: 19.7, vitB6: 0.3, vitB9: 16,
+    },
+  },
+  {
+    id: 'salade_verte', name: 'Salade verte', emoji: '🥬',
+    category: 'légumes', seasons: ['printemps', 'ete', 'automne'],
+    unit: 'g', defaultQty: 50,
+    per100g: {
+      calories: 15, proteines: 1.4, glucides: 2.9, lipides: 0.2, fibres: 1.3,
+      fer: 0.9, calcium: 36, magnesium: 13, zinc: 0.2,
+      vitC: 9.2, vitA: 370, vitB9: 38, vitK: 126,
+    },
+  },
+  {
+    id: 'chou_rouge', name: 'Chou rouge', emoji: '🟣',
+    category: 'légumes', seasons: ['automne', 'hiver'],
+    unit: 'g', defaultQty: 80,
+    per100g: {
+      calories: 31, proteines: 1.4, glucides: 7.4, lipides: 0.2, fibres: 2.1,
+      fer: 0.8, calcium: 45, magnesium: 16, zinc: 0.2,
+      vitC: 57, vitA: 56, vitB9: 18, vitK: 38,
+    },
+  },
+  {
+    id: 'ail', name: 'Ail', emoji: '🧄',
+    category: 'légumes', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 5,
+    per100g: {
+      calories: 149, proteines: 6.4, glucides: 33, lipides: 0.5, fibres: 2.1,
+      fer: 1.7, calcium: 181, magnesium: 25, zinc: 1.2, selenium: 14.2,
+      vitC: 31, vitB6: 1.24, vitB9: 3,
+    },
+  },
 ];

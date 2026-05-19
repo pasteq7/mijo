@@ -79,8 +79,8 @@ export function NutrientBar({ meta, value, goal, foods, bufferFoods, compact }: 
   })();
 
   return (
-    <div className={`group ${compact ? 'py-0.5' : 'py-2'}`}>
-      <div className={`flex items-baseline gap-2 ${compact ? 'mb-0.5' : 'mb-1.5'}`}>
+    <div className={`group ${compact ? 'py-0.5' : 'py-1.5'}`}>
+      <div className={`flex items-baseline gap-2 ${compact ? 'mb-0.5' : 'mb-1'}`}>
         <span className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-[var(--text-h)] flex-1`}>
           {meta.label}
         </span>

@@ -1,4 +1,4 @@
-import { Settings, Leaf, Sun, Snowflake, Flower2, Clock, Palette } from 'lucide-react';
+import { Settings, Leaf, Sun, Snowflake, Flower2, Palette } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Season } from '../../types';
 import type { Theme } from '../../hooks/useTheme';
@@ -36,13 +36,6 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
       </div>
 
       <div className="flex-1 flex flex-col gap-5 items-center">
-        <button
-          className="p-3 rounded-full text-[var(--text)] hover:text-[var(--accent)] hover:bg-[var(--warm-200)] transition-all"
-          title="Aujourd'hui"
-        >
-          <Clock size={18} strokeWidth={1.5} />
-        </button>
-
         <button
           onClick={onToggleTheme}
           className="p-3 rounded-full text-[var(--text)] hover:text-[var(--highlight)] hover:bg-[var(--warm-200)] transition-all"

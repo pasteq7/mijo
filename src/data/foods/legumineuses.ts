@@ -99,4 +99,27 @@ export const legumineuses: Food[] = [
       lysine: 0.38, methionine: 0.05, leucine: 0.4, threonine: 0.22,
     },
   },
+  {
+    id: 'pois_casses', name: 'Pois cassés', emoji: '🟢',
+    category: 'légumineuses', seasons: ['automne', 'hiver', 'printemps'],
+    unit: 'g', defaultQty: 80,
+    per100g: {
+      calories: 118, proteines: 8.3, glucides: 21, lipides: 0.4, fibres: 8.3,
+      fer: 1.3, calcium: 14, magnesium: 36, zinc: 1, selenium: 1.6,
+      vitB9: 65, vitB6: 0.1,
+      lysine: 0.58, methionine: 0.08, leucine: 0.64, threonine: 0.32,
+    },
+  },
+  {
+    id: 'houmous', name: 'Houmous', emoji: '🥣',
+    category: 'légumineuses', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 50,
+    per100g: {
+      calories: 166, proteines: 7.9, glucides: 14, lipides: 9.6, fibres: 6,
+      fer: 2.4, calcium: 38, magnesium: 71, zinc: 1.8, selenium: 2.6,
+      vitB9: 83, vitB6: 0.2,
+      omega3: 0.1, omega6: 2.3,
+      lysine: 0.45, methionine: 0.08, leucine: 0.55, threonine: 0.29,
+    },
+  },
 ];

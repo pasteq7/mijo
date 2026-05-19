@@ -32,9 +32,6 @@ export function FoodManagement({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:h-full" style={{ gridTemplateRows: 'auto minmax(0, 1fr)' }}>
       <div className="card p-5 flex flex-col min-h-0">
-        <NutritionOverview totals={totals} goals={goals} foods={selectedFoods} />
-      </div>
-      <div className="card p-5 flex flex-col min-h-0">
         <FoodList
           items={selectedFoods}
           onUpdateQty={onUpdateQty}
@@ -42,6 +39,9 @@ export function FoodManagement({
           onSaveMeal={onSaveMeal}
           onClear={onClear}
         />
+      </div>
+      <div className="card p-5 flex flex-col min-h-0">
+        <NutritionOverview totals={totals} goals={goals} foods={selectedFoods} />
       </div>
       <div className="col-span-1 lg:col-span-2 card p-5 min-h-0 flex flex-col">
         <FoodSearch

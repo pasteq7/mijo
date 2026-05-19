@@ -91,4 +91,44 @@ export const fruits: Food[] = [
       vitC: 3.2, vitK: 14.6,
     },
   },
+  {
+    id: 'clementine', name: 'Clémentine', emoji: '🍊',
+    category: 'fruits', seasons: ['automne', 'hiver'],
+    unit: 'g', defaultQty: 100,
+    per100g: {
+      calories: 47, proteines: 0.9, glucides: 12, lipides: 0.2, fibres: 1.7,
+      fer: 0.1, calcium: 30, magnesium: 10,
+      vitC: 49, vitB9: 24, vitA: 34,
+    },
+  },
+  {
+    id: 'melon', name: 'Melon', emoji: '🍈',
+    category: 'fruits', seasons: ['ete'],
+    unit: 'g', defaultQty: 150,
+    per100g: {
+      calories: 34, proteines: 0.8, glucides: 8.2, lipides: 0.2, fibres: 0.9,
+      fer: 0.2, calcium: 9, magnesium: 12,
+      vitC: 36.7, vitA: 169, vitB9: 21,
+    },
+  },
+  {
+    id: 'peche', name: 'Pêche', emoji: '🍑',
+    category: 'fruits', seasons: ['ete'],
+    unit: 'g', defaultQty: 120,
+    per100g: {
+      calories: 39, proteines: 0.9, glucides: 9.5, lipides: 0.3, fibres: 1.5,
+      fer: 0.3, calcium: 6, magnesium: 9,
+      vitC: 6.6, vitA: 16, vitE: 0.73,
+    },
+  },
+  {
+    id: 'compote_pomme', name: 'Compote de pomme', emoji: '🥣',
+    category: 'fruits', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 100,
+    per100g: {
+      calories: 68, proteines: 0.2, glucides: 16, lipides: 0.1, fibres: 1.4,
+      fer: 0.2, calcium: 4, magnesium: 3,
+      vitC: 1.2,
+    },
+  },
 ];

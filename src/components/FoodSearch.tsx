@@ -52,27 +52,27 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
   }), [query, cat]);
 
   return (
-    <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-col lg:gap-4 lg:flex-1 lg:min-h-0">
-      <div className="flex items-center gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <h3 className="display-font text-base font-semibold text-[var(--text-h)] shrink-0">
           Catalogue d'aliments
         </h3>
-        <div className="flex items-center gap-2 ml-auto">
-          <div className="relative max-w-60">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text)]" />
+        <div className="flex min-w-0 items-center gap-2 sm:ml-auto">
+          <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text)]" />
             <input
               id="food-search-input"
               type="text"
               placeholder={PLACEHOLDERS[phIndex]}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm bg-[var(--warm-100)] text-[var(--text-h)] rounded-full outline-none focus:ring-2 focus:ring-[var(--accent-soft)] focus:bg-[var(--bg-subtle)] transition-all"
+              className="h-8 w-full rounded-full bg-[var(--warm-100)] pl-8 pr-3 text-sm text-[var(--text-h)] outline-none transition-all focus:bg-[var(--bg-subtle)] focus:ring-2 focus:ring-[var(--accent-soft)]"
             />
           </div>
           <button
             onClick={() => onTooltipModeChange(tooltipMode === 'simple' ? 'advanced' : 'simple')}
             className={clsx(
-              'text-[11px] px-3 py-1.5 rounded-full transition-all font-medium shrink-0',
+              'h-8 shrink-0 rounded-full px-3 text-[11px] font-medium transition-all',
               tooltipMode === 'advanced'
                 ? 'bg-[var(--accent)] text-white shadow-sm'
                 : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
@@ -83,11 +83,11 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5">
         <button
           onClick={() => setCat('tous')}
           className={clsx(
-            'text-[11px] px-4 py-1.5 rounded-full transition-all font-medium',
+            'h-7 shrink-0 rounded-full px-3 text-[11px] font-medium transition-all',
             cat === 'tous'
               ? 'bg-[var(--accent)] text-white shadow-sm'
               : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
@@ -101,7 +101,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
             onClick={() => setCat(c.value)}
             title={c.label}
             className={clsx(
-              'flex items-center gap-1.5 text-[11px] px-3.5 py-1.5 rounded-full transition-all font-medium',
+              'flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-[11px] font-medium transition-all',
               cat === c.value
                 ? 'bg-[var(--accent)] text-white shadow-sm'
                 : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
@@ -113,7 +113,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
         ))}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 content-start max-h-[300px] lg:max-h-none lg:flex-1 lg:min-h-0 overflow-y-auto pr-0.5">
+      <div className="grid max-h-[300px] grid-cols-2 content-start gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-3 lg:min-h-0 lg:max-h-none lg:flex-1 xl:grid-cols-4">
         <AnimatePresence>
           {filtered.map((food) => {
             const isSelected = selectedIds.has(food.id);

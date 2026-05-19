@@ -236,12 +236,6 @@ h6,
   letter-spacing: -0.02em;
 }
 
-.font-number {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-weight: 400;
-  letter-spacing: -0.03em;
-}
-
 .card {
   background: var(--card-bg);
   backdrop-filter: blur(8px);

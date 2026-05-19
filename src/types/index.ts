@@ -4,6 +4,7 @@ export interface NutrientMeta {
   unit: string;
   group: 'macros' | 'vitamines' | 'mineraux' | 'acidesgras' | 'aminoacides';
   veganAlert?: boolean;
+  isSupplement?: boolean;
   tooltip: string;
   tip?: string;
 }

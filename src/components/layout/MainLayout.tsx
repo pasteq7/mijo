@@ -18,7 +18,7 @@ export function MainLayout({ children, sidebar, utilityRail }: MainLayoutProps) 
         </main>
       </div>
       {sidebar && (
-        <div className="hidden lg:block w-80 xl:w-96 shrink-0 bg-[var(--bg-subtle)] shadow-[var(--shadow)] overflow-y-auto p-6 relative z-20">
+        <div className="hidden lg:block w-80 xl:w-96 shrink-0 bg-[var(--bg-subtle)] shadow-[var(--shadow)] overflow-hidden p-6 relative z-20">
           {sidebar}
         </div>
       )}

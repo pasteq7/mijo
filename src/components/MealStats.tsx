@@ -41,7 +41,7 @@ export function MealStats({ totals, goals, hasFoods }: Props) {
       <div className="flex justify-between items-end mb-4">
         <div>
           <motion.p className="text-5xl font-light text-[var(--text-h)] tabular-nums tracking-tighter display-font">
-            <motion.span className="font-number">{display}</motion.span>
+            <motion.span className="display-font">{display}</motion.span>
             <span className="text-sm font-normal text-[var(--text)] ml-2 font-sans">kcal</span>
           </motion.p>
         </div>

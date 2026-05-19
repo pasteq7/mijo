@@ -98,4 +98,60 @@ export const autres: Food[] = [
       omega3: 0.3, omega6: 9.5,
     },
   },
+  {
+    id: 'oeuf', name: 'Oeuf', emoji: '🥚',
+    category: 'autres', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 60,
+    per100g: {
+      calories: 143, proteines: 12.6, glucides: 0.7, lipides: 9.5, fibres: 0,
+      fer: 1.8, calcium: 56, magnesium: 12, zinc: 1.3, selenium: 30.7,
+      vitA: 160, vitB9: 47, vitB6: 0.17, vitE: 1.1, vitK: 0.3,
+      omega3: 0.07, omega6: 1.2,
+      lysine: 0.91, methionine: 0.38, leucine: 1.08, threonine: 0.61,
+    },
+  },
+  {
+    id: 'miel', name: 'Miel', emoji: '🍯',
+    category: 'autres', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 15,
+    per100g: {
+      calories: 304, proteines: 0.3, glucides: 82, lipides: 0, fibres: 0.2,
+      fer: 0.4, calcium: 6, magnesium: 2, zinc: 0.2,
+      vitC: 0.5, vitB9: 2,
+    },
+  },
+  {
+    id: 'yaourt_grec', name: 'Yaourt grec', emoji: '🥛',
+    category: 'autres', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 125,
+    per100g: {
+      calories: 97, proteines: 9, glucides: 3.6, lipides: 5, fibres: 0,
+      fer: 0.1, calcium: 110, magnesium: 11, zinc: 0.5, selenium: 9.7,
+      vitA: 27, vitB9: 7, vitB6: 0.05,
+      lysine: 0.75, methionine: 0.24, leucine: 0.9, threonine: 0.42,
+    },
+  },
+  {
+    id: 'fromage_blanc', name: 'Fromage blanc', emoji: '🥛',
+    category: 'autres', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 125,
+    per100g: {
+      calories: 76, proteines: 7.5, glucides: 4, lipides: 3.2, fibres: 0,
+      fer: 0.1, calcium: 120, magnesium: 10, zinc: 0.5, selenium: 8,
+      vitA: 35, vitB9: 10, vitB6: 0.04,
+      lysine: 0.67, methionine: 0.21, leucine: 0.78, threonine: 0.38,
+    },
+  },
+  {
+    id: 'emmental', name: 'Emmental', emoji: '🧀',
+    category: 'autres', seasons: ['printemps', 'ete', 'automne', 'hiver'],
+    unit: 'g', defaultQty: 30,
+    per100g: {
+      calories: 380, proteines: 28, glucides: 0.5, lipides: 29, fibres: 0,
+      fer: 0.3, calcium: 970, magnesium: 30, zinc: 4.6, selenium: 14.5,
+      vitA: 265, vitB9: 10, vitB6: 0.08, vitE: 0.3, vitK: 2.3,
+      omega3: 0.25, omega6: 0.7,
+      lysine: 2.4, methionine: 0.8, leucine: 2.7, threonine: 1.2,
+    },
+  },
 ];
