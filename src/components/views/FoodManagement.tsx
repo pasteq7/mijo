@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NutritionOverview } from '../NutritionOverview';
 import { FoodList } from '../FoodList';
 import { FoodSearch } from '../FoodSearch';
-import type { SelectedFood, Food, NutrientGoals } from '../../types';
+import type { SelectedFood, Food, NutrientGoals, TooltipMode } from '../../types';
 
 interface FoodManagementProps {
   selectedFoods: SelectedFood[];
@@ -27,10 +27,13 @@ export function FoodManagement({
   totals,
   goals,
 }: FoodManagementProps) {
-  const [tooltipMode, setTooltipMode] = useState<'simple' | 'advanced'>('simple');
+  const [tooltipMode, setTooltipMode] = useState<TooltipMode>('simple');
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:h-full" style={{ gridTemplateRows: 'auto minmax(0, 1fr)' }}>
+      <div className="card p-5 flex flex-col min-h-0">
+        <NutritionOverview totals={totals} goals={goals} foods={selectedFoods} />
+      </div>
       <div className="card p-5 flex flex-col min-h-0">
         <FoodList
           items={selectedFoods}
@@ -40,9 +43,7 @@ export function FoodManagement({
           onClear={onClear}
         />
       </div>
-      <div className="card p-5 flex flex-col min-h-0">
-        <NutritionOverview totals={totals} goals={goals} foods={selectedFoods} />
-      </div>
+
       <div className="col-span-1 lg:col-span-2 card p-5 min-h-0 flex flex-col">
         <FoodSearch
           selectedIds={selectedIds}

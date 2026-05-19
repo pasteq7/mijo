@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Leaf, Check } from 'lucide-react';
-import type { Food } from '../types';
+import type { Food, TooltipMode } from '../types';
 import { Tooltip } from './Tooltip';
 import { AdvancedTooltip } from './AdvancedTooltip';
 
@@ -11,7 +11,7 @@ interface Props {
   isSelected: boolean;
   onToggle: (food: Food) => void;
   isInSeason?: boolean;
-  tooltipMode?: 'simple' | 'advanced';
+  tooltipMode?: TooltipMode;
 }
 
 function getNutrientLevel(value: number, thresholds: { low: number; mid: number; high: number }): 'low' | 'mid' | 'high' {
@@ -34,6 +34,8 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
   const fibre = getNutrientLevel(nutrients.fibres || 0, { low: 3, mid: 6, high: 10 });
 
   const handleMouseEnter = () => {
+    if (tooltipMode === 'off') return;
+
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       setAnchorTop(rect.top);
@@ -59,7 +61,7 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {isHovered && createPortal(
+      {tooltipMode !== 'off' && isHovered && createPortal(
         <div
           style={{
             position: 'fixed',

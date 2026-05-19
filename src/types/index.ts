@@ -37,6 +37,7 @@ export interface NutrientGoals {
 export type NutrientKey = keyof NutrientGoals;
 export type DailyGoals = NutrientGoals;
 export type MealGoals = NutrientGoals;
+export type TooltipMode = 'off' | 'simple' | 'advanced';
 
 export type Season = 'printemps' | 'ete' | 'automne' | 'hiver';
 export type FoodCategory =

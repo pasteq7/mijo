@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis } from 'lucide-react';
+import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis, EyeOff, Info, BarChart3 } from 'lucide-react';
 import { FOODS } from '../data/foods';
-import type { Food, FoodCategory, Season } from '../types';
+import type { Food, FoodCategory, Season, TooltipMode } from '../types';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FoodCard } from './FoodCard';
@@ -17,6 +17,12 @@ const CATEGORIES: { value: FoodCategory; icon: typeof Bean; label: string }[] = 
   { value: 'autres', icon: Ellipsis, label: 'Autres' },
 ];
 
+const TOOLTIP_MODES: { value: TooltipMode; label: string; icon: typeof Info }[] = [
+  { value: 'off', label: 'Sans survol', icon: EyeOff },
+  { value: 'simple', label: 'Simple', icon: Info },
+  { value: 'advanced', label: 'Avancé', icon: BarChart3 },
+];
+
 const MONTH_SEASON: Record<number, Season> = {
   3: 'printemps', 4: 'printemps', 5: 'printemps',
   6: 'ete', 7: 'ete', 8: 'ete',
@@ -28,8 +34,8 @@ const currentSeason = MONTH_SEASON[new Date().getMonth() + 1]!;
 interface Props {
   selectedIds: Set<string>;
   onToggle: (f: Food) => void;
-  tooltipMode: 'simple' | 'advanced';
-  onTooltipModeChange: (mode: 'simple' | 'advanced') => void;
+  tooltipMode: TooltipMode;
+  onTooltipModeChange: (mode: TooltipMode) => void;
 }
 
 export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeChange }: Props) {
@@ -69,17 +75,26 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
               className="h-8 w-full rounded-full bg-[var(--warm-100)] pl-8 pr-3 text-sm text-[var(--text-h)] outline-none transition-all focus:bg-[var(--bg-subtle)] focus:ring-2 focus:ring-[var(--accent-soft)]"
             />
           </div>
-          <button
-            onClick={() => onTooltipModeChange(tooltipMode === 'simple' ? 'advanced' : 'simple')}
-            className={clsx(
-              'h-8 shrink-0 rounded-full px-3 text-[11px] font-medium transition-all',
-              tooltipMode === 'advanced'
-                ? 'bg-[var(--accent)] text-white shadow-sm'
-                : 'bg-[var(--warm-100)] text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
-            )}
-          >
-            {tooltipMode === 'simple' ? 'Simple' : 'Avancé'}
-          </button>
+          <div className="flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--warm-100)] p-1" aria-label="Mode d'infobulles">
+            {TOOLTIP_MODES.map((mode) => (
+              <button
+                key={mode.value}
+                type="button"
+                title={mode.label}
+                aria-label={`Infobulles: ${mode.label}`}
+                aria-pressed={tooltipMode === mode.value}
+                onClick={() => onTooltipModeChange(mode.value)}
+                className={clsx(
+                  'flex h-6 w-6 items-center justify-center rounded-full transition-all',
+                  tooltipMode === mode.value
+                    ? 'bg-[var(--accent)] text-white shadow-sm'
+                    : 'text-[var(--text)] hover:bg-[var(--warm-200)] hover:text-[var(--text-h)]'
+                )}
+              >
+                <mode.icon size={13} strokeWidth={2.2} />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

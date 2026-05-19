@@ -4,7 +4,7 @@ import { CalendarDays, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MealHistory } from '../MealHistory';
 import { NutrientBar } from '../NutrientBar';
 import { NUTRIENT_META } from '../../data/nutrients';
-import type { NutrientGoals, MealRecord, DayRecord, NutrientKey, SelectedFood } from '../../types';
+import type { NutrientGoals, MealRecord, DayRecord, NutrientKey, SelectedFood, FavoriteMeal } from '../../types';
 import clsx from 'clsx';
 
 interface AnalysisViewProps {
@@ -17,8 +17,11 @@ interface AnalysisViewProps {
   onDeleteHistoryMeal?: (dayId: string, mealId: string) => void;
   onUpdateHistoryMealQty?: (dayId: string, mealId: string, foodIndex: number, newQty: number) => void;
   onEditHistoryMealFoods?: (dayId: string, mealId: string) => void;
+  favorites?: FavoriteMeal[];
   favoriteIds?: Set<string>;
   onToggleFavorite?: (meal: MealRecord) => void;
+  onAddFavoriteMeal?: (favorite: FavoriteMeal) => void;
+  onDeleteFavorite?: (id: string) => void;
   onValidateDay?: () => void;
   currentMealFoods?: SelectedFood[];
   onAddMeal?: () => void;
@@ -46,8 +49,11 @@ export function AnalysisView({
   onDeleteHistoryMeal,
   onUpdateHistoryMealQty,
   onEditHistoryMealFoods,
+  favorites,
   favoriteIds,
   onToggleFavorite,
+  onAddFavoriteMeal,
+  onDeleteFavorite,
   onValidateDay,
   currentMealFoods,
 }: AnalysisViewProps) {
@@ -376,6 +382,7 @@ export function AnalysisView({
               <MealHistory
                 meals={selectedDay.meals}
                 readOnly
+                favorites={favorites}
                 favoriteIds={favoriteIds}
                 onToggleFavorite={onToggleFavorite}
                 onDeleteHistory={onDeleteHistoryMeal ? (mealId) => onDeleteHistoryMeal(selectedDay.id, mealId) : undefined}
@@ -387,8 +394,11 @@ export function AnalysisView({
                 meals={pastMeals}
                 onEdit={onEditMeal}
                 onDelete={onDeleteMeal}
+                favorites={favorites}
                 favoriteIds={favoriteIds}
                 onToggleFavorite={onToggleFavorite}
+                onAddFavoriteMeal={onAddFavoriteMeal}
+                onDeleteFavorite={onDeleteFavorite}
               />
             )}
 

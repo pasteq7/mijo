@@ -13,7 +13,7 @@ import { AnalysisView } from './components/views/AnalysisView';
 import { NutritionGoalsModal } from './components/NutritionGoalsModal';
 import { DayValidationDialog } from './components/DayValidationDialog';
 
-import type { Food, SelectedFood, NutrientGoals, MealRecord, Season } from './types';
+import type { Food, SelectedFood, NutrientGoals, MealRecord, Season, FavoriteMeal } from './types';
 import type { GoalProfile } from './utils/goalCalculations';
 
 const DEFAULT_GOAL_PROFILE: GoalProfile = {
@@ -40,6 +40,13 @@ function getCurrentSeason(): Season {
 
 function mergeGoals(stored: NutrientGoals, defaults: NutrientGoals): NutrientGoals {
   return { ...defaults, ...stored };
+}
+
+function getFoodsSignature(foods: SelectedFood[]): string {
+  return foods
+    .map(sf => `${sf.food.id}:${sf.qty}`)
+    .sort()
+    .join('|');
 }
 
 export default function App() {
@@ -151,13 +158,25 @@ export default function App() {
   }, []);
 
   const handleToggleFavorite = useCallback((meal: MealRecord) => {
-    if (favoriteIds.has(meal.id)) {
-      const fav = favorites.find(f => f.sourceMealId === meal.id);
-      if (fav) removeFavorite(fav.id);
+    const mealSignature = getFoodsSignature(meal.foods);
+    const fav = favorites.find(f => f.sourceMealId === meal.id || getFoodsSignature(f.foods) === mealSignature);
+
+    if (fav) {
+      removeFavorite(fav.id);
     } else {
       addFavorite(meal);
     }
-  }, [favoriteIds, favorites, addFavorite, removeFavorite]);
+  }, [favorites, addFavorite, removeFavorite]);
+
+  const handleAddFavoriteMeal = useCallback((favorite: FavoriteMeal) => {
+    const meal: MealRecord = {
+      id: generateFoodId(),
+      date: new Date().toISOString(),
+      foods: favorite.foods.map(sf => ({ ...sf, id: generateFoodId() })),
+      totals: favorite.totals,
+    };
+    addMealToDay(meal);
+  }, [addMealToDay]);
 
   const handleExport = useCallback(() => {
     const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
@@ -237,8 +256,11 @@ export default function App() {
             onDeleteHistoryMeal={handleDeleteHistoryMeal}
             onUpdateHistoryMealQty={handleUpdateHistoryMealQty}
             onEditHistoryMealFoods={handleEditHistoryMealFoods}
+            favorites={favorites}
             favoriteIds={favoriteIds}
             onToggleFavorite={handleToggleFavorite}
+            onAddFavoriteMeal={handleAddFavoriteMeal}
+            onDeleteFavorite={removeFavorite}
             onValidateDay={() => setShowDayValidation(true)}
             currentMealFoods={selectedFoods}
             onAddMeal={handleAddMeal}
