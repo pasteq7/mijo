@@ -27,7 +27,7 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: 
           <div className="relative w-18 h-18 rounded-full border-2 border-dashed border-[var(--border)] flex items-center justify-center mb-2.5 bg-[var(--warm-100)]/15 animate-[spin_120s_linear_infinite]">
             <div className="w-12 h-12 rounded-full border border-dashed border-[var(--border)]/65 flex items-center justify-center" />
           </div>
-          <div className="absolute top-[3.75rem] flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-2xs border border-[var(--border-soft)] text-[var(--text-muted)]/75">
+          <div className="absolute top-[3.75rem] flex items-center justify-center w-7 h-7 rounded-full bg-[var(--bg-raised)] shadow-2xs border border-[var(--border-soft)] text-[var(--text-muted)]/75">
             <Utensils size={12} />
           </div>
           
@@ -81,14 +81,14 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: 
                 transition={{ duration: 0.15 }}
                 className="group flex items-center gap-3 px-3 py-2 rounded-xl bg-[var(--warm-100)] hover:bg-[var(--warm-200)]"
               >
-                <span className="text-lg leading-none shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/60">
+                <span className="text-lg leading-none shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--bg-raised)]">
                   {sf.food.emoji}
                 </span>
                 <span className="flex-1 text-sm font-medium text-[var(--text-h)] truncate">{t('foods.' + sf.food.id)}</span>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => onUpdateQty(sf.food.id, Math.max(10, sf.qty - 10))}
-                    className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-white transition-colors"
+                    className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--bg-raised)] transition-colors"
                   >
                     <Minus size={12} />
                   </button>
@@ -97,14 +97,14 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: 
                   </span>
                   <button
                     onClick={() => onUpdateQty(sf.food.id, sf.qty + 10)}
-                    className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-white transition-colors"
+                    className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text)] hover:text-[var(--text-h)] hover:bg-[var(--bg-raised)] transition-colors"
                   >
                     <Plus size={12} />
                   </button>
                 </div>
                 <button
                   onClick={() => onRemove(sf.food.id)}
-                  className="w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text)] hover:text-[var(--action)] hover:bg-white opacity-0 group-hover:opacity-100 transition-all"
+                  className="w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text)] hover:text-[var(--action)] hover:bg-[var(--bg-raised)] opacity-0 group-hover:opacity-100 transition-all"
                 >
                   <X size={14} />
                 </button>

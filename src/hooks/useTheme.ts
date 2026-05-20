@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export type Theme = 'washi' | 'suna' | 'matcha' | 'sora' | 'sumi';
+export type Theme = 'washi' | 'frappe';
 
-const STORAGE_KEY = 'veganut-theme';
-const THEMES: Theme[] = ['washi', 'suna', 'matcha', 'sora', 'sumi'];
+const STORAGE_KEY = 'mijo-theme';
+const THEMES: Theme[] = ['washi', 'frappe'];
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (THEMES.includes(stored as Theme)) return stored as Theme;
   if (stored === 'light') return 'washi';
-  if (stored === 'dark') return 'suna';
+  if (stored === 'dark') return 'frappe';
   return 'washi';
 }
 

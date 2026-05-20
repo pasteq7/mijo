@@ -54,10 +54,7 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
 
   const themeLabels: Record<Theme, string> = {
     washi: t('themes.washi'),
-    suna: t('themes.suna'),
-    matcha: t('themes.matcha'),
-    sora: t('themes.sora'),
-    sumi: t('themes.sumi'),
+    frappe: t('themes.frappe'),
   };
 
   return (

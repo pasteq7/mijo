@@ -29,7 +29,7 @@ export function FoodManagement({
   goals,
   hasMeals,
 }: FoodManagementProps) {
-  const [tooltipMode, setTooltipMode] = useLocalStorage<TooltipMode>('veganut-tooltip-mode', 'off');
+  const [tooltipMode, setTooltipMode] = useLocalStorage<TooltipMode>('mijo-tooltip-mode', 'off');
 
   const showHint = !hasMeals && selectedFoods.length === 0;
 

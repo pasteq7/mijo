@@ -12,7 +12,7 @@ function generateName(foods: MealRecord['foods']): string {
 }
 
 export function useFavoriteMeals() {
-  const [favorites, setFavorites] = useLocalStorage<FavoriteMeal[]>('veganut-favorites', []);
+  const [favorites, setFavorites] = useLocalStorage<FavoriteMeal[]>('mijo-favorites', []);
 
   const addFavorite = useCallback((meal: MealRecord) => {
     setFavorites(prev => {

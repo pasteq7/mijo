@@ -50,11 +50,6 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
     setIsHovered(false);
   };
 
-  const dotClass = (level: 'low' | 'mid' | 'high') => {
-    if (level === 'high') return 'bg-[var(--accent)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]';
-    if (level === 'mid') return 'bg-[var(--accent-light)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]';
-    return 'bg-[var(--border-soft)] opacity-40';
-  };
 
   return (
     <div
@@ -117,18 +112,9 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
         </div>
 
         <div className="flex flex-col min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-1.5">
-            <span className="display-font text-[13px] font-medium text-[var(--text-h)] truncate leading-snug tracking-tight">
-              {t('foods.' + food.id)}
-            </span>
-            <div className="flex gap-1 items-center shrink-0">
-              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(protein)}`} />
-              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(iron)}`} />
-              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(zinc)}`} />
-              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(magnesium)}`} />
-              <div className={`w-1.5 h-1.5 rounded-full ${dotClass(fibre)}`} />
-            </div>
-          </div>
+          <span className="display-font text-[13px] font-medium text-[var(--text-h)] truncate leading-snug tracking-tight">
+            {t('foods.' + food.id)}
+          </span>
           <span className="text-[11px] text-[var(--text-muted)] tabular-nums leading-tight mt-0.5">
             {nutrients.calories || 0} {t('common.kcal')} &middot; {nutrients.proteines || 0}g prot
           </span>

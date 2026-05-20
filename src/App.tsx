@@ -52,10 +52,10 @@ function getFoodsSignature(foods: SelectedFood[]): string {
 
 export default function App() {
   const { t } = useLanguage();
-  const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('veganut-foods', []);
-  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', DAILY_GOALS);
-  const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
-  const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>('veganut-goal-profile', DEFAULT_GOAL_PROFILE);
+  const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('mijo-foods', []);
+  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('mijo-daily-goals', DAILY_GOALS);
+  const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('mijo-meal-goals', MEAL_GOALS);
+  const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>('mijo-goal-profile', DEFAULT_GOAL_PROFILE);
   const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, DAILY_GOALS), [dailyGoalsState]);
   const mealGoals = useMemo(() => mergeGoals(mealGoalsState, MEAL_GOALS), [mealGoalsState]);
   const smartGoalProfile = useMemo(() => ({ ...DEFAULT_GOAL_PROFILE, ...goalProfile }), [goalProfile]);
@@ -181,8 +181,8 @@ export default function App() {
   }, [addMealToDay]);
 
   const handleExport = useCallback(() => {
-    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
-      'veganut-days', 'veganut-favorites', 'veganut-theme'];
+    const keys = ['mijo-foods', 'mijo-daily-goals', 'mijo-meal-goals', 'mijo-goal-profile',
+      'mijo-days', 'mijo-favorites', 'mijo-theme'];
     const data: Record<string, unknown> = { version: 1, exportedAt: new Date().toISOString() };
     for (const key of keys) {
       try {
@@ -194,14 +194,14 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `veganut-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `mijo-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, []);
 
   const handleResetAll = useCallback(() => {
-    const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
-      'veganut-days', 'veganut-favorites', 'veganut-theme'];
+    const keys = ['mijo-foods', 'mijo-daily-goals', 'mijo-meal-goals', 'mijo-goal-profile',
+      'mijo-days', 'mijo-favorites', 'mijo-theme'];
     for (const key of keys) {
       localStorage.removeItem(key);
     }
@@ -211,8 +211,8 @@ export default function App() {
   const handleImport = useCallback((json: string) => {
     try {
       const data = JSON.parse(json);
-      const keys = ['veganut-foods', 'veganut-daily-goals', 'veganut-meal-goals', 'veganut-goal-profile',
-        'veganut-days', 'veganut-favorites', 'veganut-theme'];
+      const keys = ['mijo-foods', 'mijo-daily-goals', 'mijo-meal-goals', 'mijo-goal-profile',
+        'mijo-days', 'mijo-favorites', 'mijo-theme'];
       for (const key of keys) {
         if (data[key] !== undefined) {
           localStorage.setItem(key, JSON.stringify(data[key]));

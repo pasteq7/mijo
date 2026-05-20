@@ -80,7 +80,7 @@ export function NutritionOverview({ totals, goals, foods }: Props) {
                 {activeTab === tab.id && (
                   <motion.div
                     layoutId="nutrient-tab"
-                    className="absolute inset-0 rounded-md bg-white/80 shadow-sm"
+                    className="absolute inset-0 rounded-md bg-[var(--bg-raised)] shadow-sm"
                     transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.25 }}
                   />
                 )}

@@ -57,7 +57,7 @@ function computeScore(dailyTotals: Partial<NutrientGoals>, goals: NutrientGoals)
 }
 
 export function useDayHistory(dailyGoals: NutrientGoals) {
-  const [days, setDays] = useLocalStorage<DayRecord[]>('veganut-days', []);
+  const [days, setDays] = useLocalStorage<DayRecord[]>('mijo-days', []);
   const initialized = useRef(false);
 
   useEffect(() => {

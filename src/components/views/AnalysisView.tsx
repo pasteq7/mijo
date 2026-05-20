@@ -50,7 +50,7 @@ export function AnalysisView({
 }: AnalysisViewProps) {
   const { t, language } = useLanguage();
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<NutrientSection>('micros');
+  const [activeSection, setActiveSection] = useState<NutrientSection>('macros');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const calendarRef = useRef<HTMLDivElement>(null);
