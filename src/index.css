@@ -207,6 +207,11 @@ html {
   transition: background 0.35s ease, color 0.35s ease;
 }
 
+.theme-sumi img[src*="nature.svg"],
+.theme-sumi img[src*="decorative2.svg"] {
+  filter: invert(1);
+}
+
 #root {
   width: 100%;
   min-height: 100vh;
@@ -242,6 +247,21 @@ h6,
   box-shadow: var(--shadow-sm);
   border-radius: 1.5rem;
   border: 1px solid var(--border-soft);
+}
+
+@keyframes card-breath {
+  0%, 100% {
+    border-color: var(--border-soft);
+    box-shadow: var(--shadow-sm);
+  }
+  50% {
+    border-color: var(--accent-light);
+    box-shadow: 0 0 22px var(--accent-soft), var(--shadow-sm);
+  }
+}
+
+.card-breathing {
+  animation: card-breath 3s ease-in-out infinite;
 }
 
 .seg-progress {

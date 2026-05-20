@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { NutritionOverview } from '../NutritionOverview';
 import { FoodList } from '../FoodList';
 import { FoodSearch } from '../FoodSearch';
@@ -14,6 +14,7 @@ interface FoodManagementProps {
   onClear: () => void;
   totals: Partial<NutrientGoals>;
   goals: NutrientGoals;
+  hasMeals?: boolean;
 }
 
 export function FoodManagement({
@@ -26,8 +27,11 @@ export function FoodManagement({
   onClear,
   totals,
   goals,
+  hasMeals,
 }: FoodManagementProps) {
-  const [tooltipMode, setTooltipMode] = useState<TooltipMode>('simple');
+  const [tooltipMode, setTooltipMode] = useLocalStorage<TooltipMode>('veganut-tooltip-mode', 'off');
+
+  const showHint = !hasMeals && selectedFoods.length === 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:h-full" style={{ gridTemplateRows: 'auto minmax(0, 1fr)' }}>
@@ -44,7 +48,7 @@ export function FoodManagement({
         />
       </div>
 
-      <div className="col-span-1 lg:col-span-2 card p-5 min-h-0 flex flex-col">
+      <div className={`col-span-1 lg:col-span-2 card p-5 min-h-0 flex flex-col transition-all duration-500 ${showHint ? 'card-breathing' : ''}`}>
         <FoodSearch
           selectedIds={selectedIds}
           onToggle={onToggle}

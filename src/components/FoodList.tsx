@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, X, CheckCircle2, Trash2 } from 'lucide-react';
+import { Minus, Plus, X, CheckCircle2, Trash2, Utensils, ArrowDown } from 'lucide-react';
 import type { SelectedFood } from '../types';
 
 interface Props {
@@ -13,35 +13,39 @@ interface Props {
 export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: Props) {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full select-none">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-[var(--text-h)]">Aliments sélectionnés</h3>
+          <h3 className="display-font text-base font-semibold text-[var(--text-h)]">Aliments sélectionnés</h3>
           <span className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] opacity-30">
             <Trash2 size={14} />
           </span>
         </div>
-        <div className="min-h-[180px] max-h-[180px] overflow-y-auto space-y-1.5">
-          {[1].map((i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[var(--warm-100)] animate-pulse"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[var(--warm-200)] shrink-0" />
-              <div className="flex-1 h-4 rounded bg-[var(--warm-200)]" />
-              <div className="flex items-center gap-1">
-                <div className="w-6 h-6 rounded-full bg-[var(--warm-200)]" />
-                <div className="w-12 h-4 rounded bg-[var(--warm-200)]" />
-                <div className="w-6 h-6 rounded-full bg-[var(--warm-200)]" />
-              </div>
-              <div className="w-6 h-6 rounded-lg bg-[var(--warm-200)]" />
-            </div>
-          ))}
+        <div className="min-h-[180px] max-h-[180px] overflow-hidden flex flex-col items-center justify-center p-4 text-center select-none relative">
+          <div className="relative w-18 h-18 rounded-full border-2 border-dashed border-[var(--border)] flex items-center justify-center mb-2.5 bg-[var(--warm-100)]/15 animate-[spin_120s_linear_infinite]">
+            <div className="w-12 h-12 rounded-full border border-dashed border-[var(--border)]/65 flex items-center justify-center" />
+          </div>
+          <div className="absolute top-[3.75rem] flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-2xs border border-[var(--border-soft)] text-[var(--text-muted)]/75">
+            <Utensils size={12} />
+          </div>
+          
+          <p className="text-xs font-semibold text-[var(--text-h)] mt-1 mb-0.5">Votre assiette est vide</p>
+          <p className="text-[10px] text-[var(--text-muted)] max-w-[200px] leading-normal mb-2">
+            Ajoutez des ingrédients depuis le catalogue.
+          </p>
+
+          <motion.div
+            animate={{ y: [0, 3, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="text-[var(--accent)] opacity-85"
+          >
+            <ArrowDown size={11} strokeWidth={2.5} />
+          </motion.div>
         </div>
         <button
           disabled
-          className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--warm-200)] text-[var(--text-muted)] rounded-2xl font-medium text-sm shadow-sm mt-auto cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--warm-100)] text-[var(--text-muted)] opacity-55 rounded-2xl font-medium text-sm shadow-2xs mt-auto cursor-not-allowed"
         >
-          <CheckCircle2 size={18} />
+          <CheckCircle2 size={18} className="opacity-40" />
           Valider le repas
         </button>
       </div>
@@ -51,7 +55,7 @@ export function FoodList({ items, onUpdateQty, onRemove, onSaveMeal, onClear }: 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-[var(--text-h)]">Aliments sélectionnés</h3>
+        <h3 className="display-font text-base font-semibold text-[var(--text-h)]">Aliments sélectionnés</h3>
         {items.length > 0 && (
           <button
             onClick={onClear}

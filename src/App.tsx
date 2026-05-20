@@ -277,6 +277,7 @@ export default function App() {
           onClear={handleClear}
           totals={totals}
           goals={mealGoals}
+          hasMeals={(activeDay?.meals ?? []).length > 0}
         />
       </MainLayout>
 

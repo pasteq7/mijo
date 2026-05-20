@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarDays, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Utensils } from 'lucide-react';
 import { MealHistory } from '../MealHistory';
 import { NutrientBar } from '../NutrientBar';
 import { NUTRIENT_META } from '../../data/nutrients';
@@ -215,169 +215,158 @@ export function AnalysisView({
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
       <header className="shrink-0">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            <h3 className="text-sm font-semibold text-[var(--text-h)] display-font">
+          <div>
+            <h3 className="text-base font-semibold text-[var(--text-h)] display-font">
               Analyse nutritionnelle
             </h3>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
-            {!isPastDay && onValidateDay && pastMeals.length > 0 && (
-              <motion.button
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={onValidateDay}
-                className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-all hover:bg-[var(--accent-light)]"
+          <div className="relative shrink-0" ref={calendarRef}>
+            <div className="flex shrink-0 items-center bg-[var(--warm-100)]/70 dark:bg-[var(--warm-200)]/20 rounded-full p-0.5 border border-[var(--border-soft)] shadow-xs relative">
+              <button
+                onClick={goOlder}
+                disabled={!canGoOlder}
+                className={clsx(
+                  'w-6 h-6 flex items-center justify-center rounded-full transition-all',
+                  canGoOlder
+                    ? 'text-[var(--text-h)] hover:bg-[var(--warm-200)]/80 dark:hover:bg-[var(--warm-300)]'
+                    : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
+                )}
+                aria-label="Jour précédent"
               >
-                <Check size={13} />
-                Valider
-              </motion.button>
-            )}
+                <ChevronLeft size={11} strokeWidth={2.5} />
+              </button>
 
-            {pastDays.length > 0 && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={goOlder}
-                  disabled={!canGoOlder}
-                  className={clsx(
-                    'w-7 h-7 flex items-center justify-center rounded-lg transition-all',
-                    canGoOlder
-                      ? 'text-[var(--text)] hover:bg-[var(--warm-200)]'
-                      : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
-                  )}
-                  aria-label="Jour précédent"
-                >
-                  <ChevronLeft size={13} />
-                </button>
-                <span className="text-[11px] text-[var(--text)] tabular-nums min-w-[4.25rem] text-center">
-                  {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : 'Aujourd\'hui'}
+              <button
+                type="button"
+                onClick={toggleCalendar}
+                className={clsx(
+                  'flex items-center gap-1.5 px-2.5 py-0.5 rounded-full transition-all text-[11px] font-semibold tracking-wide shadow-2xs',
+                  isCalendarOpen
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'text-[var(--accent)] bg-[var(--accent-soft)] hover:bg-[var(--accent-soft)]/85'
+                )}
+                aria-label="Ouvrir le calendrier"
+                aria-expanded={isCalendarOpen}
+              >
+                <span className="tabular-nums">
+                  {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : "Aujourd'hui"}
                 </span>
-                <button
-                  onClick={goNewer}
-                  disabled={!canGoNewer}
-                  className={clsx(
-                    'w-7 h-7 flex items-center justify-center rounded-lg transition-all',
-                    canGoNewer
-                      ? 'text-[var(--text)] hover:bg-[var(--warm-200)]'
-                      : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
-                  )}
-                  aria-label="Jour suivant"
-                >
-                  <ChevronRight size={13} />
-                </button>
-                <div className="relative" ref={calendarRef}>
+                <CalendarDays size={10} className={isCalendarOpen ? 'text-white' : 'text-[var(--accent)] opacity-80'} />
+              </button>
+
+              <button
+                onClick={goNewer}
+                disabled={!canGoNewer}
+                className={clsx(
+                  'w-6 h-6 flex items-center justify-center rounded-full transition-all',
+                  canGoNewer
+                    ? 'text-[var(--text-h)] hover:bg-[var(--warm-200)]/80 dark:hover:bg-[var(--warm-300)]'
+                    : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
+                )}
+                aria-label="Jour suivant"
+              >
+                <ChevronRight size={11} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {isCalendarOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.16 }}
+                className="absolute right-0 top-9 z-30 w-56 rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-raised)] backdrop-blur-md p-3 shadow-xl"
+              >
+                <div className="mb-2 flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    onClick={toggleCalendar}
-                    className={clsx(
-                      'w-7 h-7 flex items-center justify-center rounded-lg border transition-all',
-                      isCalendarOpen
-                        ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]'
-                        : 'border-transparent text-[var(--text)] hover:bg-[var(--warm-200)]'
-                    )}
-                    aria-label="Ouvrir le calendrier"
-                    aria-expanded={isCalendarOpen}
+                    onClick={() => shiftCalendarMonth(-1)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-100)]"
+                    aria-label="Mois precedent"
                   >
-                    <CalendarDays size={13} />
+                    <ChevronLeft size={13} />
                   </button>
-
-                  {isCalendarOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.16 }}
-                      className="absolute right-0 top-8 z-30 w-56 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-raised)] p-2.5 shadow-lg"
-                    >
-                      <div className="mb-2 flex items-center justify-between gap-2">
-                        <button
-                          type="button"
-                          onClick={() => shiftCalendarMonth(-1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-100)]"
-                          aria-label="Mois precedent"
-                        >
-                          <ChevronLeft size={13} />
-                        </button>
-                        <p className="min-w-0 flex-1 text-center text-[11px] font-semibold capitalize text-[var(--text-h)] tabular-nums">
-                          {calendarMonthLabel}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => shiftCalendarMonth(1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-100)]"
-                          aria-label="Mois suivant"
-                        >
-                          <ChevronRight size={13} />
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-7 gap-1 px-0.5 text-center text-[9px] font-semibold uppercase text-[var(--text-muted)]">
-                        {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((weekday, index) => (
-                          <span key={`${weekday}-${index}`} className="leading-5">
-                            {weekday}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="mt-1 grid grid-cols-7 gap-1">
-                        {calendarDays.map((day, index) => {
-                          if (!day) {
-                            return <span key={`empty-${index}`} className="h-7" aria-hidden />;
-                          }
-
-                          const isSelected = selectedDay?.date === day.dateKey || (!selectedDay && day.isToday);
-                          const isRegistered = Boolean(day.record);
-
-                          return (
-                            <button
-                              key={day.dateKey}
-                              type="button"
-                              onClick={() => day.record ? selectRegisteredDay(day.record) : day.isToday ? selectToday() : undefined}
-                              disabled={!isRegistered && !day.isToday}
-                              className={clsx(
-                                'relative flex h-7 w-7 items-center justify-center rounded-lg text-[11px] tabular-nums transition-all',
-                                isSelected
-                                  ? 'bg-[var(--accent)] font-semibold text-white shadow-sm'
-                                  : isRegistered
-                                    ? 'text-[var(--text-h)] hover:bg-[var(--accent-soft)]'
-                                    : day.isToday
-                                      ? 'text-[var(--accent)] hover:bg-[var(--accent-soft)]'
-                                      : 'cursor-default text-[var(--text-muted)] opacity-30'
-                              )}
-                              aria-label={day.record ? `Voir le ${formatDayDate(day.dateKey)}` : day.isToday ? "Voir aujourd'hui" : undefined}
-                            >
-                              {day.dayNumber}
-                              {isRegistered && !isSelected && (
-                                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[var(--accent)]" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="mt-2 flex items-center justify-between border-t border-[var(--border-soft)] pt-2">
-                        <span className="text-[10px] text-[var(--text-muted)]">
-                          {pastDays.length} jours
-                        </span>
-                        <button
-                          type="button"
-                          onClick={selectToday}
-                          className="rounded-lg px-2 py-1 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent-soft)]"
-                        >
-                          Aujourd'hui
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
+                  <p className="min-w-0 flex-1 text-center text-[11px] font-semibold capitalize text-[var(--text-h)] tabular-nums">
+                    {calendarMonthLabel}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => shiftCalendarMonth(1)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-100)]"
+                    aria-label="Mois suivant"
+                  >
+                    <ChevronRight size={13} />
+                  </button>
                 </div>
-              </div>
+
+                <div className="grid grid-cols-7 gap-1 px-0.5 text-center text-[9px] font-semibold uppercase text-[var(--text-muted)]">
+                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((weekday, index) => (
+                    <span key={`${weekday}-${index}`} className="leading-5">
+                      {weekday}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-1 grid grid-cols-7 gap-1">
+                  {calendarDays.map((day, index) => {
+                    if (!day) {
+                      return <span key={`empty-${index}`} className="h-7" aria-hidden />;
+                    }
+
+                    const isSelected = selectedDay?.date === day.dateKey || (!selectedDay && day.isToday);
+                    const isRegistered = Boolean(day.record);
+
+                    return (
+                      <button
+                        key={day.dateKey}
+                        type="button"
+                        onClick={() => day.record ? selectRegisteredDay(day.record) : day.isToday ? selectToday() : undefined}
+                        disabled={!isRegistered && !day.isToday}
+                        className={clsx(
+                          'relative flex h-7 w-7 items-center justify-center rounded-lg text-[11px] tabular-nums transition-all',
+                          isSelected
+                            ? 'bg-[var(--accent)] font-semibold text-white shadow-sm'
+                            : isRegistered
+                              ? 'text-[var(--text-h)] hover:bg-[var(--accent-soft)]'
+                              : day.isToday
+                                ? 'text-[var(--accent)] hover:bg-[var(--accent-soft)]'
+                                : 'cursor-default text-[var(--text-muted)] opacity-30'
+                        )}
+                        aria-label={day.record ? `Voir le ${formatDayDate(day.dateKey)}` : day.isToday ? "Voir aujourd'hui" : undefined}
+                      >
+                        {day.dayNumber}
+                        {isRegistered && !isSelected && (
+                          <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[var(--accent)]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-2 flex items-center justify-between border-t border-[var(--border-soft)] pt-2">
+                  <span className="text-[10px] text-[var(--text-muted)]">
+                    {pastDays.length} jours
+                  </span>
+                  <button
+                    type="button"
+                    onClick={selectToday}
+                    className="rounded-lg px-2 py-1 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent-soft)]"
+                  >
+                    Aujourd'hui
+                  </button>
+                </div>
+              </motion.div>
             )}
           </div>
         </div>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-rows-[minmax(150px,0.9fr)_minmax(230px,1.1fr)] gap-4 overflow-hidden">
-        <section className="min-h-0 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--card-bg)] px-3 py-3">
-          <div className="h-full min-h-0 overflow-y-auto pr-1">
+        <section className="card p-3.5 flex flex-col min-h-0 overflow-hidden">
+          <div className={clsx(
+            "flex-grow flex-1 min-h-0 flex flex-col",
+            mealsForView.length > 0 ? "overflow-y-auto pr-1" : "overflow-hidden"
+          )}>
             {selectedDayId && selectedDay ? (
               <MealHistory
                 meals={selectedDay.meals}
@@ -403,22 +392,60 @@ export function AnalysisView({
             )}
 
             {mealsForView.length === 0 && (
-              <div className="flex h-full min-h-[120px] items-center justify-center text-center">
-                <p className="text-xs text-[var(--text-muted)]">Aucun repas enregistré</p>
+              <div className="flex-grow flex-1 flex flex-col items-center justify-center text-center py-4 px-4 overflow-hidden select-none">
+                {(currentMealFoods?.length ?? 0) === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="relative w-16 h-16 rounded-full border-2 border-dashed border-[var(--border)]/65 flex items-center justify-center mb-3 bg-[var(--warm-100)]/10">
+                      <Utensils size={14} className="text-[var(--text-muted)] opacity-60" />
+                    </div>
+                    <p className="text-xs font-semibold text-[var(--text-h)] mb-0.5">Aucun repas enregistré</p>
+                    <p className="text-[10px] text-[var(--text-muted)] max-w-[180px] leading-normal">
+                      Composez et validez votre premier repas.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="relative w-16 h-16 rounded-full border border-dashed border-[var(--accent)]/45 flex items-center justify-center mb-3 bg-[var(--accent-soft)]/5">
+                      <Sparkles size={14} className="text-[var(--accent)] animate-spin-slow" />
+                    </div>
+                    <p className="text-xs font-semibold text-[var(--text-h)] mb-0.5">Assiette prête</p>
+                    <p className="text-[10px] text-[var(--text-muted)] max-w-[180px] leading-normal mb-2">
+                      Validez votre repas pour l'enregistrer.
+                    </p>
+                    
+                    <motion.div
+                      animate={{ x: [0, 3, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                      className="text-[var(--accent)]"
+                    >
+                      <ArrowRight size={12} strokeWidth={2.5} />
+                    </motion.div>
+                  </motion.div>
+                )}
               </div>
             )}
           </div>
         </section>
 
-        <section className="flex min-h-0 flex-col gap-3 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--card-bg)] px-3 py-3">
+        <section className="card p-3.5 flex min-h-0 flex-col gap-2.5 overflow-hidden">
           <div className="shrink-0">
             <div className="mb-2 flex items-center justify-between">
-              <h4 className="text-xs font-semibold text-[var(--text)] uppercase tracking-[0.1em]">
+              <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-[var(--accent)] px-2.5 py-0.5">
                 Nutriments
-              </h4>
+              </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-1 rounded-lg bg-[var(--warm-100)] p-1">
+            <div className="grid grid-cols-3 gap-1 rounded-xl bg-[var(--warm-100)]/70 p-1 border border-[var(--border-soft)]/40 shadow-xs">
               {NUTRIENT_SECTIONS.map((section) => {
                 const isActive = activeSection === section.id;
                 return (
@@ -427,21 +454,24 @@ export function AnalysisView({
                     type="button"
                     onClick={() => setActiveSection(section.id)}
                     className={clsx(
-                      'relative min-w-0 rounded-md px-2 py-2 text-center transition-colors',
+                      'relative min-w-0 rounded-lg px-2 py-1 text-center transition-colors cursor-pointer',
                       isActive
-                        ? 'text-[var(--text-h)]'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+                        ? 'font-semibold'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-h)]'
                     )}
                     aria-pressed={isActive}
                   >
                     {isActive && (
                       <motion.span
                         layoutId="analysis-nutrient-section"
-                        className="absolute inset-0 rounded-md bg-[var(--bg-raised)] shadow-sm"
+                        className="absolute inset-0 rounded-lg bg-[var(--bg-raised)] shadow-xs border border-[var(--border-soft)]/40"
                         transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.22 }}
                       />
                     )}
-                    <span className="relative z-10 block truncate text-[11px] font-semibold leading-tight">
+                    <span className={clsx(
+                      'relative z-10 block truncate text-[11px] font-semibold leading-tight transition-colors',
+                      isActive ? 'text-[var(--accent)] font-bold' : 'text-[var(--text-muted)]'
+                    )}>
                       {section.label}
                     </span>
                   </button>
@@ -470,31 +500,43 @@ export function AnalysisView({
         </section>
       </div>
 
-      <footer className="shrink-0 rounded-xl border border-[var(--border-soft)] bg-[var(--bg-raised)] p-3 shadow-sm">
-        <div className="mb-2 flex items-end justify-between gap-3">
+      <footer className="shrink-0 rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-raised)] p-4 shadow-sm relative overflow-hidden">
+        <div className="mb-3 flex items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
               Total jour
             </p>
-            <p className="text-3xl font-light text-[var(--text-h)] display-font tabular-nums leading-none">
+            <p className="text-3xl font-light text-[var(--text-h)] display-font tabular-nums leading-none mt-1">
               {Math.round(cal)}
               <span className="ml-1 text-xs font-medium text-[var(--text-muted)]">kcal</span>
             </p>
           </div>
           <div className="text-right text-[11px] text-[var(--text-muted)] tabular-nums">
             <p><span className="font-medium text-[var(--accent)]">/ {currentGoal.calories}</span> kcal</p>
-            <p>{Math.round(calPct)}% objectif</p>
+            <p className="font-medium text-[var(--text-h)] mt-0.5">{Math.round(calPct)}% objectif</p>
           </div>
         </div>
 
-        <div className="mb-2 h-1.5 rounded-full bg-[var(--warm-100)] overflow-hidden">
+        <div className="h-2 rounded-full bg-[var(--warm-100)] dark:bg-[var(--warm-200)]/20 overflow-hidden shadow-inner">
           <motion.div
-            className="h-full rounded-full bg-[var(--accent)]"
+            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-light)] to-[var(--accent)] shadow-sm"
             initial={{ width: 0 }}
             animate={{ width: `${calPct}%` }}
             transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.8 }}
           />
         </div>
+
+        {!isPastDay && onValidateDay && pastMeals.length > 0 && (
+          <motion.button
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={onValidateDay}
+            className="mt-3.5 w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-light)] text-white py-2.5 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <Check size={14} strokeWidth={2.5} />
+            Clôturer ma journée
+          </motion.button>
+        )}
       </footer>
     </div>
   );
