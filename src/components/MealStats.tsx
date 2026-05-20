@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import type { NutrientGoals } from '../types';
 import { evaluateMeal } from '../utils/recommendations';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   totals: Partial<NutrientGoals>;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function MealStats({ totals, goals, hasFoods }: Props) {
+  const { t } = useLanguage();
   const cal = totals.calories ?? 0;
   const calPct = Math.min((cal / goals.calories) * 100, 100);
 
@@ -28,7 +30,7 @@ export function MealStats({ totals, goals, hasFoods }: Props) {
       <div className="px-8 py-6 bg-[var(--bg-subtle)] border border-[var(--border)] rounded-b-2xl shadow-[var(--shadow-sm)]">
         <div className="flex justify-between items-end mb-4">
           <p className="text-base font-light text-[var(--text-muted)]">
-            Tes apports s'afficheront ici
+            {t('mealStats.infoPlaceholder')}
           </p>
         </div>
         <div className="h-3 rounded-full border border-dashed border-[var(--border)] bg-transparent" />
@@ -42,12 +44,12 @@ export function MealStats({ totals, goals, hasFoods }: Props) {
         <div>
           <motion.p className="text-5xl font-light text-[var(--text-h)] tabular-nums tracking-tighter display-font">
             <motion.span className="display-font">{display}</motion.span>
-            <span className="text-sm font-normal text-[var(--text)] ml-2 font-sans">kcal</span>
+            <span className="text-sm font-normal text-[var(--text)] ml-2 font-sans">{t('common.kcal')}</span>
           </motion.p>
         </div>
         <div className="text-right">
           <p className="text-xs font-medium text-[var(--text)] uppercase tracking-[0.1em]">
-            Objectif: {cal === 0 ? '0 / ' : ''}{Math.round(goals.calories)} kcal
+            {t('mealStats.goalLabel', { val: Math.round(goals.calories) })}
           </p>
         </div>
       </div>
@@ -62,11 +64,12 @@ export function MealStats({ totals, goals, hasFoods }: Props) {
       {cal > 0 && (
         <div className="flex justify-between items-center">
           <p className={`text-sm font-medium ${evalResult.color.includes('amber') ? 'text-[var(--highlight)]' : evalResult.color.includes('green') ? 'text-[var(--accent)]' : evalResult.color.includes('red') ? 'text-[var(--action)]' : 'text-[var(--text-h)]'}`}>
-            {evalResult.label}
+            {t(evalResult.label)}
           </p>
-          <p className="text-xs text-[var(--text)]">Score Qualité: {evalResult.score}/3</p>
+          <p className="text-xs text-[var(--text)]">{t('mealStats.qualityScore', { score: evalResult.score })}</p>
         </div>
       )}
     </div>
   );
 }
+

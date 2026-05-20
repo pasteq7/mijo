@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { NutrientBar } from './NutrientBar';
 import { NUTRIENT_META } from '../data/nutrients';
 import type { NutrientGoals, NutrientKey, SelectedFood } from '../types';
+import { useLanguage } from '../hooks/useLanguage';
 import clsx from 'clsx';
 
 interface Props {
@@ -15,12 +16,6 @@ interface Props {
   bufferFoods?: Set<SelectedFood>;
 }
 
-const GROUPS = [
-  { key: 'macros', label: 'MACROS' },
-  { key: 'vitamines', label: 'MICROS' },
-  { key: 'mineraux', label: 'MINÉRAUX' },
-] as const;
-
 const GROUP_MAP: Record<string, string[]> = {
   macros: ['macros', 'aminoacides'],
   vitamines: ['vitamines', 'acidesgras'],
@@ -29,6 +24,13 @@ const GROUP_MAP: Record<string, string[]> = {
 
 export function DetailedNutritionDrawer({ isOpen, onClose, totals, goals, foods, bufferFoods }: Props) {
   const [activeTab, setActiveTab] = useState('macros');
+  const { t } = useLanguage();
+
+  const groups = [
+    { key: 'macros', label: t('analysis.sections.macros').toUpperCase() },
+    { key: 'vitamines', label: t('analysis.sections.micros').toUpperCase() },
+    { key: 'mineraux', label: t('analysis.sections.minerals').toUpperCase() },
+  ] as const;
 
   const nutrientMeta = NUTRIENT_META.filter(n => {
     if (activeTab === 'macros' && n.id === 'calories') return false;
@@ -56,7 +58,7 @@ export function DetailedNutritionDrawer({ isOpen, onClose, totals, goals, foods,
           >
             <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--border-soft)]">
               <h3 className="text-sm font-semibold text-[var(--text-h)] display-font">
-                Analyse détaillée
+                {t('detailedDrawer.title')}
               </h3>
               <button
                 onClick={onClose}
@@ -67,7 +69,7 @@ export function DetailedNutritionDrawer({ isOpen, onClose, totals, goals, foods,
             </div>
 
             <div className="flex gap-4 px-4 border-b border-[var(--border-soft)]">
-              {GROUPS.map(({ key, label }) => (
+              {groups.map(({ key, label }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
@@ -116,7 +118,7 @@ export function DetailedNutritionDrawer({ isOpen, onClose, totals, goals, foods,
                   })}
                   {nutrientMeta.length === 0 && (
                     <p className="text-xs text-[var(--text-muted)] italic py-4 text-center">
-                      Aucun nutriment dans ce groupe
+                      {t('detailedDrawer.noNutrientsInGroup')}
                     </p>
                   )}
                 </motion.div>

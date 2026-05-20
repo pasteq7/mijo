@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   protein: 'low' | 'mid' | 'high';
@@ -11,14 +12,15 @@ interface Props {
 }
 
 const items = [
-  { label: 'Protéines', key: 'protein' as const },
-  { label: 'Fer', key: 'iron' as const },
-  { label: 'Zinc', key: 'zinc' as const },
-  { label: 'Magnésium', key: 'magnesium' as const },
-  { label: 'Fibres', key: 'fibre' as const },
+  { labelKey: 'nutrients.proteines.label', key: 'protein' as const },
+  { labelKey: 'nutrients.fer.label', key: 'iron' as const },
+  { labelKey: 'nutrients.zinc.label', key: 'zinc' as const },
+  { labelKey: 'nutrients.magnesium.label', key: 'magnesium' as const },
+  { labelKey: 'nutrients.fibres.label', key: 'fibre' as const },
 ];
 
 export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVisible }: Props) {
+  const { t } = useLanguage();
   const levels = { protein, iron, zinc, magnesium, fibre };
 
   return (
@@ -35,9 +37,9 @@ export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVis
       <div className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[var(--bg-subtle)] border-r border-b border-[var(--border)] rotate-45" />
 
       <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[var(--border)]">
-        <span className="text-xs font-medium text-[var(--text)]">Énergie</span>
+        <span className="text-xs font-medium text-[var(--text)]">{t('goalsModal.nutrientGroups.macros')}</span>
         <span className="text-sm font-semibold">
-          {calories} <span className="text-xs font-normal text-[var(--text)]">kcal</span>
+          {calories} <span className="text-xs font-normal text-[var(--text)]">{t('common.kcal')}</span>
         </span>
       </div>
 
@@ -46,7 +48,7 @@ export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVis
           const level = levels[item.key];
           return (
             <div key={item.key} className="flex items-center gap-3">
-              <span className="text-[11px] text-[var(--text)] w-16 shrink-0">{item.label}</span>
+              <span className="text-[11px] text-[var(--text)] w-16 shrink-0">{t(item.labelKey)}</span>
               <div className="flex-1 h-2 rounded-full bg-[var(--warm-100)] overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${level === 'high'
@@ -67,3 +69,4 @@ export function Tooltip({ protein, iron, zinc, magnesium, fibre, calories, isVis
     </motion.div>
   );
 }
+

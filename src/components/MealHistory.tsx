@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PenLine, Trash2, Star, ChevronDown, Check, Plus, Minus, SquarePen } from 'lucide-react';
 import type { FavoriteMeal, MealRecord } from '../types';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   meals: MealRecord[];
@@ -18,11 +19,6 @@ interface Props {
   onEditFoods?: (id: string) => void;
   onValidateDay?: () => void;
 }
-
-const formatTime = (dateString: string) => {
-  const d = new Date(dateString);
-  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-};
 
 const getFoodsSignature = (foods: MealRecord['foods']) => {
   return foods
@@ -46,10 +42,16 @@ export function MealHistory({
   onEditFoods,
   onValidateDay,
 }: Props) {
+  const { t, language } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isFavoriteMenuOpen, setIsFavoriteMenuOpen] = useState(false);
   const favoriteMenuRef = useRef<HTMLDivElement>(null);
+
+  const formatTime = (dateString: string) => {
+    const d = new Date(dateString);
+    return d.toLocaleTimeString(language === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+  };
 
   const sorted = [...meals].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const canAddFavoriteMeal = !readOnly && favorites.length > 0 && Boolean(onAddFavoriteMeal);
@@ -78,7 +80,7 @@ export function MealHistory({
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-[var(--accent)] px-2.5 py-0.5">
-          Repas
+          {t('mealHistory.title')}
         </span>
 
         <div className="flex items-center gap-1.5">
@@ -88,8 +90,8 @@ export function MealHistory({
                 type="button"
                 onClick={() => setIsFavoriteMenuOpen(open => !open)}
                 className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-soft)] text-[var(--text)] transition-all hover:border-[var(--accent)]/40 hover:bg-[var(--accent-soft)] hover:text-[var(--accent)]"
-                title="Ajouter un favori"
-                aria-label="Ajouter un repas favori"
+                title={t('mealHistory.addFavorite')}
+                aria-label={t('mealHistory.addFavoriteMeal')}
                 aria-expanded={isFavoriteMenuOpen}
               >
                 <Plus size={13} />
@@ -97,10 +99,10 @@ export function MealHistory({
 
               {isFavoriteMenuOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.16 }}
-                  className="absolute right-0 top-8 z-30 w-60 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-raised)] p-1.5 shadow-lg"
+                   initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                   animate={{ opacity: 1, y: 0, scale: 1 }}
+                   transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.16 }}
+                   className="absolute right-0 top-8 z-30 w-60 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-raised)] p-1.5 shadow-lg"
                 >
                   <div className="max-h-60 overflow-y-auto pr-0.5">
                     {favorites.map((favorite) => {
@@ -125,7 +127,7 @@ export function MealHistory({
                                 {favorite.name}
                               </span>
                               <span className="block truncate text-[10px] text-[var(--text-muted)]">
-                                {emojis} - {cal} kcal
+                                {emojis} - {cal} {t('common.kcal')}
                               </span>
                             </span>
                             <Plus size={12} className="shrink-0 text-[var(--accent)]" />
@@ -139,8 +141,8 @@ export function MealHistory({
                                 if (favorites.length <= 1) setIsFavoriteMenuOpen(false);
                               }}
                               className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--action-soft)] hover:text-[var(--action)]"
-                              title="Supprimer le favori"
-                              aria-label={`Supprimer le favori ${favorite.name}`}
+                              title={t('mealHistory.deleteFavorite')}
+                              aria-label={`${t('mealHistory.deleteFavorite')} ${favorite.name}`}
                             >
                               <Trash2 size={12} />
                             </button>
@@ -162,7 +164,7 @@ export function MealHistory({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-dashed border-[var(--accent)]/40 text-[var(--accent)] hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]/60 transition-all"
             >
               <Check size={12} />
-              Valider la journée
+              {t('mealHistory.validateDay')}
             </motion.button>
           )}
         </div>
@@ -215,14 +217,14 @@ export function MealHistory({
                     </div>
 
                     <span className="text-[11px] text-[var(--text-h)] tabular-nums font-semibold">
-                      {cal} kcal
+                      {cal} {t('common.kcal')}
                     </span>
 
                     {onToggleFavorite && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onToggleFavorite(meal); }}
                         className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] text-[var(--text-muted)] transition-all shrink-0"
-                        title={isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                        title={isFav ? t('mealHistory.removeFromFavorites') : t('mealHistory.addToFavorites')}
                       >
                         <Star
                           size={12}
@@ -252,7 +254,7 @@ export function MealHistory({
                             return (
                               <div key={i} className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] py-0.25">
                                 <span className="text-xs w-4 text-center leading-none select-none">{sf.food.emoji}</span>
-                                <span className="flex-1 truncate">{sf.food.name}</span>
+                                <span className="flex-1 truncate">{t('foods.' + sf.food.id)}</span>
 
                                 {editingId === meal.id && onUpdateQty ? (
                                   <div className="flex items-center gap-1">
@@ -276,7 +278,7 @@ export function MealHistory({
                                   <span className="tabular-nums text-[var(--text-muted)] opacity-80">{sf.qty}{sf.food.unit}</span>
                                 )}
 
-                                <span className="tabular-nums font-semibold w-12 text-right text-[var(--text-h)]">{foodCal} kcal</span>
+                                <span className="tabular-nums font-semibold w-12 text-right text-[var(--text-h)]">{foodCal} {t('common.kcal')}</span>
                               </div>
                             );
                           })}
@@ -291,7 +293,7 @@ export function MealHistory({
                                   className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] text-[var(--text)] hover:bg-[var(--warm-200)] transition-all font-medium"
                                 >
                                   {editingId === meal.id ? <Check size={11} /> : <PenLine size={11} />}
-                                  {editingId === meal.id ? 'Terminé' : 'Quantités'}
+                                  {editingId === meal.id ? t('common.done') : t('mealHistory.quantities')}
                                 </button>
                               )}
                               {onEditFoods && (
@@ -299,7 +301,7 @@ export function MealHistory({
                                   onClick={() => onEditFoods(meal.id)}
                                   className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] text-[var(--text)] hover:bg-[var(--warm-200)] transition-all font-medium"
                                 >
-                                  <SquarePen size={11} /> Modifier
+                                  <SquarePen size={11} /> {t('common.edit')}
                                 </button>
                               )}
                               {onDeleteHistory && (
@@ -307,7 +309,7 @@ export function MealHistory({
                                   onClick={() => onDeleteHistory(meal.id)}
                                   className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] text-[var(--text)] hover:text-[var(--action)] hover:bg-[var(--warm-200)] transition-all ml-auto font-medium"
                                 >
-                                  <Trash2 size={11} /> Supprimer
+                                  <Trash2 size={11} /> {t('common.delete')}
                                 </button>
                               )}
                             </>
@@ -318,7 +320,7 @@ export function MealHistory({
                                   onClick={() => onEdit(meal.id)}
                                   className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] text-[var(--text)] hover:text-[var(--accent)] hover:bg-[var(--warm-200)] transition-all font-medium"
                                 >
-                                  <PenLine size={11} /> Modifier
+                                  <PenLine size={11} /> {t('common.edit')}
                                 </button>
                               )}
                               {onDelete && (
@@ -326,7 +328,7 @@ export function MealHistory({
                                   onClick={() => onDelete(meal.id)}
                                   className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] text-[var(--text)] hover:text-[var(--action)] hover:bg-[var(--warm-200)] transition-all ml-auto font-medium"
                                 >
-                                  <Trash2 size={11} /> Supprimer
+                                  <Trash2 size={11} /> {t('common.delete')}
                                 </button>
                               )}
                             </>
@@ -344,3 +346,4 @@ export function MealHistory({
     </div>
   );
 }
+

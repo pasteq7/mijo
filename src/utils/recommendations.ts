@@ -142,13 +142,13 @@ export function evaluateMeal(totals: Partial<NutrientGoals>, goals: NutrientGoal
   const goodMicrosCount = keyMicros.filter(m => (totals[m] ?? 0) >= goals[m] * 0.5).length;
 
   if (calPct < 0.3) {
-    return { score: 0, label: 'Repas trop léger', color: 'text-stone-400', progressColor: 'bg-stone-300' };
+    return { score: 0, label: 'mealEvaluation.tooLight', color: 'text-stone-400', progressColor: 'bg-stone-300' };
   }
   if (calPct >= 0.7 && proPct >= 0.7 && goodMicrosCount >= 4) {
-    return { score: 3, label: 'Excellent & Complet', color: 'text-[#4A7A5A]', progressColor: 'bg-[#4A7A5A]' };
+    return { score: 3, label: 'mealEvaluation.excellent', color: 'text-[#4A7A5A]', progressColor: 'bg-[#4A7A5A]' };
   }
   if (calPct >= 0.5 && proPct >= 0.4) {
-    return { score: 2, label: 'Équilibré', color: 'text-[#7C9A6E]', progressColor: 'bg-[#7C9A6E]' };
+    return { score: 2, label: 'mealEvaluation.balanced', color: 'text-[#7C9A6E]', progressColor: 'bg-[#7C9A6E]' };
   }
-  return { score: 1, label: 'Incomplet', color: 'text-amber-500', progressColor: 'bg-amber-400' };
+  return { score: 1, label: 'mealEvaluation.incomplete', color: 'text-amber-500', progressColor: 'bg-amber-400' };
 }

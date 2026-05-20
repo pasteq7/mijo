@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { NUTRIENT_META } from '../data/nutrients';
 import type { FC } from 'react';
 import type { FoodSuggestion } from '../utils/recommendations';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   suggestions: FoodSuggestion[];
@@ -10,6 +10,8 @@ interface Props {
 }
 
 export const NutrientSuggestions: FC<Props> = ({ suggestions, onAddFood }) => {
+  const { t } = useLanguage();
+
   if (suggestions.length === 0) return null;
 
   return (
@@ -25,11 +27,11 @@ export const NutrientSuggestions: FC<Props> = ({ suggestions, onAddFood }) => {
         >
           <span className="text-xl">{s.food.emoji}</span>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-[var(--text-h)] truncate">{s.food.name}</div>
+            <div className="text-sm font-medium text-[var(--text-h)] truncate">{t('foods.' + s.food.id)}</div>
             <div className="flex gap-1.5 mt-1">
               {s.contributingNutrients.slice(0, 2).map((n) => (
                 <span key={n.id} className="text-[10px] text-[var(--text)] uppercase tracking-wider font-medium">
-                  {NUTRIENT_META.find((m) => m.id === n.id)?.label || n.id}
+                  {t('nutrients.' + n.id + '.label')}
                 </span>
               ))}
             </div>
@@ -45,3 +47,4 @@ export const NutrientSuggestions: FC<Props> = ({ suggestions, onAddFood }) => {
     </div>
   );
 };
+

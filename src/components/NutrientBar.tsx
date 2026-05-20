@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import type { NutrientMeta, SelectedFood, NutrientKey } from '../types';
 import { getCategoryColor } from '../utils/colors';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   meta: NutrientMeta;
@@ -52,6 +53,7 @@ interface Segment {
 }
 
 export function NutrientBar({ meta, value, goal, foods, bufferFoods, compact }: Props) {
+  const { t } = useLanguage();
   const safeGoal = goal ?? 0;
   const safeValue = value ?? 0;
   const rawPct = safeGoal > 0 ? (safeValue / safeGoal) * 100 : 0;
@@ -82,7 +84,7 @@ export function NutrientBar({ meta, value, goal, foods, bufferFoods, compact }: 
     <div className={`group ${compact ? 'py-0.5' : 'py-1.5'}`}>
       <div className={`flex items-baseline gap-2 ${compact ? 'mb-0.5' : 'mb-1'}`}>
         <span className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-[var(--text-h)] flex-1`}>
-          {meta.label}
+          {t('nutrients.' + meta.id + '.label')}
         </span>
         <span className={`${compact ? 'text-[10px]' : 'text-xs'} tabular-nums text-[var(--text)]`}>
           {safeValue.toFixed(1)}&thinsp;<span className="text-[var(--text-muted)]">/ {safeGoal.toFixed(0)}</span>
@@ -156,7 +158,7 @@ export function NutrientBar({ meta, value, goal, foods, bufferFoods, compact }: 
                 className="z-50 min-w-[220px] max-w-[300px] bg-[var(--bg-subtle)] border border-[var(--border-soft)] text-[var(--text-h)] text-[11px] leading-relaxed px-3 py-2.5 rounded-xl shadow-sm space-y-1.5"
               >
                 <p className="text-[10px] font-semibold text-[var(--text)] uppercase tracking-wider mb-2">
-                  Répartition — {meta.label}
+                  {t('analysis.distribution', { label: t('nutrients.' + meta.id + '.label') })}
                 </p>
                 {segments.map((seg, i) => {
                   const isBuffer = bufferFoods?.has(seg.food);
@@ -170,8 +172,8 @@ export function NutrientBar({ meta, value, goal, foods, bufferFoods, compact }: 
                         )}
                       </span>
                       <span className="flex-1 truncate">
-                        {seg.food.food.emoji} {seg.food.food.name}
-                        {isBuffer && <span className="text-[10px] text-[var(--text-muted)] ml-1">· à ajouter</span>}
+                        {seg.food.food.emoji} {t('foods.' + seg.food.food.id)}
+                        {isBuffer && <span className="text-[10px] text-[var(--text-muted)] ml-1">· {t('analysis.toAdd')}</span>}
                       </span>
                       <span className="tabular-nums font-medium shrink-0">{seg.contribution.toFixed(1)}</span>
                       <span className="tabular-nums text-[var(--text)] w-9 text-right shrink-0">
@@ -181,7 +183,7 @@ export function NutrientBar({ meta, value, goal, foods, bufferFoods, compact }: 
                   );
                 })}
                 <div className="border-t border-[var(--border)] pt-1.5 mt-1.5 flex justify-between text-[10px] text-[var(--text)]">
-                  <span>Total</span>
+                  <span>{t('common.total')}</span>
                   <span className="tabular-nums font-medium text-[var(--text-h)]">
                     {safeValue.toFixed(1)} {meta.unit}
                   </span>

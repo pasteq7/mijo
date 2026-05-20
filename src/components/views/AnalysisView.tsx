@@ -5,6 +5,7 @@ import { MealHistory } from '../MealHistory';
 import { NutrientBar } from '../NutrientBar';
 import { NUTRIENT_META } from '../../data/nutrients';
 import type { NutrientGoals, MealRecord, DayRecord, NutrientKey, SelectedFood, FavoriteMeal } from '../../types';
+import { useLanguage } from '../../hooks/useLanguage';
 import clsx from 'clsx';
 
 interface AnalysisViewProps {
@@ -29,16 +30,6 @@ interface AnalysisViewProps {
 
 type NutrientSection = 'macros' | 'micros' | 'minerals';
 
-const NUTRIENT_SECTIONS: {
-  id: NutrientSection;
-  label: string;
-  groups: string[];
-}[] = [
-    { id: 'macros', label: 'Macros', groups: ['macros', 'aminoacides'] },
-    { id: 'micros', label: 'Micros', groups: ['vitamines', 'acidesgras'] },
-    { id: 'minerals', label: 'Minéraux', groups: ['mineraux'] },
-  ];
-
 export function AnalysisView({
   dailyTotals,
   dailyGoals,
@@ -57,11 +48,18 @@ export function AnalysisView({
   onValidateDay,
   currentMealFoods,
 }: AnalysisViewProps) {
+  const { t, language } = useLanguage();
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<NutrientSection>('micros');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const calendarRef = useRef<HTMLDivElement>(null);
+
+  const nutrientSections = useMemo<{ id: NutrientSection; label: string; groups: string[] }[]>(() => [
+    { id: 'macros', label: t('analysis.sections.macros'), groups: ['macros', 'aminoacides'] },
+    { id: 'micros', label: t('analysis.sections.micros'), groups: ['vitamines', 'acidesgras'] },
+    { id: 'minerals', label: t('analysis.sections.minerals'), groups: ['mineraux'] },
+  ], [t]);
 
   const selectedDay = selectedDayId ? pastDays.find(d => d.id === selectedDayId) ?? null : null;
   const isPastDay = selectedDay !== null;
@@ -96,7 +94,7 @@ export function AnalysisView({
 
   const formatDayDate = (date: string) => {
     const d = new Date(`${date}T00:00:00`);
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    return d.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short' });
   };
 
   const combinedFoods: SelectedFood[] = useMemo(() => {
@@ -114,7 +112,7 @@ export function AnalysisView({
   }, [currentMealFoods]);
 
   const sectionStats = useMemo(() => {
-    return NUTRIENT_SECTIONS.reduce((acc, section) => {
+    return nutrientSections.reduce((acc, section) => {
       const nutrients = NUTRIENT_META.filter(n => {
         if (n.id === 'calories') return false;
         return section.groups.includes(n.group);
@@ -128,7 +126,7 @@ export function AnalysisView({
       acc[section.id] = { nutrients, met };
       return acc;
     }, {} as Record<NutrientSection, { nutrients: typeof NUTRIENT_META; met: number }>);
-  }, [currentTotals, currentGoal]);
+  }, [currentTotals, currentGoal, nutrientSections]);
 
   const activeNutrients = sectionStats[activeSection].nutrients;
 
@@ -145,8 +143,8 @@ export function AnalysisView({
   }, [pastDays]);
 
   const calendarMonthLabel = useMemo(() => {
-    return calendarMonth.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
-  }, [calendarMonth]);
+    return calendarMonth.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', year: 'numeric' });
+  }, [calendarMonth, language]);
 
   const calendarDays = useMemo(() => {
     const year = calendarMonth.getFullYear();
@@ -211,13 +209,15 @@ export function AnalysisView({
     setIsCalendarOpen(open => !open);
   };
 
+  const weekdays = language === 'fr' ? ['L', 'M', 'M', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
       <header className="shrink-0">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className="text-base font-semibold text-[var(--text-h)] display-font">
-              Analyse nutritionnelle
+              {t('analysis.title')}
             </h3>
           </div>
 
@@ -232,7 +232,7 @@ export function AnalysisView({
                     ? 'text-[var(--text-h)] hover:bg-[var(--warm-200)]/80 dark:hover:bg-[var(--warm-300)]'
                     : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
                 )}
-                aria-label="Jour précédent"
+                aria-label={t('analysis.prevDay')}
               >
                 <ChevronLeft size={11} strokeWidth={2.5} />
               </button>
@@ -246,11 +246,11 @@ export function AnalysisView({
                     ? 'bg-[var(--accent)] text-white'
                     : 'text-[var(--accent)] bg-[var(--accent-soft)] hover:bg-[var(--accent-soft)]/85'
                 )}
-                aria-label="Ouvrir le calendrier"
+                aria-label={t('analysis.openCalendar')}
                 aria-expanded={isCalendarOpen}
               >
                 <span className="tabular-nums">
-                  {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : "Aujourd'hui"}
+                  {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : t('common.today')}
                 </span>
                 <CalendarDays size={10} className={isCalendarOpen ? 'text-white' : 'text-[var(--accent)] opacity-80'} />
               </button>
@@ -264,7 +264,7 @@ export function AnalysisView({
                     ? 'text-[var(--text-h)] hover:bg-[var(--warm-200)]/80 dark:hover:bg-[var(--warm-300)]'
                     : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
                 )}
-                aria-label="Jour suivant"
+                aria-label={t('analysis.nextDay')}
               >
                 <ChevronRight size={11} strokeWidth={2.5} />
               </button>
@@ -300,7 +300,7 @@ export function AnalysisView({
                 </div>
 
                 <div className="grid grid-cols-7 gap-1 px-0.5 text-center text-[9px] font-semibold uppercase text-[var(--text-muted)]">
-                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((weekday, index) => (
+                  {weekdays.map((weekday, index) => (
                     <span key={`${weekday}-${index}`} className="leading-5">
                       {weekday}
                     </span>
@@ -332,7 +332,7 @@ export function AnalysisView({
                                 ? 'text-[var(--accent)] hover:bg-[var(--accent-soft)]'
                                 : 'cursor-default text-[var(--text-muted)] opacity-30'
                         )}
-                        aria-label={day.record ? `Voir le ${formatDayDate(day.dateKey)}` : day.isToday ? "Voir aujourd'hui" : undefined}
+                        aria-label={day.record ? (language === 'fr' ? `Voir le ${formatDayDate(day.dateKey)}` : `View ${formatDayDate(day.dateKey)}`) : day.isToday ? (language === 'fr' ? "Voir aujourd'hui" : "View today") : undefined}
                       >
                         {day.dayNumber}
                         {isRegistered && !isSelected && (
@@ -345,14 +345,14 @@ export function AnalysisView({
 
                 <div className="mt-2 flex items-center justify-between border-t border-[var(--border-soft)] pt-2">
                   <span className="text-[10px] text-[var(--text-muted)]">
-                    {pastDays.length} jours
+                    {t('analysis.pastDaysCount', { count: pastDays.length })}
                   </span>
                   <button
                     type="button"
                     onClick={selectToday}
                     className="rounded-lg px-2 py-1 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent-soft)]"
                   >
-                    Aujourd'hui
+                    {t('common.today')}
                   </button>
                 </div>
               </motion.div>
@@ -403,9 +403,9 @@ export function AnalysisView({
                     <div className="relative w-16 h-16 rounded-full border-2 border-dashed border-[var(--border)]/65 flex items-center justify-center mb-3 bg-[var(--warm-100)]/10">
                       <Utensils size={14} className="text-[var(--text-muted)] opacity-60" />
                     </div>
-                    <p className="text-xs font-semibold text-[var(--text-h)] mb-0.5">Aucun repas enregistré</p>
+                    <p className="text-xs font-semibold text-[var(--text-h)] mb-0.5">{t('analysis.noMealRegistered')}</p>
                     <p className="text-[10px] text-[var(--text-muted)] max-w-[180px] leading-normal">
-                      Composez et validez votre premier repas.
+                      {t('analysis.composeFirstMeal')}
                     </p>
                   </motion.div>
                 ) : (
@@ -418,9 +418,9 @@ export function AnalysisView({
                     <div className="relative w-16 h-16 rounded-full border border-dashed border-[var(--accent)]/45 flex items-center justify-center mb-3 bg-[var(--accent-soft)]/5">
                       <Sparkles size={14} className="text-[var(--accent)] animate-spin-slow" />
                     </div>
-                    <p className="text-xs font-semibold text-[var(--text-h)] mb-0.5">Assiette prête</p>
+                    <p className="text-xs font-semibold text-[var(--text-h)] mb-0.5">{t('analysis.plateReady')}</p>
                     <p className="text-[10px] text-[var(--text-muted)] max-w-[180px] leading-normal mb-2">
-                      Validez votre repas pour l'enregistrer.
+                      {t('analysis.validateToSave')}
                     </p>
                     
                     <motion.div
@@ -441,12 +441,12 @@ export function AnalysisView({
           <div className="shrink-0">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-[var(--accent)] px-2.5 py-0.5">
-                Nutriments
+                {t('analysis.nutrients')}
               </span>
             </div>
 
             <div className="grid grid-cols-3 gap-1 rounded-xl bg-[var(--warm-100)]/70 p-1 border border-[var(--border-soft)]/40 shadow-xs">
-              {NUTRIENT_SECTIONS.map((section) => {
+              {nutrientSections.map((section) => {
                 const isActive = activeSection === section.id;
                 return (
                   <button
@@ -504,16 +504,16 @@ export function AnalysisView({
         <div className="mb-3 flex items-end justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
-              Total jour
+              {t('analysis.dailyTotalLabel')}
             </p>
             <p className="text-3xl font-light text-[var(--text-h)] display-font tabular-nums leading-none mt-1">
               {Math.round(cal)}
-              <span className="ml-1 text-xs font-medium text-[var(--text-muted)]">kcal</span>
+              <span className="ml-1 text-xs font-medium text-[var(--text-muted)]">{t('common.kcal')}</span>
             </p>
           </div>
           <div className="text-right text-[11px] text-[var(--text-muted)] tabular-nums">
-            <p><span className="font-medium text-[var(--accent)]">/ {currentGoal.calories}</span> kcal</p>
-            <p className="font-medium text-[var(--text-h)] mt-0.5">{Math.round(calPct)}% objectif</p>
+            <p><span className="font-medium text-[var(--accent)]">/ {currentGoal.calories}</span> {t('common.kcal')}</p>
+            <p className="font-medium text-[var(--text-h)] mt-0.5">{Math.round(calPct)}{t('common.percentageOfGoal')}</p>
           </div>
         </div>
 
@@ -534,10 +534,11 @@ export function AnalysisView({
             className="mt-3.5 w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-light)] text-white py-2.5 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
           >
             <Check size={14} strokeWidth={2.5} />
-            Clôturer ma journée
+            {t('analysis.closeDayButton')}
           </motion.button>
         )}
       </footer>
     </div>
   );
 }
+

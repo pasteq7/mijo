@@ -5,6 +5,7 @@ import { Leaf, Check } from 'lucide-react';
 import type { Food, TooltipMode } from '../types';
 import { Tooltip } from './Tooltip';
 import { AdvancedTooltip } from './AdvancedTooltip';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   food: Food;
@@ -21,6 +22,7 @@ function getNutrientLevel(value: number, thresholds: { low: number; mid: number;
 }
 
 export function FoodCard({ food, isSelected, onToggle, isInSeason = false, tooltipMode = 'simple' }: Props) {
+  const { t } = useLanguage();
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [anchorTop, setAnchorTop] = useState(0);
@@ -117,7 +119,7 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center justify-between gap-1.5">
             <span className="display-font text-[13px] font-medium text-[var(--text-h)] truncate leading-snug tracking-tight">
-              {food.name}
+              {t('foods.' + food.id)}
             </span>
             <div className="flex gap-1 items-center shrink-0">
               <div className={`w-1.5 h-1.5 rounded-full ${dotClass(protein)}`} />
@@ -128,10 +130,11 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
             </div>
           </div>
           <span className="text-[11px] text-[var(--text-muted)] tabular-nums leading-tight mt-0.5">
-            {nutrients.calories || 0} kcal &middot; {nutrients.proteines || 0}g prot
+            {nutrients.calories || 0} {t('common.kcal')} &middot; {nutrients.proteines || 0}g prot
           </span>
         </div>
       </motion.button>
     </div>
   );
 }
+

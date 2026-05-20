@@ -5,6 +5,7 @@ import { useFavoriteMeals } from './hooks/useFavoriteMeals';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { DAILY_GOALS, MEAL_GOALS } from './data/nutrients';
+import { useLanguage } from './hooks/useLanguage';
 
 import { MainLayout } from './components/layout/MainLayout';
 import { UtilityRail } from './components/layout/UtilityRail';
@@ -50,6 +51,7 @@ function getFoodsSignature(foods: SelectedFood[]): string {
 }
 
 export default function App() {
+  const { t } = useLanguage();
   const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('veganut-foods', []);
   const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('veganut-daily-goals', DAILY_GOALS);
   const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('veganut-meal-goals', MEAL_GOALS);
@@ -218,9 +220,9 @@ export default function App() {
       }
       window.location.reload();
     } catch {
-      alert('Format de fichier invalide');
+      alert(t('goalsModal.invalidFileFormat'));
     }
-  }, []);
+  }, [t]);
 
   return (
     <>

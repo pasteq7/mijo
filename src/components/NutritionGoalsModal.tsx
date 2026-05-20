@@ -12,8 +12,9 @@ import {
 } from 'lucide-react';
 import { DAILY_GOALS, MEAL_GOALS, NUTRIENT_META } from '../data/nutrients';
 import { ACTIVITY_LABELS, CALORIE_TARGET_LABELS, calculateGoals } from '../utils/goalCalculations';
-import type { DailyGoals, MealGoals, NutrientGoals, NutrientKey, NutrientMeta } from '../types';
+import type { DailyGoals, MealGoals, NutrientGoals, NutrientKey } from '../types';
 import type { ActivityLevel, CalorieTarget, GoalProfile, Sex } from '../utils/goalCalculations';
+import { useLanguage } from '../hooks/useLanguage';
 import type { ReactNode } from 'react';
 
 interface Props {
@@ -31,15 +32,6 @@ interface Props {
 
 type Tab = 'daily' | 'meal';
 type ViewMode = 'simple' | 'advanced';
-type NutrientGroup = NutrientMeta['group'];
-
-const GROUP_LABELS: Record<NutrientGroup, string> = {
-  macros: 'Énergie',
-  vitamines: 'Vitamines',
-  mineraux: 'Minéraux',
-  acidesgras: 'Acides gras',
-  aminoacides: 'Acides aminés',
-};
 
 const SUMMARY_KEYS: NutrientKey[] = ['calories', 'proteines', 'glucides', 'lipides', 'fibres'];
 
@@ -84,6 +76,7 @@ export function NutritionGoalsModal({
   onImport,
   onResetAll,
 }: Props) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>('daily');
   const [dailyDraft, setDailyDraft] = useState<DailyGoals>({ ...dailyGoals });
   const [mealDraft, setMealDraft] = useState<MealGoals>({ ...mealGoals });
@@ -179,9 +172,9 @@ export function NutritionGoalsModal({
           <div className="border-b border-[var(--border)] bg-[var(--bg-subtle)] px-5 py-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="display-font text-xl font-light text-[var(--text-h)]">Objectifs nutritionnels</h2>
+                <h2 className="display-font text-xl font-light text-[var(--text-h)]">{t('goalsModal.title')}</h2>
                 <p className="mt-1 text-xs text-[var(--text)]">
-                  Smart pour calculer vite, manuel pour ajuster finement.
+                  {t('goalsModal.subTitle')}
                 </p>
               </div>
 
@@ -189,28 +182,28 @@ export function NutritionGoalsModal({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-200)] hover:text-[var(--action)]"
-                  title="Importer les données"
+                  title={t('goalsModal.importData')}
                 >
                   <Upload size={15} strokeWidth={1.5} />
                 </button>
                 <button
                   onClick={onExport}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-200)] hover:text-[var(--action)]"
-                  title="Exporter les données"
+                  title={t('goalsModal.exportData')}
                 >
                   <Download size={15} strokeWidth={1.5} />
                 </button>
                 <button
                   onClick={() => setShowResetConfirm(true)}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-200)] hover:text-red-500"
-                  title="Réinitialiser les objectifs"
+                  title={t('goalsModal.resetGoals')}
                 >
                   <RotateCcw size={15} strokeWidth={1.5} />
                 </button>
                 <button
                   onClick={onClose}
                   className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-200)]"
-                  title="Fermer"
+                  title={t('common.close')}
                 >
                   <X size={18} strokeWidth={1.5} />
                 </button>
@@ -227,7 +220,7 @@ export function NutritionGoalsModal({
                 }`}
               >
                 <Calculator size={16} strokeWidth={1.5} />
-                Smart
+                {t('goalsModal.viewModeSmart')}
               </button>
               <button
                 onClick={() => setViewMode('advanced')}
@@ -238,7 +231,7 @@ export function NutritionGoalsModal({
                 }`}
               >
                 <SlidersHorizontal size={16} strokeWidth={1.5} />
-                Manuel
+                {t('goalsModal.viewModeManual')}
               </button>
             </div>
 
@@ -257,7 +250,7 @@ export function NutritionGoalsModal({
                   className="space-y-5"
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Field label="Âge" suffix="ans">
+                    <Field label={t('goalsModal.fieldAge')} suffix={t('goalsModal.yearsSuffix')}>
                       <input
                         type="number"
                         min={10}
@@ -267,7 +260,7 @@ export function NutritionGoalsModal({
                         className="w-full bg-transparent text-right text-sm font-medium text-[var(--text-h)] outline-none"
                       />
                     </Field>
-                    <Field label="Poids" suffix="kg">
+                    <Field label={t('goalsModal.fieldWeight')} suffix="kg">
                       <input
                         type="number"
                         min={20}
@@ -278,7 +271,7 @@ export function NutritionGoalsModal({
                         className="w-full bg-transparent text-right text-sm font-medium text-[var(--text-h)] outline-none"
                       />
                     </Field>
-                    <Field label="Taille" suffix="cm">
+                    <Field label={t('goalsModal.fieldHeight')} suffix="cm">
                       <input
                         type="number"
                         min={50}
@@ -298,7 +291,7 @@ export function NutritionGoalsModal({
                               : 'text-[var(--text)]'
                           }`}
                         >
-                          Masculin
+                          {t('goalsModal.sexMale')}
                         </button>
                         <button
                           onClick={() => setFormSex('female')}
@@ -308,7 +301,7 @@ export function NutritionGoalsModal({
                               : 'text-[var(--text)]'
                           }`}
                         >
-                          Féminin
+                          {t('goalsModal.sexFemale')}
                         </button>
                       </div>
                     </div>
@@ -316,7 +309,7 @@ export function NutritionGoalsModal({
 
                   <label className="block">
                     <span className="mb-2 block text-xs font-medium uppercase tracking-[0.08em] text-[var(--text)]">
-                      Objectif
+                      {t('goalsModal.fieldTarget')}
                     </span>
                     <div className="grid grid-cols-3 gap-1 rounded-xl border border-[var(--border-soft)] bg-[var(--warm-100)] p-1">
                       {(Object.keys(CALORIE_TARGET_LABELS) as CalorieTarget[]).map((target) => (
@@ -329,7 +322,7 @@ export function NutritionGoalsModal({
                               : 'text-[var(--text)] hover:text-[var(--text-h)]'
                           }`}
                         >
-                          {CALORIE_TARGET_LABELS[target]}
+                          {t('targets.' + target)}
                         </button>
                       ))}
                     </div>
@@ -337,7 +330,7 @@ export function NutritionGoalsModal({
 
                   <label className="block">
                     <span className="mb-2 block text-xs font-medium uppercase tracking-[0.08em] text-[var(--text)]">
-                      Activité
+                      {t('goalsModal.fieldActivity')}
                     </span>
                     <select
                       value={formActivity}
@@ -346,7 +339,7 @@ export function NutritionGoalsModal({
                     >
                       {(Object.keys(ACTIVITY_LABELS) as ActivityLevel[]).map((level) => (
                         <option key={level} value={level}>
-                          {ACTIVITY_LABELS[level]}
+                          {t('activities.' + level)}
                         </option>
                       ))}
                     </select>
@@ -355,14 +348,14 @@ export function NutritionGoalsModal({
                   <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
                     <div className="mb-4 flex items-end justify-between gap-4">
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--text)]">Aperçu</p>
+                        <p className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--text)]">{t('goalsModal.previewTitle')}</p>
                         <p className="display-font mt-1 text-3xl font-light leading-none text-[var(--text-h)]">
                           {preview.daily.calories}
-                          <span className="ml-1 text-sm font-normal text-[var(--text)]">kcal/jour</span>
+                          <span className="ml-1 text-sm font-normal text-[var(--text)]"> {t('goalsModal.kcalPerDay')}</span>
                         </p>
                       </div>
                       <p className="text-right text-xs text-[var(--text)]">
-                        {preview.meal.calories} kcal par repas
+                        {t('goalsModal.kcalPerMeal', { calories: preview.meal.calories })}
                       </p>
                     </div>
                     <SummaryGrid goals={summaryGoals} />
@@ -388,7 +381,7 @@ export function NutritionGoalsModal({
                       }`}
                     >
                       <Sun size={16} strokeWidth={1.5} />
-                      Journalier
+                      {t('goalsModal.dailyTab')}
                     </button>
                     <button
                       onClick={() => setActiveTab('meal')}
@@ -399,13 +392,13 @@ export function NutritionGoalsModal({
                       }`}
                     >
                       <Moon size={16} strokeWidth={1.5} />
-                      Par repas
+                      {t('goalsModal.mealTab')}
                     </button>
                   </div>
 
                   <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] p-4">
                     <label className="mb-2 block text-xs font-medium uppercase tracking-[0.08em] text-[var(--text)]">
-                      Calories
+                      {t('nutrients.calories.label')}
                     </label>
                     <div className="flex items-center gap-3">
                       <input
@@ -419,7 +412,7 @@ export function NutritionGoalsModal({
                       <span className="text-sm font-medium text-[var(--text)]">kcal</span>
                     </div>
                     <p className="mt-2 text-xs text-[var(--text)]">
-                      Modifier les calories recalcule protéines, glucides, lipides, fibres et ajuste les autres cibles.
+                      {t('goalsModal.manualEditHint')}
                     </p>
                   </div>
 
@@ -435,7 +428,7 @@ export function NutritionGoalsModal({
                     ).map(([group, items]) => (
                       <div key={group} className="rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] p-3">
                         <p className="mb-2 px-1 text-xs font-medium uppercase tracking-[0.08em] text-[var(--text)]">
-                          {GROUP_LABELS[group as NutrientGroup]}
+                          {t('goalsModal.nutrientGroups.' + group)}
                         </p>
                         <div className="space-y-1">
                           {items.map((meta) => {
@@ -450,7 +443,7 @@ export function NutritionGoalsModal({
                                 className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--warm-100)]"
                               >
                                 <label className="min-w-0 flex-1 text-sm font-medium text-[var(--text-h)]">
-                                  {meta.label}
+                                  {t('nutrients.' + meta.id + '.label')}
                                   <span className="ml-1.5 text-xs font-normal text-[var(--text)]">({meta.unit})</span>
                                 </label>
                                 <div className="flex items-center gap-1.5">
@@ -458,7 +451,7 @@ export function NutritionGoalsModal({
                                     <button
                                       onClick={() => handleChange(activeTab, key, String(defaultValue))}
                                       className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-200)] hover:text-[var(--action)]"
-                                      title={`Réinitialiser à ${defaultValue} ${meta.unit}`}
+                                      title={t('goalsModal.resetToDefault', { val: defaultValue, unit: meta.unit })}
                                     >
                                       <RotateCcw size={12} strokeWidth={1.5} />
                                     </button>
@@ -489,7 +482,7 @@ export function NutritionGoalsModal({
               onClick={handleSave}
               className="w-full rounded-xl bg-[var(--accent)] py-3 text-sm font-medium text-white shadow-[var(--shadow-sm)] transition-colors hover:bg-[#5C7D5B]"
             >
-              {viewMode === 'simple' ? 'Enregistrer ces objectifs' : 'Enregistrer les modifications'}
+              {viewMode === 'simple' ? t('common.saveThese') : t('common.saveAll')}
             </button>
           </div>
         </motion.div>
@@ -513,12 +506,11 @@ export function NutritionGoalsModal({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="border-b border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-5">
-                <h2 className="display-font text-lg font-light text-[var(--text-h)]">Réinitialiser les objectifs</h2>
+                <h2 className="display-font text-lg font-light text-[var(--text-h)]">{t('goalsModal.resetConfirmTitle')}</h2>
               </div>
               <div className="px-6 py-6">
                 <p className="text-sm leading-relaxed text-[var(--text)]">
-                  Êtes-vous sûr de vouloir réinitialiser tous les objectifs&nbsp;? Cette action remettra toutes les
-                  valeurs par défaut.
+                  {t('goalsModal.resetConfirmText')}
                 </p>
               </div>
               <div className="flex gap-3 border-t border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-4">
@@ -526,13 +518,13 @@ export function NutritionGoalsModal({
                   onClick={() => setShowResetConfirm(false)}
                   className="flex-1 rounded-xl bg-[var(--warm-100)] py-2.5 text-sm font-medium text-[var(--text)] transition-colors hover:bg-[var(--warm-200)]"
                 >
-                  Annuler
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleReset}
                   className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white shadow-[var(--shadow-sm)] transition-colors hover:bg-red-600"
                 >
-                  Réinitialiser
+                  {t('common.reset')}
                 </button>
               </div>
             </motion.div>
@@ -556,6 +548,7 @@ function Field({ label, suffix, children }: { label: string; suffix: string; chi
 }
 
 function SummaryGrid({ goals }: { goals: NutrientGoals }) {
+  const { t } = useLanguage();
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       {SUMMARY_KEYS.map((key) => {
@@ -565,7 +558,7 @@ function SummaryGrid({ goals }: { goals: NutrientGoals }) {
         return (
           <div key={key} className="rounded-lg bg-[var(--warm-100)] px-3 py-2">
             <p className="truncate text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text)]">
-              {meta.label}
+              {t('nutrients.' + meta.id + '.label')}
             </p>
             <p className="mt-1 text-sm font-semibold text-[var(--text-h)] tabular-nums">
               {goals[key]}

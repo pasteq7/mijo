@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import type { NutrientGoals, NutrientKey, SelectedFood } from '../types';
 import { NutrientBar } from './NutrientBar';
 import { NUTRIENT_META } from '../data/nutrients';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface Props {
   totals: Partial<NutrientGoals>;
@@ -16,14 +17,15 @@ const macroKeys: NutrientKey[] = ['proteines', 'glucides', 'lipides', 'fibres'];
 const microKeys: NutrientKey[] = ['vitA', 'vitC', 'vitB9', 'vitB6', 'vitE', 'vitK', 'omega3', 'omega6'];
 const mineralKeys: NutrientKey[] = ['fer', 'calcium', 'zinc', 'magnesium', 'selenium'];
 
-const tabs: { id: Tab; label: string }[] = [
-  { id: 'macro', label: 'MACROS' },
-  { id: 'micro', label: 'MICROS' },
-  { id: 'mineral', label: 'MINÉRAUX' },
-];
-
 export function NutritionOverview({ totals, goals, foods }: Props) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>('macro');
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'macro', label: t('analysis.sections.macros').toUpperCase() },
+    { id: 'micro', label: t('analysis.sections.micros').toUpperCase() },
+    { id: 'mineral', label: t('analysis.sections.minerals').toUpperCase() },
+  ];
 
   const cal = totals.calories ?? 0;
   const calPct = goals.calories > 0 ? Math.min((cal / goals.calories) * 100, 100) : 0;
@@ -39,7 +41,7 @@ export function NutritionOverview({ totals, goals, foods }: Props) {
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <h3 className="display-font text-base font-semibold text-[var(--text-h)]">
-            Aperçu Nutritionnel
+            {t('analysis.overviewTitle')}
           </h3>
           <div className="shrink-0 text-right tabular-nums">
             <div className="flex items-baseline justify-end gap-1.5">
