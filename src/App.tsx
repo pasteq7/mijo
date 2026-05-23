@@ -17,6 +17,12 @@ import { DayValidationDialog } from './components/DayValidationDialog';
 import type { Food, SelectedFood, NutrientGoals, MealRecord, Season, FavoriteMeal } from './types';
 import type { GoalProfile } from './utils/goalCalculations';
 
+interface EditingHistoryMeal {
+  dayId: string;
+  mealId: string;
+  date: string;
+}
+
 const DEFAULT_GOAL_PROFILE: GoalProfile = {
   age: 30,
   weight: 70,
@@ -56,6 +62,7 @@ export default function App() {
   const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('mijo-daily-goals', DAILY_GOALS);
   const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('mijo-meal-goals', MEAL_GOALS);
   const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>('mijo-goal-profile', DEFAULT_GOAL_PROFILE);
+  const [editingHistoryMeal, setEditingHistoryMeal] = useState<EditingHistoryMeal | null>(null);
   const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, DAILY_GOALS), [dailyGoalsState]);
   const mealGoals = useMemo(() => mergeGoals(mealGoalsState, MEAL_GOALS), [mealGoalsState]);
   const smartGoalProfile = useMemo(() => ({ ...DEFAULT_GOAL_PROFILE, ...goalProfile }), [goalProfile]);
@@ -73,6 +80,7 @@ export default function App() {
     deleteMeal,
     deleteMealFromDay,
     updateMealQuantityInDay,
+    updateMealInDay,
     validateDay,
     allDays,
   } = useDayHistory(dailyGoals);
@@ -104,10 +112,24 @@ export default function App() {
 
   const handleClear = useCallback(() => {
     setSelectedFoods([]);
+    setEditingHistoryMeal(null);
   }, [setSelectedFoods]);
 
   const handleSaveMeal = useCallback(() => {
     if (selectedFoods.length === 0) return;
+    if (editingHistoryMeal) {
+      const updatedMeal: MealRecord = {
+        id: editingHistoryMeal.mealId,
+        date: editingHistoryMeal.date,
+        foods: selectedFoods,
+        totals,
+      };
+      updateMealInDay(editingHistoryMeal.dayId, editingHistoryMeal.mealId, updatedMeal);
+      setEditingHistoryMeal(null);
+      setSelectedFoods([]);
+      return;
+    }
+
     const newMeal: MealRecord = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
@@ -116,12 +138,13 @@ export default function App() {
     };
     addMealToDay(newMeal);
     setSelectedFoods([]);
-  }, [selectedFoods, totals, addMealToDay, setSelectedFoods]);
+  }, [selectedFoods, editingHistoryMeal, totals, updateMealInDay, addMealToDay, setSelectedFoods]);
 
   const handleEditMeal = useCallback((id: string) => {
     if (!activeDay) return;
     const meal = activeDay.meals.find(m => m.id === id);
     if (!meal) return;
+    setEditingHistoryMeal(null);
     setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? generateFoodId() })));
     deleteMeal(id);
   }, [activeDay, setSelectedFoods, deleteMeal]);
@@ -143,9 +166,9 @@ export default function App() {
     if (!day) return;
     const meal = day.meals.find(m => m.id === mealId);
     if (!meal) return;
+    setEditingHistoryMeal({ dayId, mealId, date: meal.date });
     setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? generateFoodId() })));
-    deleteMealFromDay(dayId, mealId);
-  }, [allDays, setSelectedFoods, deleteMealFromDay]);
+  }, [allDays, setSelectedFoods]);
 
   const handleValidateDay = useCallback(() => {
     validateDay();

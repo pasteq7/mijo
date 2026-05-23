@@ -211,6 +211,29 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
     });
   }, [setDays, dailyGoals]);
 
+  const updateMealInDay = useCallback((dayId: string, mealId: string, meal: MealRecord) => {
+    setDays(prev => {
+      const dayIdx = prev.findIndex(d => d.id === dayId);
+      if (dayIdx === -1) return prev;
+      const day = prev[dayIdx];
+      const mealIdx = day.meals.findIndex(m => m.id === mealId);
+      if (mealIdx === -1) return prev;
+
+      const updated = [...prev];
+      const updatedMeals = [...day.meals];
+      const updatedMeal = {
+        ...meal,
+        id: mealId,
+        totals: computeMealTotals(meal.foods),
+      };
+      updatedMeals[mealIdx] = updatedMeal;
+      const dailyTotals = computeDailyTotals(updatedMeals);
+      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
+      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      return updated;
+    });
+  }, [setDays, dailyGoals]);
+
   return {
     activeDay,
     pastDays,
@@ -219,6 +242,7 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
     deleteMeal,
     deleteMealFromDay,
     updateMealQuantityInDay,
+    updateMealInDay,
     validateDay,
     getDayByDate,
   };
