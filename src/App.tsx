@@ -56,6 +56,15 @@ function getFoodsSignature(foods: SelectedFood[]): string {
     .join('|');
 }
 
+function createMealDate(dayDate?: string): string {
+  if (!dayDate) return new Date().toISOString();
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return new Date(`${dayDate}T${hours}:${minutes}:${seconds}`).toISOString();
+}
+
 export default function App() {
   const { t } = useLanguage();
   const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('mijo-foods', []);
@@ -63,6 +72,7 @@ export default function App() {
   const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('mijo-meal-goals', MEAL_GOALS);
   const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>('mijo-goal-profile', DEFAULT_GOAL_PROFILE);
   const [editingHistoryMeal, setEditingHistoryMeal] = useState<EditingHistoryMeal | null>(null);
+  const [selectedAnalysisDayId, setSelectedAnalysisDayId] = useState<string | null>(null);
   const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, DAILY_GOALS), [dailyGoalsState]);
   const mealGoals = useMemo(() => mergeGoals(mealGoalsState, MEAL_GOALS), [mealGoalsState]);
   const smartGoalProfile = useMemo(() => ({ ...DEFAULT_GOAL_PROFILE, ...goalProfile }), [goalProfile]);
@@ -77,6 +87,7 @@ export default function App() {
     activeDay,
     pastDays,
     addMealToDay,
+    addMealToExistingDay,
     deleteMeal,
     deleteMealFromDay,
     updateMealQuantityInDay,
@@ -130,15 +141,20 @@ export default function App() {
       return;
     }
 
+    const targetDay = selectedAnalysisDayId ? allDays.find(day => day.id === selectedAnalysisDayId) : undefined;
     const newMeal: MealRecord = {
       id: Date.now().toString(),
-      date: new Date().toISOString(),
+      date: createMealDate(targetDay?.date),
       foods: selectedFoods,
       totals,
     };
-    addMealToDay(newMeal);
+    if (selectedAnalysisDayId) {
+      addMealToExistingDay(selectedAnalysisDayId, newMeal);
+    } else {
+      addMealToDay(newMeal);
+    }
     setSelectedFoods([]);
-  }, [selectedFoods, editingHistoryMeal, totals, updateMealInDay, addMealToDay, setSelectedFoods]);
+  }, [selectedFoods, editingHistoryMeal, selectedAnalysisDayId, allDays, totals, updateMealInDay, addMealToExistingDay, addMealToDay, setSelectedFoods]);
 
   const handleEditMeal = useCallback((id: string) => {
     if (!activeDay) return;
@@ -289,6 +305,7 @@ export default function App() {
             onValidateDay={() => setShowDayValidation(true)}
             currentMealFoods={selectedFoods}
             onAddMeal={handleAddMeal}
+            onSelectedDayChange={setSelectedAnalysisDayId}
           />
         }
       >

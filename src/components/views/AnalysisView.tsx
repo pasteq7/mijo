@@ -26,6 +26,7 @@ interface AnalysisViewProps {
   onValidateDay?: () => void;
   currentMealFoods?: SelectedFood[];
   onAddMeal?: () => void;
+  onSelectedDayChange?: (dayId: string | null) => void;
 }
 
 type NutrientSection = 'macros' | 'micros' | 'minerals';
@@ -47,6 +48,7 @@ export function AnalysisView({
   onDeleteFavorite,
   onValidateDay,
   currentMealFoods,
+  onSelectedDayChange,
 }: AnalysisViewProps) {
   const { t, language } = useLanguage();
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
@@ -63,6 +65,10 @@ export function AnalysisView({
 
   const selectedDay = selectedDayId ? pastDays.find(d => d.id === selectedDayId) ?? null : null;
   const isPastDay = selectedDay !== null;
+
+  useEffect(() => {
+    onSelectedDayChange?.(selectedDay?.id ?? null);
+  }, [onSelectedDayChange, selectedDay]);
 
   const currentTotals = isPastDay && selectedDay ? selectedDay.dailyTotals : dailyTotals;
   const currentGoal = dailyGoals;
@@ -541,4 +547,3 @@ export function AnalysisView({
     </div>
   );
 }
-
