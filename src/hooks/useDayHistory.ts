@@ -1,36 +1,10 @@
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { toDateKey } from '../utils/dateHelpers';
-import type { DayRecord, MealRecord, NutrientGoals, NutrientKey, DayScore, SelectedFood } from '../types';
-
-function computeMealTotals(foods: SelectedFood[]): Partial<NutrientGoals> {
-  const totals: Partial<NutrientGoals> = {};
-  for (const sf of foods) {
-    for (const [key, value] of Object.entries(sf.food.per100g)) {
-      const k = key as NutrientKey;
-      totals[k] = ((totals[k] ?? 0) + ((value ?? 0) / 100) * sf.qty) as never;
-    }
-  }
-  return totals;
-}
-
-function computeDailyTotals(meals: MealRecord[]): Partial<NutrientGoals> {
-  const totals: Partial<NutrientGoals> = {};
-  for (const meal of meals) {
-    for (const [key, value] of Object.entries(meal.totals)) {
-      const k = key as NutrientKey;
-      totals[k] = ((totals[k] ?? 0) + (value ?? 0)) as never;
-    }
-  }
-  return totals;
-}
-
-function generateId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-}
+import { createId } from '../utils/ids';
+import { calculateDailyTotals, calculateMealTotals } from '../utils/nutritionTotals';
+import { STORAGE_KEYS } from '../utils/storageKeys';
+import type { DayRecord, MealRecord, NutrientGoals, NutrientKey, DayScore } from '../types';
 
 function computeScore(dailyTotals: Partial<NutrientGoals>, goals: NutrientGoals): DayScore {
   const caloriesPct = goals.calories > 0 ? ((dailyTotals.calories ?? 0) / goals.calories) * 100 : 0;
@@ -56,8 +30,26 @@ function computeScore(dailyTotals: Partial<NutrientGoals>, goals: NutrientGoals)
   return { caloriesPct, proteinPct, microCoverage, label };
 }
 
+function recalculateDay(day: DayRecord, meals: MealRecord[], goals: NutrientGoals): DayRecord {
+  const normalizedMeals = meals.map(meal => ({
+    ...meal,
+    totals: calculateMealTotals(meal.foods),
+  }));
+  const dailyTotals = calculateDailyTotals(normalizedMeals);
+
+  return {
+    ...day,
+    meals: normalizedMeals,
+    dailyTotals,
+    ...(day.status === 'validated' ? { score: computeScore(dailyTotals, goals) } : { score: undefined }),
+  };
+}
+
 export function useDayHistory(dailyGoals: NutrientGoals) {
-  const [days, setDays] = useLocalStorage<DayRecord[]>('mijo-days', []);
+  const [days, setDays] = useLocalStorage<DayRecord[]>(
+    STORAGE_KEYS.days,
+    [],
+  );
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -67,7 +59,7 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
     const today = toDateKey(new Date());
 
     setDays(prev => {
-      const migrated = prev.map(d => d.id ? d : { ...d, id: generateId() });
+      const migrated = prev.map(d => d.id ? d : { ...d, id: createId() });
       const updated = [...migrated];
 
       const activeIdx = updated.findIndex(d => d.status === 'active');
@@ -75,8 +67,7 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
         const activeDay = updated[activeIdx];
         if (activeDay.date !== today) {
           updated[activeIdx] = {
-            ...activeDay,
-            dailyTotals: computeDailyTotals(activeDay.meals),
+            ...recalculateDay(activeDay, activeDay.meals, dailyGoals),
             status: 'validated',
             validatedAt: new Date().toISOString(),
           };
@@ -85,7 +76,7 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
 
       if (!updated.some(d => d.date === today)) {
         updated.push({
-          id: generateId(),
+          id: createId(),
           date: today,
           meals: [],
           dailyTotals: {},
@@ -95,7 +86,7 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
 
       return updated;
     });
-  }, [setDays]);
+  }, [setDays, dailyGoals]);
 
   const activeDay = useMemo(() => {
     return days.find(d => d.status === 'active') ?? null;
@@ -116,24 +107,21 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
     setDays(prev => {
       const dayIdx = prev.findIndex(d => d.date === today && d.status === 'active');
       if (dayIdx === -1) {
-        return [...prev, {
-          id: generateId(),
+        const day: DayRecord = {
+          id: createId(),
           date: today,
-          meals: [meal],
-          dailyTotals: computeDailyTotals([meal]),
+          meals: [],
+          dailyTotals: {},
           status: 'active',
-        }];
+        };
+        return [...prev, recalculateDay(day, [meal], dailyGoals)];
       }
       const updated = [...prev];
       const updatedMeals = [...updated[dayIdx].meals, meal];
-      updated[dayIdx] = {
-        ...updated[dayIdx],
-        meals: updatedMeals,
-        dailyTotals: computeDailyTotals(updatedMeals),
-      };
+      updated[dayIdx] = recalculateDay(updated[dayIdx], updatedMeals, dailyGoals);
       return updated;
     });
-  }, [setDays]);
+  }, [setDays, dailyGoals]);
 
   const addMealToExistingDay = useCallback((dayId: string, meal: MealRecord) => {
     setDays(prev => {
@@ -142,14 +130,8 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
 
       const updated = [...prev];
       const day = updated[dayIdx];
-      const mealWithTotals = {
-        ...meal,
-        totals: computeMealTotals(meal.foods),
-      };
-      const updatedMeals = [...day.meals, mealWithTotals];
-      const dailyTotals = computeDailyTotals(updatedMeals);
-      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
-      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      const updatedMeals = [...day.meals, meal];
+      updated[dayIdx] = recalculateDay(day, updatedMeals, dailyGoals);
       return updated;
     });
   }, [setDays, dailyGoals]);
@@ -160,14 +142,10 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
       if (activeIdx === -1) return prev;
       const updated = [...prev];
       const updatedMeals = updated[activeIdx].meals.filter(m => m.id !== id);
-      updated[activeIdx] = {
-        ...updated[activeIdx],
-        meals: updatedMeals,
-        dailyTotals: computeDailyTotals(updatedMeals),
-      };
+      updated[activeIdx] = recalculateDay(updated[activeIdx], updatedMeals, dailyGoals);
       return updated;
     });
-  }, [setDays]);
+  }, [setDays, dailyGoals]);
 
   const validateDay = useCallback(() => {
     setDays(prev => {
@@ -175,11 +153,12 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
       if (activeIdx === -1) return prev;
       const day = prev[activeIdx];
       if (day.meals.length === 0) return prev;
-      const dailyTotals = computeDailyTotals(day.meals);
+      const recalculatedDay = recalculateDay(day, day.meals, dailyGoals);
+      const dailyTotals = recalculatedDay.dailyTotals;
       const score = computeScore(dailyTotals, dailyGoals);
       const updated = [...prev];
       updated[activeIdx] = {
-        ...day,
+        ...recalculatedDay,
         dailyTotals,
         status: 'validated',
         validatedAt: new Date().toISOString(),
@@ -199,10 +178,8 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
       if (dayIdx === -1) return prev;
       const day = prev[dayIdx];
       const updatedMeals = day.meals.filter(m => m.id !== mealId);
-      const dailyTotals = computeDailyTotals(updatedMeals);
-      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
       const updated = [...prev];
-      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      updated[dayIdx] = recalculateDay(day, updatedMeals, dailyGoals);
       return updated;
     });
   }, [setDays, dailyGoals]);
@@ -221,11 +198,8 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
       const foods = [...meal.foods];
       foods[foodIndex] = { ...foods[foodIndex], qty };
       meal.foods = foods;
-      meal.totals = computeMealTotals(foods);
       updatedMeals[mealIdx] = meal;
-      const dailyTotals = computeDailyTotals(updatedMeals);
-      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
-      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      updated[dayIdx] = recalculateDay(day, updatedMeals, dailyGoals);
       return updated;
     });
   }, [setDays, dailyGoals]);
@@ -243,12 +217,9 @@ export function useDayHistory(dailyGoals: NutrientGoals) {
       const updatedMeal = {
         ...meal,
         id: mealId,
-        totals: computeMealTotals(meal.foods),
       };
       updatedMeals[mealIdx] = updatedMeal;
-      const dailyTotals = computeDailyTotals(updatedMeals);
-      const score = day.status === 'validated' ? computeScore(dailyTotals, dailyGoals) : undefined;
-      updated[dayIdx] = { ...day, meals: updatedMeals, dailyTotals, ...(score ? { score } : {}) };
+      updated[dayIdx] = recalculateDay(day, updatedMeals, dailyGoals);
       return updated;
     });
   }, [setDays, dailyGoals]);

@@ -1,5 +1,7 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
+import { createId } from '../utils/ids';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 import type { FavoriteMeal, MealRecord, SelectedFood, NutrientGoals } from '../types';
 
 function generateName(foods: MealRecord['foods']): string {
@@ -12,13 +14,16 @@ function generateName(foods: MealRecord['foods']): string {
 }
 
 export function useFavoriteMeals() {
-  const [favorites, setFavorites] = useLocalStorage<FavoriteMeal[]>('mijo-favorites', []);
+  const [favorites, setFavorites] = useLocalStorage<FavoriteMeal[]>(
+    STORAGE_KEYS.favorites,
+    [],
+  );
 
   const addFavorite = useCallback((meal: MealRecord) => {
     setFavorites(prev => {
       if (prev.some(f => f.sourceMealId === meal.id)) return prev;
       const fav: FavoriteMeal = {
-        id: crypto.randomUUID(),
+        id: createId(),
         sourceMealId: meal.id,
         name: generateName(meal.foods),
         foods: meal.foods,
@@ -32,8 +37,8 @@ export function useFavoriteMeals() {
   const addFavoriteFromSelection = useCallback((foods: SelectedFood[], totals: Partial<NutrientGoals>) => {
     setFavorites(prev => {
       const fav: FavoriteMeal = {
-        id: crypto.randomUUID(),
-        sourceMealId: 'selection-' + crypto.randomUUID(),
+        id: createId(),
+        sourceMealId: `selection-${createId()}`,
         name: generateName(foods),
         foods,
         totals,

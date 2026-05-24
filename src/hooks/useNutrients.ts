@@ -1,18 +1,9 @@
 import { useMemo } from 'react';
+import { addNutrientValue, calculateMealTotals } from '../utils/nutritionTotals';
 import type { SelectedFood, DailyGoals, NutrientKey, MealRecord } from '../types';
 
 export function useNutrients(selectedFoods: SelectedFood[]): Partial<DailyGoals> {
-  return useMemo(() => {
-    const totals: Partial<DailyGoals> = {};
-    for (const { food, qty } of selectedFoods) {
-      const ratio = qty / 100;
-      for (const [key, value] of Object.entries(food.per100g)) {
-        const k = key as NutrientKey;
-        totals[k] = Math.round((((totals[k] ?? 0) + (value ?? 0) * ratio)) * 10) / 10 as never;
-      }
-    }
-    return totals;
-  }, [selectedFoods]);
+  return useMemo(() => calculateMealTotals(selectedFoods), [selectedFoods]);
 }
 
 export function useDailyNutrients(
@@ -32,9 +23,8 @@ export function useDailyNutrients(
     const dailyTotals: Partial<DailyGoals> = { ...currentTotals };
 
     for (const meal of todayMeals) {
-      for (const [key, value] of Object.entries(meal.totals)) {
-        const k = key as NutrientKey;
-        dailyTotals[k] = ((dailyTotals[k] ?? 0) + (value ?? 0)) as never;
+      for (const [key, value] of Object.entries(meal.totals) as [NutrientKey, number | undefined][]) {
+        addNutrientValue(dailyTotals, key, value ?? 0);
       }
     }
 

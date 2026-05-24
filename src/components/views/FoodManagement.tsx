@@ -1,4 +1,5 @@
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { STORAGE_KEYS } from '../../utils/storageKeys';
 import { NutritionOverview } from '../NutritionOverview';
 import { FoodList } from '../FoodList';
 import { FoodSearch } from '../FoodSearch';
@@ -29,7 +30,10 @@ export function FoodManagement({
   goals,
   hasMeals,
 }: FoodManagementProps) {
-  const [tooltipMode, setTooltipMode] = useLocalStorage<TooltipMode>('mijo-tooltip-mode', 'off');
+  const [tooltipMode, setTooltipMode] = useLocalStorage<TooltipMode>(
+    STORAGE_KEYS.tooltipMode,
+    'off',
+  );
 
   const showHint = !hasMeals && selectedFoods.length === 0;
 

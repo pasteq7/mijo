@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 
 export type Theme = 'washi' | 'frappe';
 
-const STORAGE_KEY = 'mijo-theme';
 const THEMES: Theme[] = ['washi', 'frappe'];
 
 function getInitialTheme(): Theme {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(STORAGE_KEYS.theme);
   if (THEMES.includes(stored as Theme)) return stored as Theme;
   if (stored === 'light') return 'washi';
   if (stored === 'dark') return 'frappe';
@@ -20,7 +20,7 @@ export function useTheme() {
     const root = document.documentElement;
     root.classList.remove(...THEMES.map(t => `theme-${t}`));
     root.classList.add(`theme-${theme}`);
-    localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem(STORAGE_KEYS.theme, theme);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {

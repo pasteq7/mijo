@@ -6,6 +6,8 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { DAILY_GOALS, MEAL_GOALS } from './data/nutrients';
 import { useLanguage } from './hooks/useLanguage';
+import { createId } from './utils/ids';
+import { BACKUP_STORAGE_KEYS, STORAGE_KEYS } from './utils/storageKeys';
 
 import { MainLayout } from './components/layout/MainLayout';
 import { UtilityRail } from './components/layout/UtilityRail';
@@ -31,11 +33,6 @@ const DEFAULT_GOAL_PROFILE: GoalProfile = {
   activity: 'light',
   target: 'deficit',
 };
-
-function generateFoodId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-}
 
 function getCurrentSeason(): Season {
   const month = new Date().getMonth() + 1;
@@ -67,10 +64,22 @@ function createMealDate(dayDate?: string): string {
 
 export default function App() {
   const { t } = useLanguage();
-  const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>('mijo-foods', []);
-  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>('mijo-daily-goals', DAILY_GOALS);
-  const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>('mijo-meal-goals', MEAL_GOALS);
-  const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>('mijo-goal-profile', DEFAULT_GOAL_PROFILE);
+  const [selectedFoods, setSelectedFoods] = useLocalStorage<SelectedFood[]>(
+    STORAGE_KEYS.selectedFoods,
+    [],
+  );
+  const [dailyGoalsState, setDailyGoals] = useLocalStorage<NutrientGoals>(
+    STORAGE_KEYS.dailyGoals,
+    DAILY_GOALS,
+  );
+  const [mealGoalsState, setMealGoals] = useLocalStorage<NutrientGoals>(
+    STORAGE_KEYS.mealGoals,
+    MEAL_GOALS,
+  );
+  const [goalProfile, setGoalProfile] = useLocalStorage<GoalProfile>(
+    STORAGE_KEYS.goalProfile,
+    DEFAULT_GOAL_PROFILE,
+  );
   const [editingHistoryMeal, setEditingHistoryMeal] = useState<EditingHistoryMeal | null>(null);
   const [selectedAnalysisDayId, setSelectedAnalysisDayId] = useState<string | null>(null);
   const dailyGoals = useMemo(() => mergeGoals(dailyGoalsState, DAILY_GOALS), [dailyGoalsState]);
@@ -107,7 +116,7 @@ export default function App() {
       if (prev.find((sf) => sf.food.id === food.id)) {
         return prev.filter((sf) => sf.food.id !== food.id);
       }
-      return [...prev, { id: generateFoodId(), food, qty: food.defaultQty }];
+      return [...prev, { id: createId(), food, qty: food.defaultQty }];
     });
   }, [setSelectedFoods]);
 
@@ -143,7 +152,7 @@ export default function App() {
 
     const targetDay = selectedAnalysisDayId ? allDays.find(day => day.id === selectedAnalysisDayId) : undefined;
     const newMeal: MealRecord = {
-      id: Date.now().toString(),
+      id: createId(),
       date: createMealDate(targetDay?.date),
       foods: selectedFoods,
       totals,
@@ -161,7 +170,7 @@ export default function App() {
     const meal = activeDay.meals.find(m => m.id === id);
     if (!meal) return;
     setEditingHistoryMeal(null);
-    setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? generateFoodId() })));
+    setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? createId() })));
     deleteMeal(id);
   }, [activeDay, setSelectedFoods, deleteMeal]);
 
@@ -183,7 +192,7 @@ export default function App() {
     const meal = day.meals.find(m => m.id === mealId);
     if (!meal) return;
     setEditingHistoryMeal({ dayId, mealId, date: meal.date });
-    setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? generateFoodId() })));
+    setSelectedFoods(meal.foods.map(sf => ({ ...sf, id: sf.id ?? createId() })));
   }, [allDays, setSelectedFoods]);
 
   const handleValidateDay = useCallback(() => {
@@ -211,19 +220,17 @@ export default function App() {
 
   const handleAddFavoriteMeal = useCallback((favorite: FavoriteMeal) => {
     const meal: MealRecord = {
-      id: generateFoodId(),
+      id: createId(),
       date: new Date().toISOString(),
-      foods: favorite.foods.map(sf => ({ ...sf, id: generateFoodId() })),
+      foods: favorite.foods.map(sf => ({ ...sf, id: createId() })),
       totals: favorite.totals,
     };
     addMealToDay(meal);
   }, [addMealToDay]);
 
   const handleExport = useCallback(() => {
-    const keys = ['mijo-foods', 'mijo-daily-goals', 'mijo-meal-goals', 'mijo-goal-profile',
-      'mijo-days', 'mijo-favorites', 'mijo-theme'];
     const data: Record<string, unknown> = { version: 1, exportedAt: new Date().toISOString() };
-    for (const key of keys) {
+    for (const key of BACKUP_STORAGE_KEYS) {
       try {
         const item = localStorage.getItem(key);
         if (item) data[key] = JSON.parse(item);
@@ -239,9 +246,7 @@ export default function App() {
   }, []);
 
   const handleResetAll = useCallback(() => {
-    const keys = ['mijo-foods', 'mijo-daily-goals', 'mijo-meal-goals', 'mijo-goal-profile',
-      'mijo-days', 'mijo-favorites', 'mijo-theme'];
-    for (const key of keys) {
+    for (const key of BACKUP_STORAGE_KEYS) {
       localStorage.removeItem(key);
     }
     window.location.reload();
@@ -250,9 +255,7 @@ export default function App() {
   const handleImport = useCallback((json: string) => {
     try {
       const data = JSON.parse(json);
-      const keys = ['mijo-foods', 'mijo-daily-goals', 'mijo-meal-goals', 'mijo-goal-profile',
-        'mijo-days', 'mijo-favorites', 'mijo-theme'];
-      for (const key of keys) {
+      for (const key of BACKUP_STORAGE_KEYS) {
         if (data[key] !== undefined) {
           localStorage.setItem(key, JSON.stringify(data[key]));
         }

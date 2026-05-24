@@ -1,8 +1,8 @@
-# 🌿 VegaNutrient
+# 🌿 Mijo
 
-> **VegaNutrient** est un planificateur et tracker nutritionnel végétalien haut de gamme, conçu pour offrir une expérience utilisateur fluide, esthétique et scientifiquement rigoureuse. Inspiré par le minimalisme organique et la précision nutritionnelle, VegaNutrient aide les utilisateurs à équilibrer leurs apports quotidiens en macronutriments, vitamines, minéraux, acides gras essentiels et acides aminés clés.
+> **Mijo** est un planificateur et tracker nutritionnel végétalien haut de gamme, conçu pour offrir une expérience utilisateur fluide, esthétique et scientifiquement rigoureuse. Inspiré par le minimalisme organique et la précision nutritionnelle, Mijo aide les utilisateurs à équilibrer leurs apports quotidiens en macronutriments, vitamines, minéraux, acides gras essentiels et acides aminés clés.
 
-![Capture d'écran de VegaNutrient](screenshot.png)
+![Capture d'écran de Mijo](screenshot.png)
 
 ---
 
@@ -94,7 +94,20 @@ src/
 └── index.css            # Configuration Tailwind 4 & Déclarations de thèmes
 ```
 
+## Contributor Map
+
+Use this quick map when making changes:
+
+* **App orchestration**: `src/App.tsx` wires meal selection, day history, favorites, goals, import/export, and layout together.
+* **Nutrition math**: `src/utils/nutritionTotals.ts` contains reusable meal/day total calculations. `src/utils/goalCalculations.ts` handles profile-based goal generation.
+* **Persistence keys**: `src/utils/storageKeys.ts` is the source of truth for localStorage names and legacy key migration.
+* **Generated IDs**: `src/utils/ids.ts` centralizes browser-safe ID creation.
+* **Domain model**: `src/types/index.ts` defines `Food`, `SelectedFood`, `MealRecord`, `DayRecord`, `NutrientGoals`, and related app contracts.
+* **Data sources**: `src/data/foods/` contains the food catalog by category; `src/data/nutrients.ts` defines nutrient metadata and default goals.
+* **Localization**: `src/locales/fr.ts` and `src/locales/en.ts` hold UI copy. `src/hooks/useLanguage.tsx` provides translation lookup with French fallback.
+* **Verification**: run `npm run lint` first, then `npm run build` for typecheck and production build.
+
 ---
 
 ## 🔒 Confidentialité des Données
-Toutes vos données nutritionnelles et personnelles restent privées et ne quittent jamais votre navigateur. VegaNutrient fonctionne entièrement **côté client** et stocke les données dans le stockage local sécurisé de votre navigateur.
+Toutes vos données nutritionnelles et personnelles restent privées et ne quittent jamais votre navigateur. Mijo fonctionne entièrement **côté client** et stocke les données dans le stockage local sécurisé de votre navigateur.
