@@ -58,12 +58,12 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
   };
 
   return (
-    <aside className="w-16 lg:w-20 h-full flex flex-col items-center py-8 bg-transparent z-50">
-      <div className="mb-10 text-[var(--accent)]">
+    <aside className="flex h-14 w-full items-center justify-between bg-transparent px-3 z-50 lg:h-full lg:w-20 lg:flex-col lg:justify-start lg:px-0 lg:py-8">
+      <div className="text-[var(--accent)] lg:mb-10">
         <Leaf size={24} strokeWidth={1.5} />
       </div>
 
-      <div className="flex-1 flex flex-col gap-5 items-center">
+      <div className="flex items-center gap-2 lg:flex-1 lg:flex-col lg:gap-5">
         <button
           onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
           className="p-2.5 rounded-full hover:bg-[var(--warm-200)] hover:scale-105 active:scale-95 transition-all relative flex items-center justify-center shadow-none hover:shadow-sm"
@@ -105,11 +105,12 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
         </button>
       </div>
 
-      {(() => {
+      <div className="hidden lg:block lg:mt-auto">
+        {(() => {
         const cfg = seasonConfig[currentSeason];
         const Icon = cfg.icon;
         return (
-          <div className="relative flex flex-col items-center mt-auto pb-2" title={cfg.label}>
+          <div className="relative flex flex-col items-center pb-2" title={cfg.label}>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.15]">
               <Icon size={56} strokeWidth={1} style={{ color: cfg.color }} />
             </div>
@@ -122,7 +123,8 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
             </div>
           </div>
         );
-      })()}
+        })()}
+      </div>
     </aside>
   );
 }

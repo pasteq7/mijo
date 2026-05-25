@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PenLine, Trash2, Star, ChevronDown, Check, Plus, Minus, SquarePen } from 'lucide-react';
 import type { FavoriteMeal, MealRecord } from '../types';
 import { useLanguage } from '../hooks/useLanguage';
+import { getFoodsSignature } from '../utils/mealSignatures';
+import { FavoriteMealMenu } from './meal/FavoriteMealMenu';
 
 interface Props {
   meals: MealRecord[];
@@ -19,13 +21,6 @@ interface Props {
   onEditFoods?: (id: string) => void;
   onValidateDay?: () => void;
 }
-
-const getFoodsSignature = (foods: MealRecord['foods']) => {
-  return foods
-    .map(sf => `${sf.food.id}:${sf.qty}`)
-    .sort()
-    .join('|');
-};
 
 export function MealHistory({
   meals,
@@ -45,8 +40,6 @@ export function MealHistory({
   const { t, language } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [isFavoriteMenuOpen, setIsFavoriteMenuOpen] = useState(false);
-  const favoriteMenuRef = useRef<HTMLDivElement>(null);
 
   const formatTime = (dateString: string) => {
     const d = new Date(dateString);
@@ -56,26 +49,6 @@ export function MealHistory({
   const sorted = [...meals].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const canAddFavoriteMeal = !readOnly && favorites.length > 0 && Boolean(onAddFavoriteMeal);
 
-  useEffect(() => {
-    if (!isFavoriteMenuOpen) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (favoriteMenuRef.current?.contains(event.target as Node)) return;
-      setIsFavoriteMenuOpen(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsFavoriteMenuOpen(false);
-    };
-
-    window.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isFavoriteMenuOpen]);
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-1">
@@ -84,78 +57,13 @@ export function MealHistory({
         </span>
 
         <div className="flex items-center gap-1.5">
-          {canAddFavoriteMeal && (
-            <div ref={favoriteMenuRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setIsFavoriteMenuOpen(open => !open)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-soft)] text-[var(--text)] transition-all hover:border-[var(--accent)]/40 hover:bg-[var(--accent-soft)] hover:text-[var(--accent)]"
-                title={t('mealHistory.addFavorite')}
-                aria-label={t('mealHistory.addFavoriteMeal')}
-                aria-expanded={isFavoriteMenuOpen}
-              >
-                <Plus size={13} />
-              </button>
-
-              {isFavoriteMenuOpen && (
-                <motion.div
-                   initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                   transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.16 }}
-                   className="absolute right-0 top-8 z-30 w-60 overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--bg-raised)] p-1.5 shadow-lg"
-                >
-                  <div className="max-h-60 overflow-y-auto pr-0.5">
-                    {favorites.map((favorite) => {
-                      const cal = Math.round(favorite.totals.calories ?? 0);
-                      const emojis = favorite.foods.map(sf => sf.food.emoji).slice(0, 3).join(' ');
-
-                      return (
-                        <div
-                          key={favorite.id}
-                          className="flex items-center gap-1 rounded-lg transition-colors hover:bg-[var(--warm-100)]"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onAddFavoriteMeal?.(favorite);
-                              setIsFavoriteMenuOpen(false);
-                            }}
-                            className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-2 text-left"
-                          >
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate text-xs font-medium text-[var(--text-h)]">
-                                {favorite.name}
-                              </span>
-                              <span className="block truncate text-[10px] text-[var(--text-muted)]">
-                                {emojis} - {cal} {t('common.kcal')}
-                              </span>
-                            </span>
-                            <Plus size={12} className="shrink-0 text-[var(--accent)]" />
-                          </button>
-
-                          {onDeleteFavorite && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                onDeleteFavorite(favorite.id);
-                                if (favorites.length <= 1) setIsFavoriteMenuOpen(false);
-                              }}
-                              className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--action-soft)] hover:text-[var(--action)]"
-                              title={t('mealHistory.deleteFavorite')}
-                              aria-label={`${t('mealHistory.deleteFavorite')} ${favorite.name}`}
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </div>
+          {canAddFavoriteMeal && onAddFavoriteMeal && (
+            <FavoriteMealMenu
+              favorites={favorites}
+              onAddFavoriteMeal={onAddFavoriteMeal}
+              onDeleteFavorite={onDeleteFavorite}
+            />
           )}
-
           {!readOnly && onValidateDay && (
             <motion.button
               initial={{ opacity: 0, y: 8 }}

@@ -67,12 +67,12 @@ export function NutritionOverview({ totals, goals, foods }: Props) {
 
       <div className="flex flex-col gap-3 min-w-0">
         <div className="min-w-0 space-y-3">
-          <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--warm-100)] w-fit">
+          <div className="flex w-full gap-1 rounded-lg bg-[var(--warm-100)] p-0.5 min-[420px]:w-fit">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative px-3 py-1 text-xs font-medium rounded-md transition-colors ${activeTab === tab.id
+                className={`relative min-w-0 flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors min-[420px]:flex-none min-[420px]:px-3 ${activeTab === tab.id
                   ? 'text-[var(--text-h)]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text)]'
                   }`}
@@ -84,7 +84,7 @@ export function NutritionOverview({ totals, goals, foods }: Props) {
                     transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.25 }}
                   />
                 )}
-                <span className="relative z-10">{tab.label}</span>
+                <span className="relative z-10 block truncate">{tab.label}</span>
               </button>
             ))}
           </div>

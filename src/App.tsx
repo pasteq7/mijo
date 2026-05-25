@@ -7,6 +7,7 @@ import { useTheme } from './hooks/useTheme';
 import { DAILY_GOALS, MEAL_GOALS } from './data/nutrients';
 import { useLanguage } from './hooks/useLanguage';
 import { createId } from './utils/ids';
+import { getFoodsSignature } from './utils/mealSignatures';
 import { BACKUP_STORAGE_KEYS, STORAGE_KEYS } from './utils/storageKeys';
 
 import { MainLayout } from './components/layout/MainLayout';
@@ -44,13 +45,6 @@ function getCurrentSeason(): Season {
 
 function mergeGoals(stored: NutrientGoals, defaults: NutrientGoals): NutrientGoals {
   return { ...defaults, ...stored };
-}
-
-function getFoodsSignature(foods: SelectedFood[]): string {
-  return foods
-    .map(sf => `${sf.food.id}:${sf.qty}`)
-    .sort()
-    .join('|');
 }
 
 function createMealDate(dayDate?: string): string {
@@ -201,12 +195,6 @@ export default function App() {
     setSelectedFoods([]);
   }, [validateDay, setSelectedFoods]);
 
-  const handleAddMeal = useCallback(() => {
-    const el = document.getElementById('food-search-input');
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el?.focus();
-  }, []);
-
   const handleToggleFavorite = useCallback((meal: MealRecord) => {
     const mealSignature = getFoodsSignature(meal.foods);
     const fav = favorites.find(f => f.sourceMealId === meal.id || getFoodsSignature(f.foods) === mealSignature);
@@ -307,7 +295,6 @@ export default function App() {
             onDeleteFavorite={removeFavorite}
             onValidateDay={() => setShowDayValidation(true)}
             currentMealFoods={selectedFoods}
-            onAddMeal={handleAddMeal}
             onSelectedDayChange={setSelectedAnalysisDayId}
           />
         }

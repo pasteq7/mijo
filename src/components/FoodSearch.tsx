@@ -20,9 +20,18 @@ interface Props {
   onToggle: (f: Food) => void;
   tooltipMode: TooltipMode;
   onTooltipModeChange: (mode: TooltipMode) => void;
+  hideTitle?: boolean;
+  fillAvailableHeight?: boolean;
 }
 
-export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeChange }: Props) {
+export function FoodSearch({
+  selectedIds,
+  onToggle,
+  tooltipMode,
+  onTooltipModeChange,
+  hideTitle = false,
+  fillAvailableHeight = false,
+}: Props) {
   const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState<FoodCategory | 'tous'>('tous');
@@ -69,10 +78,12 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <h3 className="display-font text-base font-semibold text-[var(--text-h)] shrink-0">
-          {t('foodSearch.title')}
-        </h3>
-        <div className="flex min-w-0 items-center gap-2 sm:ml-auto">
+        {!hideTitle && (
+          <h3 className="display-font text-base font-semibold text-[var(--text-h)] shrink-0">
+            {t('foodSearch.title')}
+          </h3>
+        )}
+        <div className="flex min-w-0 flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center sm:ml-auto">
           <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text)]" />
             <input
@@ -84,7 +95,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
               className="h-8 w-full rounded-full bg-[var(--warm-100)] pl-8 pr-3 text-sm text-[var(--text-h)] outline-none transition-all focus:bg-[var(--bg-subtle)] focus:ring-2 focus:ring-[var(--accent-soft)]"
             />
           </div>
-          <div className="flex h-8 shrink-0 items-center gap-1 rounded-full bg-[var(--warm-100)] p-1" aria-label={t('foodSearch.tooltipModeLabel')}>
+          <div className="flex h-8 w-fit shrink-0 items-center gap-1 rounded-full bg-[var(--warm-100)] p-1" aria-label={t('foodSearch.tooltipModeLabel')}>
             {tooltipModesList.map((mode) => (
               <button
                 key={mode.value}
@@ -107,7 +118,7 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
         </div>
       </div>
 
-      <div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5">
+      <div className="-mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
           onClick={() => setCat('tous')}
           className={clsx(
@@ -137,7 +148,10 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
         ))}
       </div>
 
-      <div className="grid max-h-[300px] grid-cols-2 content-start gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-3 lg:min-h-0 lg:max-h-none lg:flex-1 xl:grid-cols-4">
+      <div className={clsx(
+        'grid grid-cols-1 content-start gap-1.5 pr-0.5 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:min-h-0 lg:max-h-none lg:flex-1 lg:overflow-y-auto xl:grid-cols-4',
+        fillAvailableHeight ? 'min-h-[18rem] overflow-visible lg:min-h-0 lg:flex-1' : 'max-h-[360px] overflow-y-auto',
+      )}>
         <AnimatePresence>
           {filtered.map((food) => {
             const isSelected = selectedIds.has(food.id);
@@ -166,4 +180,3 @@ export function FoodSearch({ selectedIds, onToggle, tooltipMode, onTooltipModeCh
     </div>
   );
 }
-

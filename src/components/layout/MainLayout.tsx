@@ -8,15 +8,28 @@ interface MainLayoutProps {
 
 export function MainLayout({ children, sidebar, utilityRail }: MainLayoutProps) {
   return (
-    <div className="h-screen text-[var(--text-h)] flex overflow-hidden selection:bg-[var(--accent-soft)] selection:text-[var(--accent)] relative">
-      <div className="shrink-0 bg-[var(--bg-subtle)]  shadow-[var(--shadow)] relative z-10">
+    <div className="min-h-dvh text-[var(--text-h)] flex flex-col overflow-x-hidden selection:bg-[var(--accent-soft)] selection:text-[var(--accent)] relative lg:h-screen lg:flex-row lg:overflow-hidden">
+      <div className="sticky top-0 shrink-0 bg-[var(--bg-subtle)] shadow-[var(--shadow)] relative z-30 lg:static lg:z-10">
         {utilityRail}
       </div>
-      <div className="flex-1 flex overflow-hidden relative z-10">
-        <main className="flex-1 lg:overflow-hidden overflow-y-auto px-6 lg:px-10 py-6">
+
+      <div className="flex min-w-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto px-3 py-4 [scrollbar-width:none] sm:px-5 lg:hidden [&::-webkit-scrollbar]:hidden">
+        <main className="w-[calc(100vw-1.5rem)] shrink-0 snap-center sm:w-[calc(100vw-2.5rem)]">
+          {children}
+        </main>
+        {sidebar && (
+          <aside className="card w-[calc(100vw-1.5rem)] shrink-0 snap-center p-4 sm:w-[calc(100vw-2.5rem)]">
+            {sidebar}
+          </aside>
+        )}
+      </div>
+
+      <div className="relative z-10 hidden min-w-0 flex-1 overflow-hidden lg:flex">
+        <main className="min-w-0 flex-1 overflow-hidden px-10 py-6">
           {children}
         </main>
       </div>
+
       {sidebar && (
         <div className="hidden lg:block w-80 xl:w-96 shrink-0 bg-[var(--bg-soft)] backdrop-blur-2 shadow-[var(--shadow)] overflow-hidden p-6 relative z-20">
           {sidebar}

@@ -1,8 +1,9 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, ArrowRight, Utensils } from 'lucide-react';
+import { Check, Sparkles, ArrowLeft, Utensils } from 'lucide-react';
 import { MealHistory } from '../MealHistory';
 import { NutrientBar } from '../NutrientBar';
+import { AnalysisCalendar } from '../analysis/AnalysisCalendar';
 import { NUTRIENT_META } from '../../data/nutrients';
 import type { NutrientGoals, MealRecord, DayRecord, NutrientKey, SelectedFood, FavoriteMeal } from '../../types';
 import { useLanguage } from '../../hooks/useLanguage';
@@ -25,7 +26,6 @@ interface AnalysisViewProps {
   onDeleteFavorite?: (id: string) => void;
   onValidateDay?: () => void;
   currentMealFoods?: SelectedFood[];
-  onAddMeal?: () => void;
   onSelectedDayChange?: (dayId: string | null) => void;
 }
 
@@ -50,12 +50,9 @@ export function AnalysisView({
   currentMealFoods,
   onSelectedDayChange,
 }: AnalysisViewProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<NutrientSection>('macros');
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
-  const calendarRef = useRef<HTMLDivElement>(null);
 
   const nutrientSections = useMemo<{ id: NutrientSection; label: string; groups: string[] }[]>(() => [
     { id: 'macros', label: t('analysis.sections.macros'), groups: ['macros', 'aminoacides'] },
@@ -76,32 +73,6 @@ export function AnalysisView({
   const mealsForView = isPastDay && selectedDay ? selectedDay.meals : pastMeals;
   const cal = currentTotals.calories ?? 0;
   const calPct = Math.min((cal / currentGoal.calories) * 100, 100);
-
-  const selectedDayIdx = useMemo(() => {
-    if (!selectedDayId) return null;
-    const idx = pastDays.findIndex(d => d.id === selectedDayId);
-    return idx >= 0 ? idx : null;
-  }, [selectedDayId, pastDays]);
-
-  const canGoOlder = selectedDayId === null ? pastDays.length > 0 : (selectedDayIdx ?? -1) < pastDays.length - 1;
-  const canGoNewer = selectedDayId !== null && selectedDayIdx !== null;
-
-  const goOlder = () => {
-    if (!canGoOlder) return;
-    if (selectedDayId === null) setSelectedDayId(pastDays[0].id);
-    else if (selectedDayIdx !== null) setSelectedDayId(pastDays[selectedDayIdx + 1].id);
-  };
-
-  const goNewer = () => {
-    if (!canGoNewer) return;
-    if (selectedDayIdx === 0) setSelectedDayId(null);
-    else setSelectedDayId(pastDays[selectedDayIdx - 1].id);
-  };
-
-  const formatDayDate = (date: string) => {
-    const d = new Date(`${date}T00:00:00`);
-    return d.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'short' });
-  };
 
   const combinedFoods: SelectedFood[] = useMemo(() => {
     const meals = isPastDay && selectedDay ? selectedDay.meals : pastMeals;
@@ -136,89 +107,8 @@ export function AnalysisView({
 
   const activeNutrients = sectionStats[activeSection].nutrients;
 
-  const todayKey = useMemo(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }, []);
-
-  const registeredDaysByDate = useMemo(() => {
-    return new Map(pastDays.map(day => [day.date, day]));
-  }, [pastDays]);
-
-  const calendarMonthLabel = useMemo(() => {
-    return calendarMonth.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', year: 'numeric' });
-  }, [calendarMonth, language]);
-
-  const calendarDays = useMemo(() => {
-    const year = calendarMonth.getFullYear();
-    const month = calendarMonth.getMonth();
-    const firstOfMonth = new Date(year, month, 1);
-    const startOffset = (firstOfMonth.getDay() + 6) % 7;
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    return Array.from({ length: 42 }, (_, index) => {
-      const dayNumber = index - startOffset + 1;
-      if (dayNumber < 1 || dayNumber > daysInMonth) return null;
-      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-      return {
-        dayNumber,
-        dateKey,
-        record: registeredDaysByDate.get(dateKey),
-        isToday: dateKey === todayKey,
-      };
-    });
-  }, [calendarMonth, registeredDaysByDate, todayKey]);
-
-  useEffect(() => {
-    if (!isCalendarOpen) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (calendarRef.current?.contains(event.target as Node)) return;
-      setIsCalendarOpen(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsCalendarOpen(false);
-    };
-
-    window.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isCalendarOpen]);
-
-  const shiftCalendarMonth = (offset: number) => {
-    setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
-  };
-
-  const selectRegisteredDay = (day: DayRecord) => {
-    setSelectedDayId(day.id);
-    setCalendarMonth(new Date(`${day.date}T00:00:00`));
-    setIsCalendarOpen(false);
-  };
-
-  const selectToday = () => {
-    setSelectedDayId(null);
-    setCalendarMonth(new Date());
-    setIsCalendarOpen(false);
-  };
-
-  const toggleCalendar = () => {
-    if (!isCalendarOpen) {
-      setCalendarMonth(selectedDay ? new Date(`${selectedDay.date}T00:00:00`) : new Date());
-    }
-    setIsCalendarOpen(open => !open);
-  };
-
-  const weekdays = language === 'fr' ? ['L', 'M', 'M', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
+    <div className="flex flex-col gap-4 overflow-visible lg:h-full lg:min-h-0 lg:overflow-hidden">
       <header className="shrink-0">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -227,148 +117,17 @@ export function AnalysisView({
             </h3>
           </div>
 
-          <div className="relative shrink-0" ref={calendarRef}>
-            <div className="flex shrink-0 items-center bg-[var(--warm-100)]/70 dark:bg-[var(--warm-200)]/20 rounded-full p-0.5 border border-[var(--border-soft)] shadow-xs relative">
-              <button
-                onClick={goOlder}
-                disabled={!canGoOlder}
-                className={clsx(
-                  'w-6 h-6 flex items-center justify-center rounded-full transition-all',
-                  canGoOlder
-                    ? 'text-[var(--text-h)] hover:bg-[var(--warm-200)]/80 dark:hover:bg-[var(--warm-300)]'
-                    : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
-                )}
-                aria-label={t('analysis.prevDay')}
-              >
-                <ChevronLeft size={11} strokeWidth={2.5} />
-              </button>
-
-              <button
-                type="button"
-                onClick={toggleCalendar}
-                className={clsx(
-                  'flex items-center gap-1.5 px-2.5 py-0.5 rounded-full transition-all text-[11px] font-semibold tracking-wide shadow-2xs',
-                  isCalendarOpen
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'text-[var(--accent)] bg-[var(--accent-soft)] hover:bg-[var(--accent-soft)]/85'
-                )}
-                aria-label={t('analysis.openCalendar')}
-                aria-expanded={isCalendarOpen}
-              >
-                <span className="tabular-nums">
-                  {isPastDay && selectedDay ? formatDayDate(selectedDay.date) : t('common.today')}
-                </span>
-                <CalendarDays size={10} className={isCalendarOpen ? 'text-white' : 'text-[var(--accent)] opacity-80'} />
-              </button>
-
-              <button
-                onClick={goNewer}
-                disabled={!canGoNewer}
-                className={clsx(
-                  'w-6 h-6 flex items-center justify-center rounded-full transition-all',
-                  canGoNewer
-                    ? 'text-[var(--text-h)] hover:bg-[var(--warm-200)]/80 dark:hover:bg-[var(--warm-300)]'
-                    : 'text-[var(--text-muted)] opacity-30 cursor-not-allowed'
-                )}
-                aria-label={t('analysis.nextDay')}
-              >
-                <ChevronRight size={11} strokeWidth={2.5} />
-              </button>
-            </div>
-
-            {isCalendarOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ ease: [0.22, 1, 0.36, 1], duration: 0.16 }}
-                className="absolute right-0 top-9 z-30 w-56 rounded-2xl border border-[var(--border-soft)] bg-[var(--bg-raised)] backdrop-blur-md p-3 shadow-xl"
-              >
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => shiftCalendarMonth(-1)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-100)]"
-                    aria-label="Mois precedent"
-                  >
-                    <ChevronLeft size={13} />
-                  </button>
-                  <p className="min-w-0 flex-1 text-center text-[11px] font-semibold capitalize text-[var(--text-h)] tabular-nums">
-                    {calendarMonthLabel}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => shiftCalendarMonth(1)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text)] transition-colors hover:bg-[var(--warm-100)]"
-                    aria-label="Mois suivant"
-                  >
-                    <ChevronRight size={13} />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 px-0.5 text-center text-[9px] font-semibold uppercase text-[var(--text-muted)]">
-                  {weekdays.map((weekday, index) => (
-                    <span key={`${weekday}-${index}`} className="leading-5">
-                      {weekday}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-1 grid grid-cols-7 gap-1">
-                  {calendarDays.map((day, index) => {
-                    if (!day) {
-                      return <span key={`empty-${index}`} className="h-7" aria-hidden />;
-                    }
-
-                    const isSelected = selectedDay?.date === day.dateKey || (!selectedDay && day.isToday);
-                    const isRegistered = Boolean(day.record);
-
-                    return (
-                      <button
-                        key={day.dateKey}
-                        type="button"
-                        onClick={() => day.record ? selectRegisteredDay(day.record) : day.isToday ? selectToday() : undefined}
-                        disabled={!isRegistered && !day.isToday}
-                        className={clsx(
-                          'relative flex h-7 w-7 items-center justify-center rounded-lg text-[11px] tabular-nums transition-all',
-                          isSelected
-                            ? 'bg-[var(--accent)] font-semibold text-white shadow-sm'
-                            : isRegistered
-                              ? 'text-[var(--text-h)] hover:bg-[var(--accent-soft)]'
-                              : day.isToday
-                                ? 'text-[var(--accent)] hover:bg-[var(--accent-soft)]'
-                                : 'cursor-default text-[var(--text-muted)] opacity-30'
-                        )}
-                        aria-label={day.record ? (language === 'fr' ? `Voir le ${formatDayDate(day.dateKey)}` : `View ${formatDayDate(day.dateKey)}`) : day.isToday ? (language === 'fr' ? "Voir aujourd'hui" : "View today") : undefined}
-                      >
-                        {day.dayNumber}
-                        {isRegistered && !isSelected && (
-                          <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[var(--accent)]" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-2 flex items-center justify-between border-t border-[var(--border-soft)] pt-2">
-                  <span className="text-[10px] text-[var(--text-muted)]">
-                    {t('analysis.pastDaysCount', { count: pastDays.length })}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={selectToday}
-                    className="rounded-lg px-2 py-1 text-[10px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent-soft)]"
-                  >
-                    {t('common.today')}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </div>
+          <AnalysisCalendar
+            selectedDay={selectedDay}
+            selectedDayId={selectedDayId}
+            pastDays={pastDays}
+            onSelectDayId={setSelectedDayId}
+          />
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-rows-[minmax(150px,0.9fr)_minmax(230px,1.1fr)] gap-4 overflow-hidden">
-        <section className="card p-3.5 flex flex-col min-h-0 overflow-hidden">
+      <div className="grid min-h-0 flex-1 gap-4 overflow-visible lg:grid-rows-[minmax(150px,0.9fr)_minmax(230px,1.1fr)] lg:overflow-hidden">
+        <section className="card p-3.5 flex flex-col min-h-0 overflow-hidden max-h-[360px] lg:max-h-none">
           <div className={clsx(
             "flex-grow flex-1 min-h-0 flex flex-col",
             mealsForView.length > 0 ? "overflow-y-auto pr-1" : "overflow-hidden"
@@ -430,11 +189,11 @@ export function AnalysisView({
                     </p>
                     
                     <motion.div
-                      animate={{ x: [0, 3, 0] }}
+                      animate={{ x: [0, -3, 0] }}
                       transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                       className="text-[var(--accent)]"
                     >
-                      <ArrowRight size={12} strokeWidth={2.5} />
+                      <ArrowLeft size={12} strokeWidth={2.5} />
                     </motion.div>
                   </motion.div>
                 )}
@@ -443,7 +202,7 @@ export function AnalysisView({
           </div>
         </section>
 
-        <section className="card p-3.5 flex min-h-0 flex-col gap-2.5 overflow-hidden">
+        <section className="card p-3.5 flex min-h-0 flex-col gap-2.5 overflow-hidden max-h-[420px] lg:max-h-none">
           <div className="shrink-0">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-[var(--accent)] px-2.5 py-0.5">
