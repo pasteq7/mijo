@@ -3,7 +3,6 @@ import { useNutrients, useDailyNutrients } from './hooks/useNutrients';
 import { useDayHistory } from './hooks/useDayHistory';
 import { useFavoriteMeals } from './hooks/useFavoriteMeals';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { useTheme } from './hooks/useTheme';
 import { DAILY_GOALS, MEAL_GOALS } from './data/nutrients';
 import { useLanguage } from './hooks/useLanguage';
 import { createId } from './utils/ids';
@@ -83,7 +82,6 @@ export default function App() {
   const [showDayValidation, setShowDayValidation] = useState(false);
 
   const currentSeason = getCurrentSeason();
-  const { theme, toggleTheme } = useTheme();
   const totals = useNutrients(selectedFoods);
 
   const {
@@ -103,7 +101,14 @@ export default function App() {
 
   const { favorites, favoriteIds, addFavorite, removeFavorite } = useFavoriteMeals();
 
-  const selectedIds = new Set(selectedFoods.map((sf) => sf.food.id));
+  const selectedIdsKey = useMemo(
+    () => selectedFoods.map((sf) => sf.food.id).join('\u0000'),
+    [selectedFoods],
+  );
+  const selectedIds = useMemo(
+    () => new Set(selectedIdsKey ? selectedIdsKey.split('\u0000') : []),
+    [selectedIdsKey],
+  );
 
   const handleToggle = useCallback((food: Food) => {
     setSelectedFoods((prev) => {
@@ -269,12 +274,7 @@ export default function App() {
         utilityRail={
           <UtilityRail
             onOpenGoals={() => setShowGoals(true)}
-            onResetFoods={() => setSelectedFoods([])}
-            hasFoods={selectedFoods.length > 0}
             currentSeason={currentSeason}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-            dayValidated={activeDay === null}
           />
         }
         sidebar={

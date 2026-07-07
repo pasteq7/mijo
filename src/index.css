@@ -87,9 +87,11 @@ html {
   transition: background 0.35s ease, color 0.35s ease;
 }
 
-.theme-frappe img[src*="nature.svg"],
-.theme-frappe img[src*="decorative2.svg"] {
-  filter: invert(1);
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 #root {
@@ -123,7 +125,6 @@ h6,
 
 .card {
   background: var(--card-bg);
-  backdrop-filter: blur(8px);
   box-shadow: var(--shadow-sm);
   border-radius: 1.5rem;
   border: 1px solid var(--border-soft);

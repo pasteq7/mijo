@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { createId } from '../utils/ids';
 import { STORAGE_KEYS } from '../utils/storageKeys';
@@ -56,7 +56,10 @@ export function useFavoriteMeals() {
     return favorites.some(f => f.sourceMealId === sourceMealId);
   }, [favorites]);
 
-  const favoriteIds = new Set(favorites.map(f => f.sourceMealId));
+  const favoriteIds = useMemo(
+    () => new Set(favorites.map(f => f.sourceMealId)),
+    [favorites],
+  );
 
   return { favorites, favoriteIds, addFavorite, addFavoriteFromSelection, removeFavorite, isFavorite };
 }

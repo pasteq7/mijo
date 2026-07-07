@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect } from 'react';
+import { memo, useState, useMemo, useEffect } from 'react';
 import { Search, Bean, Wheat, Carrot, Apple, Nut, Ellipsis, EyeOff, Info, BarChart3 } from 'lucide-react';
 import { FOODS } from '../data/foods';
 import type { Food, FoodCategory, Season, TooltipMode } from '../types';
 import clsx from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FoodCard } from './FoodCard';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -24,7 +23,7 @@ interface Props {
   fillAvailableHeight?: boolean;
 }
 
-export function FoodSearch({
+function FoodSearchComponent({
   selectedIds,
   onToggle,
   tooltipMode,
@@ -152,31 +151,24 @@ export function FoodSearch({
         'grid grid-cols-1 content-start gap-1.5 pr-0.5 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:min-h-0 lg:max-h-none lg:flex-1 lg:overflow-y-auto xl:grid-cols-4',
         fillAvailableHeight ? 'min-h-[18rem] overflow-visible lg:min-h-0 lg:flex-1' : 'max-h-[360px] overflow-y-auto',
       )}>
-        <AnimatePresence>
-          {filtered.map((food) => {
-            const isSelected = selectedIds.has(food.id);
-            const isInSeason = food.seasons.includes(currentSeason);
-            return (
-              <motion.div
-                key={food.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.12 }}
-                className="h-full"
-              >
-                <FoodCard
-                   food={food}
-                   isSelected={isSelected}
-                   onToggle={onToggle}
-                   isInSeason={isInSeason}
-                   tooltipMode={tooltipMode}
-                />
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+        {filtered.map((food) => {
+          const isSelected = selectedIds.has(food.id);
+          const isInSeason = food.seasons.includes(currentSeason);
+          return (
+            <div key={food.id} className="h-full">
+              <FoodCard
+                food={food}
+                isSelected={isSelected}
+                onToggle={onToggle}
+                isInSeason={isInSeason}
+                tooltipMode={tooltipMode}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+export const FoodSearch = memo(FoodSearchComponent);

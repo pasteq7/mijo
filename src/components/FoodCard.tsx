@@ -1,5 +1,4 @@
-import { motion } from 'framer-motion';
-import { useState, useRef } from 'react';
+import { memo, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Leaf, Check } from 'lucide-react';
 import type { Food, TooltipMode } from '../types';
@@ -21,7 +20,7 @@ function getNutrientLevel(value: number, thresholds: { low: number; mid: number;
   return 'low';
 }
 
-export function FoodCard({ food, isSelected, onToggle, isInSeason = false, tooltipMode = 'simple' }: Props) {
+function FoodCardComponent({ food, isSelected, onToggle, isInSeason = false, tooltipMode = 'simple' }: Props) {
   const { t } = useLanguage();
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -86,15 +85,13 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
         document.body
       )}
 
-      <motion.button
+      <button
         onClick={() => onToggle(food)}
-        whileHover={isSelected ? undefined : { y: -1, boxShadow: 'var(--shadow)' }}
-        whileTap={{ scale: 0.98 }}
         className={`
-          relative w-full h-14 flex items-center gap-2.5 py-2 pl-2 pr-2.5 rounded-2xl border transition-colors duration-200
+          relative w-full h-14 flex items-center gap-2.5 py-2 pl-2 pr-2.5 rounded-2xl border transition-[transform,box-shadow,border-color,background-color] duration-200 active:scale-[0.98]
           ${isSelected
             ? 'border-[var(--accent)] bg-[var(--accent-soft)] shadow-[inset_0_0_0_1px_var(--accent),0_2px_10px_rgba(74,103,65,0.10)]'
-            : 'border-[var(--border-soft)] backdrop-blur-sm hover:border-[var(--border)] hover:bg-[var(--warm-100)]'
+            : 'border-[var(--border-soft)] hover:-translate-y-px hover:border-[var(--border)] hover:bg-[var(--warm-100)] hover:shadow-[var(--shadow)]'
           }
         `}
       >
@@ -119,8 +116,10 @@ export function FoodCard({ food, isSelected, onToggle, isInSeason = false, toolt
             {nutrients.calories || 0} {t('common.kcal')} &middot; {nutrients.proteines || 0}g prot
           </span>
         </div>
-      </motion.button>
+      </button>
     </div>
   );
 }
+
+export const FoodCard = memo(FoodCardComponent);
 

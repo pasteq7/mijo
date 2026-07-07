@@ -1,7 +1,7 @@
 import { Settings, Leaf, Sun, Snowflake, Flower2, Palette } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Season } from '../../types';
-import type { Theme } from '../../hooks/useTheme';
+import { useTheme, type Theme } from '../../hooks/useTheme';
 import { useLanguage } from '../../hooks/useLanguage';
 
 const EnFlag = () => (
@@ -34,16 +34,12 @@ const FrFlag = () => (
 
 interface UtilityRailProps {
   onOpenGoals: () => void;
-  onResetFoods: () => void;
-  hasFoods: boolean;
   currentSeason: Season;
-  theme: Theme;
-  onToggleTheme: () => void;
-  dayValidated?: boolean;
 }
 
-export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }: UtilityRailProps) {
+export function UtilityRail({ onOpenGoals, currentSeason }: UtilityRailProps) {
   const { language, setLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   const seasonConfig: Record<Season, { icon: typeof Leaf; label: string; color: string; softColor: string }> = {
     printemps: { icon: Flower2, label: t('seasons.printemps'), color: 'var(--accent)', softColor: 'var(--accent-soft)' },
@@ -81,19 +77,14 @@ export function UtilityRail({ onOpenGoals, currentSeason, theme, onToggleTheme }
         </button>
 
         <button
-          onClick={onToggleTheme}
-          className="p-3 rounded-full text-[var(--text)] hover:text-[var(--highlight)] hover:bg-[var(--warm-200)] transition-all"
+          onClick={toggleTheme}
+          className="p-3 rounded-full text-[var(--text)] hover:text-[var(--highlight)] hover:bg-[var(--warm-200)] transition-colors"
           title={themeLabels[theme]}
+          aria-label={themeLabels[theme]}
         >
-          <motion.span
-            key={theme}
-            initial={{ rotate: -90, scale: 0.6 }}
-            animate={{ rotate: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="block"
-          >
+          <span className="block">
             <Palette size={18} strokeWidth={1.5} />
-          </motion.span>
+          </span>
         </button>
 
         <button
